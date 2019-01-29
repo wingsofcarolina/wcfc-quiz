@@ -1,0 +1,15 @@
+= User Profile
+
+navbar:${requester.userId}[]
+
+[.medium,frame=none,grid=none,cols="20,80"]
+<#setting number_format="#0">
+|===
+| User | ${user.fullname}
+| Member Number | ${user.memberNumber!"None"}
+| Unique ID | ${user.userId}
+| Email | ${user.email!"None"}
+| Phone | ${user.phone!"None"}
+| Instructor | ${user.instructor?string('YES', 'NO')}
+|===
+

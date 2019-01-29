@@ -1,0 +1,84 @@
+= Student Training Record
+
+<#if isOwner()>
+navbar:${requester.userId}[buttons="/student/addInstructor:Add Instructor"]
+<#else>
+navbar:${requester.userId}[]
+</#if>
+
+[.medium,frame=none,grid=none,cols="20,80"]
+|===
+| User | ${user.fullname}
+| Instruction type | ${user.record.type}
+| Instructor(s) | <#list user.record.instructors as instructor> link:/student/profile/${instructor.userId}[${instructor.fullname}] &nbsp; &nbsp; </#list>
+| Started on | _${user.created?date}_ 
+| Updated on | _${user.updated?date}_
+| Unique ID | ${user.userId}
+|===
+
+
+== Notes
+<#if requester.isInstructor()>
+button:/student/editNote/${user.userId}[label="Edit Note"]
+</#if>
+
+<#if user.notes??>
+${user.notes}
+<#else>
+None
+</#if>
+
+== Progress
+
+pass:[<a name=”progress”></a>]
+
+[.small,cols="<.>10,<.>70,^.>10,^.>10",options="header"]
+|===
+| Status | Tasks/Skills | Completed | Confirmed
+<#list user.record.tasks as task>
+<#if task.completionDate??>
+<#assign completion = task.completionDate?date?string.iso>
+<#else>
+<#if isInstructor()>
+<#assign completion = "link:/student/api/completed/${user.userId}/${task.index}[Pending]">
+<#else>
+<#assign completion = "">
+</#if>
+</#if>
+
+<#if task.confirmationDate??>
+<#assign confirmed = task.confirmationDate?date?string.iso>
+<#else>
+<#if task.completed && isOwner()>
+<#assign confirmed = "link:/student/api/confirmed/${task.index}[Pending]">
+<#else>
+<#assign confirmed = "">
+</#if>
+</#if>
+| ${task.status} | ${task.description} | ${completion} | ${confirmed}
+</#list>
+|===
+
+== Lessons
+
+<#if requester.isInstructor()>
+button:/student/addLesson/${user.userId}[label="Add Lesson"]
+</#if>
+
+[.small,cols="10,90",options="header"]
+|===
+| Date | Description
+<#list user.record.lessons as lesson>
+<#if lesson.date??>
+<#assign date = lesson.date?date?string.iso>
+<#else>
+<#assign date = "Unknown">
+</#if>
+| ${date} | ${lesson.description!"Unknown"}
+<#if requester.isInstructor()>
+<#if lesson.comment??>
+| | color:#87162d[${lesson.comment}]
+</#if>
+</#if>
+</#list>
+|===

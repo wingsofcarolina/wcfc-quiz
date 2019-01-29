@@ -1,0 +1,27 @@
+= Register New User
+
+++++
+<center>
+<form action="/student/api/register" method="post">
+++++
+
+flash:message[]
+
+|===
+| Full Name : | pass:[<input type="text" name="fullname">]
+| Email : | pass:[<input type="text" name="email">]
+| Password : | pass:[<input type="password" name="password">]
+| Password (again) : | pass:[<input type="password" name="passwordVerify">]
+| &nbsp; | 
+| Name | pass:[<input type="text" name="name">]
+| Phone | pass:[<input type="text" name="phone">]
+| Member Number | pass:[<input type="text" name="member">]
+|===
+
+++++
+  <input type="submit" name="action" value="Register">
+  <input type="submit" name="action" value="Cancel">
+</form>
+</p>
+</center>
+++++

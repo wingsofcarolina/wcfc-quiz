@@ -1,0 +1,15 @@
+= Edit Note
+
+<#if isOwner()>
+navbar:${requester.userId}[buttons="/student/addInstructor:Add Instructor"]
+<#else>
+navbar:${requester.userId}[]
+</#if>
+
+== ${user.fullname}
+
+pass:[<form action="/student/api/setNote" method="post">]
+pass:[<input type="hidden" id="userId" name="userId" value="${user.userId}">]
+pass:[<textarea name="note" rows=5 cols=100>${user.notes}</textarea></p>]
+pass:[<input type="submit" name="type" value="Cancel">]
+pass:[<input type="submit" name="type" value="Save Note">]

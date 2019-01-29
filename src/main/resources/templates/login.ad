@@ -1,0 +1,50 @@
+= WCFC Quiz Service
+
+++++
+<center>
+<form action="/quiz/api/login" method="post">
+++++
+
+flash:message[]
+
+Instructors needing to retrieve a quiz key :
+|===
+| Email | pass:[<input type="text" name="email">]
+| Password | pass:[<input type="password" name="password">]
+|===
+++++
+  <input type="submit" name="type" value="Login">
+</form>
+</p>
+<hr>
+Cub member needing a quiz :</p>
+<form action="/quiz/generate" method="post">
+<div style="text-align: center;">
+  <div style="display: inline-block; text-align:left;">
+   <input type="radio" name="gender" value="sop"> SOP<br>
+   <input type="radio" name="gender" value="c152"> C-152<br>
+   <input type="radio" name="gender" value="c172"> C-172 Skyhawk<br>
+   <input type="radio" name="gender" value="pa28"> PA-28 Warrior<br>
+   <input type="radio" name="gender" value="m20j"> M20J Mooney<br>
+  </div>
+</div>
+
+</p>
+<input type="submit" name="type" value="Generate"></form>
+</p>
+++++
+
+****
+
+[IMPORTANT]
+====
+This system uses cookies to implement advanced functionality. 
+When registering with or logging into the system the user agrees to
+accept the use of cookies for the purposes of site administration
+and functionality.
+====
+****
+ 
+++++
+</center>
+++++

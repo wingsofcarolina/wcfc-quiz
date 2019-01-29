@@ -1,0 +1,13 @@
+= Instructor Details
+
+navbar:${requester.userId}[]
+
+== Students for ${user.fullname}
+
+[.medium,frame=none,grid=none,cols="10,20,20,50",options="header"]
+|===
+| Type | Name | Email | Phone
+<#list students as student>
+| ${student.record.type} | link:/student/${student.userId}[${student.fullname}] | ${student.email!"None"} | ${student.phone!"None"}
+</#list>
+|===

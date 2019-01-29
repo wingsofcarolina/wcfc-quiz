@@ -1,0 +1,26 @@
+= Add Instructor  
+
+navbar:${requester.userId}[]
+
+== Instructors
+
+=== ${requester.fullname}
+
+[.medium,frame=none,grid=none,cols="<.>,<.>,<.>,^",options="header"]
+|===
+| Name | Email | Phone | Action
+<#list instructors as instructor>
+| ${instructor.fullname} | ${instructor.email!"None"} | ${instructor.phone!"None"} | button:/student/api/addInstructor/${instructor.userId}[label="Add"] 
+</#list>
+|===
+
+****
+
+[IMPORTANT]
+====
+This page allows a student to grant access permissions for a selected instructor. This
+will permit the instructor to view the student's data, as well as make modifications
+and entries to the data. Once an instructor is added, they can't be removed as they are
+now a permanent part of the training record for the student.
+====
+****

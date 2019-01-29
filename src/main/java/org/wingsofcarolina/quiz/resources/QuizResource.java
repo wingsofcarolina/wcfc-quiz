@@ -1,0 +1,420 @@
+package org.wingsofcarolina.quiz.resources;
+
+import static org.asciidoctor.Asciidoctor.Factory.create;
+import static org.asciidoctor.AttributesBuilder.attributes;
+import static org.asciidoctor.OptionsBuilder.options;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+
+import javax.ws.rs.CookieParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Cookie;
+import javax.ws.rs.core.Response;
+
+import org.asciidoctor.Asciidoctor;
+import org.asciidoctor.extension.JavaExtensionRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.wingsofcarolina.quiz.QuizConfiguration;
+import org.wingsofcarolina.quiz.authentication.AuthUtils;
+import org.wingsofcarolina.quiz.authentication.AuthenticationException;
+import org.wingsofcarolina.quiz.authentication.HashUtils;
+import org.wingsofcarolina.quiz.authentication.Privilege;
+import org.wingsofcarolina.quiz.common.Pages;
+import org.wingsofcarolina.quiz.common.Templates;
+import org.wingsofcarolina.quiz.domain.*;
+import org.wingsofcarolina.quiz.domain.presentation.AddInstructorWrapper;
+import org.wingsofcarolina.quiz.domain.presentation.InstructorWrapper;
+import org.wingsofcarolina.quiz.domain.presentation.Wrapper;
+import org.wingsofcarolina.quiz.extensions.*;
+import org.wingsofcarolina.quiz.responses.RedirectResponse;
+
+import de.thomaskrille.dropwizard_template_config.redist.freemarker.template.Configuration;
+import de.thomaskrille.dropwizard_template_config.redist.freemarker.template.Template;
+import de.thomaskrille.dropwizard_template_config.redist.freemarker.template.TemplateException;
+import de.thomaskrille.dropwizard_template_config.redist.freemarker.template.TemplateExceptionHandler;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+
+/**
+ * @author dwight
+ *
+ */
+@Path("/quiz")
+public class QuizResource {
+	private static final Logger LOG = LoggerFactory.getLogger(QuizResource.class);
+
+	private static QuizResource instance;
+	
+	@SuppressWarnings("unused")
+	private QuizConfiguration config;	// Dropwizard configuration
+	private Configuration cfg;			// FreeMarker configuration
+	
+	private Asciidoctor asciidoctor;
+	private Map<String, Object> options;
+	private AuthUtils authUtils;
+
+	public QuizResource(QuizConfiguration config) throws IOException {
+		QuizResource.instance = this;
+		
+		this.config = config;
+		authUtils = new AuthUtils();
+
+		Map<String, Object> userAttributes = new HashMap<String,Object>();
+		userAttributes.put("lesson-version","1.2.3");
+
+		asciidoctor = create();
+		Map<String, Object> attributes = attributes()
+				.linkCss(true)
+				.attributes(userAttributes)
+				// TODO: Find a better place for the CSS 
+				.styleSheetName("http://planez.co/css/asciidoctor-default.css")
+				.allowUriRead(true).asMap();
+		options = options()
+				.inPlace(true)
+				.backend("html5")
+				.headerFooter(true)
+				.attributes(attributes).asMap();
+		
+		// Add custom extensions
+		JavaExtensionRegistry extensionRegistry = this.asciidoctor.javaExtensionRegistry(); 
+		extensionRegistry.inlineMacro("navbar", NavigationBar.class);
+		extensionRegistry.inlineMacro("flash", Flash.class);
+		extensionRegistry.inlineMacro("button", Button.class);
+		extensionRegistry.inlineMacro("color", Color.class);
+		
+		// Create your Configuration instance, and specify if up to what FreeMarker
+		// version (here 2.3.27) do you want to apply the fixes that are not 100%
+		// backward-compatible. See the Configuration JavaDoc for details.
+		cfg = new Configuration(Configuration.VERSION_2_3_22);
+
+		// Specify the source where the template files come from. Here I set a
+		// plain directory for it, but non-file-system sources are possible too:
+		// TODO: Make this a configuration option
+		cfg.setDirectoryForTemplateLoading(new File(config.getTemplates()));
+		cfg.setTemplateUpdateDelay(0);  // TODO: Change this for "production"
+
+		// Set the preferred charset template files are stored in. UTF-8 is
+		// a good choice in most applications:
+		cfg.setDefaultEncoding("UTF-8");
+
+		// Sets how errors will appear.
+		// During web page *development* TemplateExceptionHandler.HTML_DEBUG_HANDLER is better.
+		cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+
+		// Don't log exceptions inside FreeMarker that it will thrown at you anyway:
+		cfg.setLogTemplateExceptions(false);
+	}
+	
+	public static QuizResource instance() {
+		return instance;
+	}
+	
+	@GET
+	@Produces("text/html")
+	public Response userHome(@CookieParam("quiz.token") Cookie cookie) throws Exception, AuthenticationException {
+		if (cookie != null) {
+			Jws<Claims> claims = authUtils.validateUser(cookie.getValue());
+			User user = User.getWithClaims(claims);
+			String output = "";
+			if (user != null) {
+				if (user.isInstructor()) {
+					output = renderInstructor(user, user);
+				} else {
+					output = renderStudent(user, user);
+				}
+				return Response.ok().entity(output).build();
+			} else {
+				return Response.status(404).build();
+			}
+		} else {
+			return new RedirectResponse(Pages.LOGIN_PAGE).build();
+		}
+	}
+
+	@GET
+	@Path("profile/{id}")
+	@Produces("text/html")
+	public Response userProfile(@CookieParam("quiz.token") Cookie cookie,
+			@PathParam("id") String id) throws Exception, AuthenticationException {
+		
+		if (cookie != null) {
+			Jws<Claims> claims = authUtils.validateUser(cookie.getValue());
+			User requester = User.getWithClaims(claims);
+			User user = User.getByUserId(id);
+	
+			String output = "";
+			if (user != null) {
+				output = renderProfile(requester, user);
+				return Response.ok().entity(output).build();
+			} else {
+				return Response.status(404).build();
+			}
+		} else {
+			return new RedirectResponse(Pages.LOGIN_PAGE).build();
+		}
+	}
+
+	@GET
+	@Path("login")
+	@Produces("text/html")
+	public Response login() throws Exception {
+		String output = "";
+		try {
+			String rendered = render(Templates.LOGIN, new Object()).toString();
+			output = asciidoctor.convert(rendered, options);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return Response.ok().entity(output).build();
+	}
+
+	@POST
+	@Path("register")
+	@Produces("text/html")
+	public Response register() throws Exception {
+		String output = "";
+		try {
+			String rendered = render(Templates.REGISTER, new Object()).toString();
+			output = asciidoctor.convert(rendered, options);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return Response.ok().entity(output).build();
+	}
+	
+	@GET
+	@Path("addInstructor")
+	public Response addInstructor(@CookieParam("quiz.token") Cookie cookie) throws AuthenticationException {
+		String output = "";
+		if (cookie != null) {
+			Jws<Claims> claims = authUtils.validateUser(cookie.getValue());
+			User requester = User.getWithClaims(claims);
+			if (requester != null) {
+				List<User> instructors = User.getInstructors();
+				ListIterator<User> iter = instructors.listIterator();
+			    List<User> list = requester.getRecord().getInstructors();
+				while(iter.hasNext()){
+				    User instructor = iter.next();
+				    if (containsUser(list, instructor.getUserId())) {
+				        iter.remove();
+				    }
+				}
+				try {
+					AddInstructorWrapper wrapper = new AddInstructorWrapper(requester, instructors);
+					String rendered = render(Templates.ADD_INSTRUCTOR, wrapper).toString();
+					output = asciidoctor.convert(rendered, options);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				return Response.ok().entity(output).build();
+			}
+		}
+		return Response.ok().build();
+	}
+
+	public boolean containsUser(final List<User> list, final String userId){
+	    return list.stream().map(User::getUserId).filter(userId::equals).findFirst().isPresent();
+	}
+
+	/**
+	 * Return the add lesson view for the specifically identified user
+	 * @param id
+	 * @return
+	 * @throws AuthenticationException 
+	 */
+	@POST
+	@Path("addLesson/{userId}")
+	@Produces("text/html")
+	public Response addLesson(@CookieParam("quiz.token") Cookie cookie,
+			@PathParam("userId") String userId) throws AuthenticationException {
+		String output = "";
+		if (cookie != null) {
+			Jws<Claims> claims = authUtils.validateUser(cookie.getValue());
+			User requester = User.getWithClaims(claims);
+			User user = User.getByUserId(userId);
+			if (user != null) {
+				try {
+					Wrapper wrapper = new Wrapper(requester, user);
+					String rendered = render(Templates.ADD_LESSON, wrapper).toString();
+					output = asciidoctor.convert(rendered, options);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				return Response.ok().entity(output).build();
+			} else {
+			return Response.status(404).build();
+			}
+		} else {
+			return new RedirectResponse(Pages.LOGIN_PAGE).build();
+		}
+	}
+	
+	/**
+	 * Return the edit notes view for the specifically identified user
+	 * @param id
+	 * @return
+	 * @throws AuthenticationException 
+	 */
+	@POST
+	@Path("editNote/{userId}")
+	@Produces("text/html")
+	public Response editNote(@CookieParam("quiz.token") Cookie cookie,
+			@PathParam("userId") String userId) throws AuthenticationException {
+		String output = "";
+		if (cookie != null) {
+			Jws<Claims> claims = authUtils.validateUser(cookie.getValue());
+			User requester = User.getWithClaims(claims);
+			User user = User.getByUserId(userId);
+			if (user != null) {
+				try {
+					Wrapper wrapper = new Wrapper(requester, user);
+					String rendered = render(Templates.EDIT_NOTES, wrapper).toString();
+					output = asciidoctor.convert(rendered, options);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				return Response.ok().entity(output).build();
+			} else {
+			return Response.status(404).build();
+			}
+		} else {
+			return new RedirectResponse(Pages.LOGIN_PAGE).build();
+		}
+	}
+	
+	/**
+	 * Return the view for the specifically identified user
+	 * @param id
+	 * @return
+	 * @throws AuthenticationException 
+	 */
+	@GET
+	@Path("{id}")
+	@Produces("text/html")
+	public Response getUserById(@CookieParam("quiz.token") Cookie cookie,
+			@PathParam("id") String id) throws AuthenticationException {
+		
+		if (cookie != null) {
+			Jws<Claims> claims = authUtils.validateUser(cookie.getValue());
+			User requester = User.getWithClaims(claims);
+			User user = User.getByUserId(id);
+			if (user != null) {
+				String output = renderStudent(requester, user);
+				return Response.ok().entity(output).build();
+			} else {
+				return Response.status(404).build();
+			}
+		} else {
+			return new RedirectResponse(Pages.LOGIN_PAGE).build();
+		}
+	}
+	
+	private String renderInstructor(User requester, User user) {
+		String output = "";
+		try {
+			InstructorWrapper wrapper = new InstructorWrapper(requester, user);
+			String rendered = render(Templates.INSTRUCTOR, wrapper).toString();
+			output = asciidoctor.convert(rendered, options);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return output;
+	}
+	
+	private String renderStudent(User requester, User user) {
+		String output = "";
+		try {
+			Wrapper wrapper = new Wrapper(requester, user);
+			String rendered = render(Templates.STUDENT, wrapper).toString();
+			output = asciidoctor.convert(rendered, options);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return output;
+	}
+	
+	private String renderProfile(User requester, User user) {
+		String output = "";
+		try {
+			Wrapper wrapper = new Wrapper(requester, user);
+			String rendered = render(Templates.PROFILE, wrapper).toString();
+			output = asciidoctor.convert(rendered, options);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return output;
+	}
+	
+	private Writer render(String template, Object entity) throws IOException {
+		
+		Template temp = cfg.getTemplate(template);
+
+		Writer out = new StringWriter();
+		try {
+			temp.process(entity, out);
+		} catch (TemplateException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return out;
+	}
+	
+	public User addUser(String email) {
+		return this.addUser(null, email, null, Privilege.USER);
+	}
+	
+	public User addUser(String name, String email) {
+		return this.addUser(name, email, null, Privilege.USER);
+	}
+	
+	public User addUser(String email, String password, Privilege priv) {
+		return addUser(null, email, password, priv);
+	}
+
+	public User addUser(String name, String email, String password, Privilege priv) {
+		String hashedPw = null;
+		try {
+			if (password != null) {
+				hashedPw = HashUtils.generateStrongPasswordHash(password);
+			}
+			
+			User user = User.getByEmail(email);
+			if (user == null) {
+				if (hashedPw == null) {
+					user = new User(email);
+				} else {
+					user = new User(email, hashedPw);
+				}
+				if (name == null) {
+					name = "none";
+				}
+				user.setFullname(name);
+				user.addPriv(priv);
+				user.save();
+				LOG.info("New user  : {}", user);
+			} else {
+				LOG.info("User '{}' already exists.", user.getEmail());
+			}
+
+			return user;
+		} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+}
