@@ -41,9 +41,4 @@ public class UserDAO extends BasicDAO<User, ObjectId> {
 			return null;
 		}
 	}
-
-	public List<User> getInstructors() {
-		List<User> result = getDatastore().find(User.class).filter("privileges = ", Privilege.INSTRUCTOR).order("email").asList();
-		return result;
-	}
 }

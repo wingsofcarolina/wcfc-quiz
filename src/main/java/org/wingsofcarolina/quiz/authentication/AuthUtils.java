@@ -103,9 +103,9 @@ public class AuthUtils {
 		// https://stormpath.com/blog/jwt-java-create-verify
 		// https://scotch.io/tutorials/the-anatomy-of-a-json-web-token
 		Claims claims = new DefaultClaims();
-		claims.setSubject(user.getEmail());
 		claims.setIssuedAt(new Date());
-		claims.put("admin", true);
+		claims.put("email", user.getEmail());
+		claims.put("admin", user.getPrivileges().contains(Privilege.ADMIN));
 		claims.put("userId", user.getUserId());
 		String compactJws = Jwts.builder().setClaims(claims).signWith(SignatureAlgorithm.HS512, key).compact();
 

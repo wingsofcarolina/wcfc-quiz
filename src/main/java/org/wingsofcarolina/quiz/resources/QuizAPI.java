@@ -23,9 +23,6 @@ import org.wingsofcarolina.quiz.authentication.HashUtils;
 import org.wingsofcarolina.quiz.authentication.Privilege;
 import org.wingsofcarolina.quiz.common.FlashMessage;
 import org.wingsofcarolina.quiz.common.Pages;
-import org.wingsofcarolina.quiz.domain.Lesson;
-import org.wingsofcarolina.quiz.domain.Record;
-import org.wingsofcarolina.quiz.domain.Task;
 import org.wingsofcarolina.quiz.domain.User;
 import org.wingsofcarolina.quiz.responses.LoginResponse;
 import org.wingsofcarolina.quiz.responses.RedirectResponse;
@@ -148,114 +145,6 @@ public class QuizAPI {
 		} else {
 			return new RedirectResponse(Pages.LOGIN_PAGE).build();
 		}
-	}
-
-	@POST
-	@Path("setNote")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response setNote(@CookieParam("quiz.token") Cookie cookie,
-			@FormParam("type") String type,
-			@FormParam("userId") String userId,
-			@FormParam("note") String note)
-			throws AuthenticationException {
-		
-		User user = User.getByUserId(userId);
-		if ( ! type.equals("Cancel")) {
-			if (cookie != null) {
-				authUtils.validateUser(cookie.getValue());
-				user.setNotes(note);
-				user.save();
-			}
-		}
-		
-		return new RedirectResponse(Pages.HOME_PAGE + "/" + user.getUserId() + "#progress").build();
-	}
-	
-	@POST
-	@Path("addLesson")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response addLesson(@CookieParam("quiz.token") Cookie cookie,
-			@FormParam("type") String type,
-			@FormParam("userId") String userId,
-			@FormParam("details") String details,
-			@FormParam("comment") String comment)
-			throws AuthenticationException {
-		
-		User user = User.getByUserId(userId);
-		if ( ! type.equals("Cancel")) {
-			if (cookie != null) {
-				authUtils.validateUser(cookie.getValue());
-				Record record = user.getRecord();
-				Lesson lesson;
-				if (comment.isEmpty()) {
-					lesson = new Lesson(details);
-				} else {
-					lesson = new Lesson(details, comment);
-				}
-				record.addLesson(lesson);
-				user.save();
-			}
-		}
-		
-		return new RedirectResponse(Pages.HOME_PAGE + "/" + user.getUserId() + "#progress").build();
-	}
-	
-	
-	@POST
-	@Path("addInstructor/{userId}")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response addInstructor(@CookieParam("quiz.token") Cookie cookie, @PathParam("userId") String userId)
-			throws AuthenticationException {
-
-		if (cookie != null) {
-			Jws<Claims> claims;
-			claims = authUtils.validateUser(cookie.getValue());
-			User user = User.getWithClaims(claims);
-			User instructor = User.getByUserId(userId);
-			if (instructor != null && user.getRecord() != null) {
-				user.getRecord().addInstructor(instructor);
-				user.save();
-			} else {
-				return new Response404().build();
-			}
-		}
-		return new RedirectResponse(Pages.HOME_PAGE).build();
-	}
-
-	@GET
-	@Path("completed/{userId}/{index}")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response flagCompleted(@CookieParam("quiz.token") Cookie cookie,
-			@PathParam("userId") String userId,
-			@PathParam("index") Integer index)
-			throws AuthenticationException {
-		User user = null;
-		if (cookie != null) {
-			authUtils.validateUser(cookie.getValue());
-			user = User.getByUserId(userId);
-			// TODO: Check that requester has permission
-			Task task = user.getRecord().getTask(index);
-			task.setCompleted();
-			user.save();
-		}
-		return new RedirectResponse(Pages.HOME_PAGE + "/" + user.getUserId() + "#progress").build();
-	}
-
-	@GET
-	@Path("confirmed/{index}")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response flagConfirmed(@CookieParam("quiz.token") Cookie cookie, @PathParam("index") Integer index)
-			throws AuthenticationException {
-		User user = null;
-		if (cookie != null) {
-			Jws<Claims> claims;
-			claims = authUtils.validateUser(cookie.getValue());
-			user = User.getWithClaims(claims);
-			Task task = user.getRecord().getTask(index);
-			task.setConfirmed();
-			user.save();
-		}
-		return new RedirectResponse(Pages.HOME_PAGE + "/" + user.getUserId() + "#progress").build();
 	}
 
 	private String getUserCredentials(String name) {

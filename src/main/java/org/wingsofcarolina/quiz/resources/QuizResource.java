@@ -11,16 +11,16 @@ import java.io.Writer;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.HashMap;
-import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 
 import javax.ws.rs.CookieParam;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.Response;
 
@@ -36,8 +36,7 @@ import org.wingsofcarolina.quiz.authentication.Privilege;
 import org.wingsofcarolina.quiz.common.Pages;
 import org.wingsofcarolina.quiz.common.Templates;
 import org.wingsofcarolina.quiz.domain.*;
-import org.wingsofcarolina.quiz.domain.presentation.AddInstructorWrapper;
-import org.wingsofcarolina.quiz.domain.presentation.InstructorWrapper;
+import org.wingsofcarolina.quiz.domain.presentation.QuizWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.Wrapper;
 import org.wingsofcarolina.quiz.extensions.*;
 import org.wingsofcarolina.quiz.responses.RedirectResponse;
@@ -61,7 +60,7 @@ public class QuizResource {
 	
 	@SuppressWarnings("unused")
 	private QuizConfiguration config;	// Dropwizard configuration
-	private Configuration cfg;			// FreeMarker configuration
+	private Configuration freemarker;	// FreeMarker configuration
 	
 	private Asciidoctor asciidoctor;
 	private Map<String, Object> options;
@@ -99,75 +98,29 @@ public class QuizResource {
 		// Create your Configuration instance, and specify if up to what FreeMarker
 		// version (here 2.3.27) do you want to apply the fixes that are not 100%
 		// backward-compatible. See the Configuration JavaDoc for details.
-		cfg = new Configuration(Configuration.VERSION_2_3_22);
+		freemarker = new Configuration(Configuration.VERSION_2_3_22);
 
 		// Specify the source where the template files come from. Here I set a
 		// plain directory for it, but non-file-system sources are possible too:
 		// TODO: Make this a configuration option
-		cfg.setDirectoryForTemplateLoading(new File(config.getTemplates()));
-		cfg.setTemplateUpdateDelay(0);  // TODO: Change this for "production"
+		freemarker.setDirectoryForTemplateLoading(new File(config.getTemplates()));
+		freemarker.setTemplateUpdateDelay(0);  // TODO: Change this for "production"
 
 		// Set the preferred charset template files are stored in. UTF-8 is
 		// a good choice in most applications:
-		cfg.setDefaultEncoding("UTF-8");
+		freemarker.setDefaultEncoding("UTF-8");
 
 		// Sets how errors will appear.
 		// During web page *development* TemplateExceptionHandler.HTML_DEBUG_HANDLER is better.
-		cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+		freemarker.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
 
 		// Don't log exceptions inside FreeMarker that it will thrown at you anyway:
-		cfg.setLogTemplateExceptions(false);
+		freemarker.setLogTemplateExceptions(false);
 	}
 	
 	public static QuizResource instance() {
 		return instance;
 	}
-	
-	@GET
-	@Produces("text/html")
-	public Response userHome(@CookieParam("quiz.token") Cookie cookie) throws Exception, AuthenticationException {
-		if (cookie != null) {
-			Jws<Claims> claims = authUtils.validateUser(cookie.getValue());
-			User user = User.getWithClaims(claims);
-			String output = "";
-			if (user != null) {
-				if (user.isInstructor()) {
-					output = renderInstructor(user, user);
-				} else {
-					output = renderStudent(user, user);
-				}
-				return Response.ok().entity(output).build();
-			} else {
-				return Response.status(404).build();
-			}
-		} else {
-			return new RedirectResponse(Pages.LOGIN_PAGE).build();
-		}
-	}
-
-	@GET
-	@Path("profile/{id}")
-	@Produces("text/html")
-	public Response userProfile(@CookieParam("quiz.token") Cookie cookie,
-			@PathParam("id") String id) throws Exception, AuthenticationException {
-		
-		if (cookie != null) {
-			Jws<Claims> claims = authUtils.validateUser(cookie.getValue());
-			User requester = User.getWithClaims(claims);
-			User user = User.getByUserId(id);
-	
-			String output = "";
-			if (user != null) {
-				output = renderProfile(requester, user);
-				return Response.ok().entity(output).build();
-			} else {
-				return Response.status(404).build();
-			}
-		} else {
-			return new RedirectResponse(Pages.LOGIN_PAGE).build();
-		}
-	}
-
 	@GET
 	@Path("login")
 	@Produces("text/html")
@@ -196,124 +149,16 @@ public class QuizResource {
 		return Response.ok().entity(output).build();
 	}
 	
-	@GET
-	@Path("addInstructor")
-	public Response addInstructor(@CookieParam("quiz.token") Cookie cookie) throws AuthenticationException {
-		String output = "";
-		if (cookie != null) {
-			Jws<Claims> claims = authUtils.validateUser(cookie.getValue());
-			User requester = User.getWithClaims(claims);
-			if (requester != null) {
-				List<User> instructors = User.getInstructors();
-				ListIterator<User> iter = instructors.listIterator();
-			    List<User> list = requester.getRecord().getInstructors();
-				while(iter.hasNext()){
-				    User instructor = iter.next();
-				    if (containsUser(list, instructor.getUserId())) {
-				        iter.remove();
-				    }
-				}
-				try {
-					AddInstructorWrapper wrapper = new AddInstructorWrapper(requester, instructors);
-					String rendered = render(Templates.ADD_INSTRUCTOR, wrapper).toString();
-					output = asciidoctor.convert(rendered, options);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				return Response.ok().entity(output).build();
-			}
-		}
-		return Response.ok().build();
-	}
-
-	public boolean containsUser(final List<User> list, final String userId){
-	    return list.stream().map(User::getUserId).filter(userId::equals).findFirst().isPresent();
-	}
-
-	/**
-	 * Return the add lesson view for the specifically identified user
-	 * @param id
-	 * @return
-	 * @throws AuthenticationException 
-	 */
-	@POST
-	@Path("addLesson/{userId}")
-	@Produces("text/html")
-	public Response addLesson(@CookieParam("quiz.token") Cookie cookie,
-			@PathParam("userId") String userId) throws AuthenticationException {
-		String output = "";
-		if (cookie != null) {
-			Jws<Claims> claims = authUtils.validateUser(cookie.getValue());
-			User requester = User.getWithClaims(claims);
-			User user = User.getByUserId(userId);
-			if (user != null) {
-				try {
-					Wrapper wrapper = new Wrapper(requester, user);
-					String rendered = render(Templates.ADD_LESSON, wrapper).toString();
-					output = asciidoctor.convert(rendered, options);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				return Response.ok().entity(output).build();
-			} else {
-			return Response.status(404).build();
-			}
-		} else {
-			return new RedirectResponse(Pages.LOGIN_PAGE).build();
-		}
-	}
 	
-	/**
-	 * Return the edit notes view for the specifically identified user
-	 * @param id
-	 * @return
-	 * @throws AuthenticationException 
-	 */
-	@POST
-	@Path("editNote/{userId}")
-	@Produces("text/html")
-	public Response editNote(@CookieParam("quiz.token") Cookie cookie,
-			@PathParam("userId") String userId) throws AuthenticationException {
-		String output = "";
-		if (cookie != null) {
-			Jws<Claims> claims = authUtils.validateUser(cookie.getValue());
-			User requester = User.getWithClaims(claims);
-			User user = User.getByUserId(userId);
-			if (user != null) {
-				try {
-					Wrapper wrapper = new Wrapper(requester, user);
-					String rendered = render(Templates.EDIT_NOTES, wrapper).toString();
-					output = asciidoctor.convert(rendered, options);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				return Response.ok().entity(output).build();
-			} else {
-			return Response.status(404).build();
-			}
-		} else {
-			return new RedirectResponse(Pages.LOGIN_PAGE).build();
-		}
-	}
-	
-	/**
-	 * Return the view for the specifically identified user
-	 * @param id
-	 * @return
-	 * @throws AuthenticationException 
-	 */
 	@GET
-	@Path("{id}")
 	@Produces("text/html")
-	public Response getUserById(@CookieParam("quiz.token") Cookie cookie,
-			@PathParam("id") String id) throws AuthenticationException {
-		
+	public Response userHome(@CookieParam("quiz.token") Cookie cookie) throws Exception, AuthenticationException {
 		if (cookie != null) {
 			Jws<Claims> claims = authUtils.validateUser(cookie.getValue());
-			User requester = User.getWithClaims(claims);
-			User user = User.getByUserId(id);
+			User user = User.getWithClaims(claims);
+			String output = "";
 			if (user != null) {
-				String output = renderStudent(requester, user);
+				output = render("home.ad", user).toString();
 				return Response.ok().entity(output).build();
 			} else {
 				return Response.status(404).build();
@@ -322,46 +167,39 @@ public class QuizResource {
 			return new RedirectResponse(Pages.LOGIN_PAGE).build();
 		}
 	}
-	
-	private String renderInstructor(User requester, User user) {
+
+	@GET
+	@Path("generate")
+	@Produces("text/html")
+	public Response generate(@QueryParam("quiz") String quiz) throws Exception {
 		String output = "";
 		try {
-			InstructorWrapper wrapper = new InstructorWrapper(requester, user);
-			String rendered = render(Templates.INSTRUCTOR, wrapper).toString();
-			output = asciidoctor.convert(rendered, options);
+			QuizWrapper wrapper = generateQuiz(quiz);
+			output = render(Templates.QUIZ, wrapper).toString();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return output;
+		return Response.ok().entity(output).build();
 	}
 	
-	private String renderStudent(User requester, User user) {
-		String output = "";
-		try {
-			Wrapper wrapper = new Wrapper(requester, user);
-			String rendered = render(Templates.STUDENT, wrapper).toString();
-			output = asciidoctor.convert(rendered, options);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return output;
-	}
-	
-	private String renderProfile(User requester, User user) {
-		String output = "";
-		try {
-			Wrapper wrapper = new Wrapper(requester, user);
-			String rendered = render(Templates.PROFILE, wrapper).toString();
-			output = asciidoctor.convert(rendered, options);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return output;
+	private QuizWrapper generateQuiz(String quiz) {
+		QuizWrapper wrapper = new QuizWrapper(null, quiz);
+		switch (quiz) {
+		   case "far":
+		   case "sop-student":
+		   case "sop-pilot":
+		   case "sop-instructor":
+		   case "c152":
+		   case "c172":
+		   case "pa28":
+		   case "m20j":
+		   }
+		return wrapper;
 	}
 	
 	private Writer render(String template, Object entity) throws IOException {
 		
-		Template temp = cfg.getTemplate(template);
+		Template temp = freemarker.getTemplate(template);
 
 		Writer out = new StringWriter();
 		try {

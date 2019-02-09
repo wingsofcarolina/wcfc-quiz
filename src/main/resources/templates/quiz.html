@@ -1,0 +1,21 @@
+<h1>${quizName}</h1>
+
+<#setting number_format="#0">
+
+<#list questions as question>
+[${question.questionId}] ${question.question}</p>
+
+<#list question.answers as answer>
+<#if question.isBlank()>
+${answer.index} : __________________________________________________________________</br>
+<#else>
+<#if answer.isCorrect()>
+<b>${answer.index} : ${answer.answer}</b></br>
+<#else>
+${answer.index} : ${answer.answer}</br>
+</#if>
+</#if>
+</#list>
+</p>
+
+</#list>

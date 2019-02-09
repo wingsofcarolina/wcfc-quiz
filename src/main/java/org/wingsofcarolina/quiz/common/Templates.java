@@ -13,4 +13,6 @@ public class Templates {
 	public static final String EDIT_NOTES = BASE + "/editNote.ad";
 	public static final String ADD_LESSON = BASE + "/addLesson.ad";
 
+	public static final String QUIZ = BASE + "/quiz.html";
+
 }

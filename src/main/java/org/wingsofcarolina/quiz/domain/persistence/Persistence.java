@@ -6,10 +6,12 @@ import java.util.Map;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Morphia;
 import org.mongodb.morphia.dao.BasicDAO;
+import org.mongodb.morphia.query.Query;
+import org.mongodb.morphia.query.UpdateOperations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wingsofcarolina.quiz.domain.User;
-import org.wingsofcarolina.quiz.domain.dao.UserDAO;
+import org.wingsofcarolina.quiz.domain.*;
+import org.wingsofcarolina.quiz.domain.dao.*;
 
 import com.mongodb.MongoClient;
 
@@ -23,8 +25,9 @@ public class Persistence {
 	private Map<Class, Object> daoStore = new HashMap<Class, Object>();
 
 	private static Persistence instance = null;
-	
-	public Persistence() {}
+
+	public Persistence() {
+	}
 
 	public Persistence initialize(String mongodb) {
 		if (instance == null) {
@@ -34,22 +37,39 @@ public class Persistence {
 			mongo = new MongoClient(mongodb, 27017);
 			morphia.mapPackage("com.skyegadgets.domain");
 			datastore = morphia.createDatastore(mongo, "wcfc-quiz");
-			
+
 			// Create DAOs
 			daoStore.put(User.class, new UserDAO(datastore));
-			
+			daoStore.put(Question.class, new QuestionDAO(datastore));
+
 			// Make this a singleton
 			instance = this;
 		}
 		return this;
 	}
-	
+
 	public static Persistence instance() {
 		return instance;
 	}
-	
+
 	@SuppressWarnings("rawtypes")
 	public BasicDAO get(Class clazz) {
 		return (BasicDAO) daoStore.get(clazz);
+	}
+
+	public long generateAutoIncrement(final String key, final long minimumValue) {
+
+		// Get the given key from the auto increment entity and try to increment it.
+		final Query<AutoIncrement> query = datastore.find(AutoIncrement.class).field("_id").equal(key);
+		final UpdateOperations<AutoIncrement> update = datastore
+				.createUpdateOperations(AutoIncrement.class).inc("value");
+		AutoIncrement autoIncrement = datastore.findAndModify(query, update);
+
+		// If none is found, we need to create one for the given key.
+		if (autoIncrement == null) {
+			autoIncrement = new AutoIncrement(key, minimumValue);
+			datastore.save(autoIncrement);
+		}
+		return autoIncrement.getValue();
 	}
 }

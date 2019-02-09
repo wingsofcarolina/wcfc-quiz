@@ -1,0 +1,9 @@
+= Quiz Management
+
+<#if isAdmin()>
+navbar:${requester.userId}[buttons="/quiz/addQuestion:Add Question"]
+<#else>
+navbar:${requester.userId}[]
+</#if>
+
+Quiz is : ${quiz}
