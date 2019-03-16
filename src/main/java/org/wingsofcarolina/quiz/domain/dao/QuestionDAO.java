@@ -9,8 +9,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wingsofcarolina.quiz.domain.Category;
 import org.wingsofcarolina.quiz.domain.Question;
-import org.wingsofcarolina.quiz.domain.SubCategory;
 import org.wingsofcarolina.quiz.domain.Type;
+
+import com.mongodb.BasicDBObjectBuilder;
 
 
 public class QuestionDAO extends BasicDAO<Question, ObjectId> {
@@ -44,12 +45,22 @@ public class QuestionDAO extends BasicDAO<Question, ObjectId> {
 		return result;
 	}
 	
-	public List<Question> getCategory(Category category, SubCategory subCategory) {
+	public List<Question> getSelected(Category category, String attribute) {
+		if (attribute == null || attribute.isEmpty()) {
+			return getSelected(category);
+		} else {
+			Query<Question> query = getDatastore().createQuery(Question.class).disableValidation();
+	
+			query.filter("category = ", category);
+			query.filter("attributes elem", BasicDBObjectBuilder.start("$eq", attribute).get());
+
+		return query.order("questionid").asList();
+		}
+	}
+
+	public List<Question> getSelected(Category category) {
 		Query<Question> query = getDatastore().createQuery(Question.class).disableValidation();
-
 		query.filter("category = ", category);
-		query.filter("subCategory = ", subCategory);
-
 		return query.order("questionid").asList();
 	}
 }

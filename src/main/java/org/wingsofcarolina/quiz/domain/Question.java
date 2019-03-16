@@ -1,11 +1,12 @@
 package org.wingsofcarolina.quiz.domain;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Id;
+import org.mongodb.morphia.annotations.Transient;
 import org.wingsofcarolina.quiz.domain.dao.QuestionDAO;
 import org.wingsofcarolina.quiz.domain.persistence.Persistence;
 
@@ -15,11 +16,15 @@ public class Question {
     @Id
 	@JsonIgnore
     private ObjectId id;
+    @Transient
+    private Integer index;
 	private long questionId;
 	private Type type;
 	private Category category;
-	private SubCategory subCategory;
-	private Boolean deprecated = false;
+	private Difficulty difficulty;
+	private List<String> attributes;
+	private Boolean deployed = false;
+	private long supercededBy = -1;
 	private Date createdDate = new Date();
 	private String question;
 	private String references;
@@ -28,11 +33,12 @@ public class Question {
 	
 	public Question() {}
 	
-	public Question(Type type, Category category, SubCategory subCategory, String question, String references, List<Answer> answers, String discussion) {
+	public Question(Type type, Category category, List<String> attribute, String question, String references, List<Answer> answers, String discussion) {
 		super();
 		this.type = type;
 		this.category = category;
-		this.subCategory = subCategory;
+		this.difficulty = Difficulty.EASY;
+		this.attributes = attribute;
 		this.question = question;
 		this.references = references;
 		this.answers = answers;
@@ -48,8 +54,16 @@ public class Question {
 		return questionId;
 	}
 
-	public void setQuestionId(Integer questionId) {
+	public void setQuestionId(long questionId) {
 		this.questionId = questionId;
+	}
+
+	public Integer getIndex() {
+		return index;
+	}
+
+	public void setIndex(Integer index) {
+		this.index = index;
 	}
 
 	public Type getType() {
@@ -68,20 +82,32 @@ public class Question {
 		this.category = category;
 	}
 
-	public SubCategory getSubCategory() {
-		return subCategory;
+	public List<String> getAttributes() {
+		return attributes;
 	}
 
-	public void setSubCategory(SubCategory subCategory) {
-		this.subCategory = subCategory;
+	public void setAttributes(List<String> attributes) {
+		this.attributes = attributes;
+	}
+	
+	public void addAttribute(String attribute) {
+		this.attributes.add(attribute);
 	}
 
-	public Boolean getDeprecated() {
-		return deprecated;
+	public Boolean getDeployed() {
+		return deployed;
 	}
 
-	public void setDeprecated(Boolean deprecated) {
-		this.deprecated = deprecated;
+	public void setDeployed(Boolean deployed) {
+		this.deployed = deployed;
+	}
+	
+	public long getSupercededBy() {
+		return supercededBy;
+	}
+
+	public void setSupercededBy(long supercededBy) {
+		this.supercededBy = supercededBy;
 	}
 
 	public Date getCreatedDate() {
@@ -112,6 +138,10 @@ public class Question {
 		return answers;
 	}
 
+	public void setAnswers(List<Answer> answers) {
+		this.answers = answers;
+	}
+
 	public String getDiscussion() {
 		return discussion;
 	}
@@ -119,13 +149,23 @@ public class Question {
 	public void setDiscussion(String discussion) {
 		this.discussion = discussion;
 	}
-	
+
 	/*
 	 * Database Management Functionality
 	 */
 	public static List<Question> getAllQuestions() {
-		QuestionDAO userDao = (QuestionDAO) Persistence.instance().get(Question.class);
-		return userDao.getAllQuestions();
+		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
+		return questionDao.getAllQuestions();
+	}
+
+	public static Collection<? extends Question> getSelected(Category category) {
+		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
+		return questionDao.getSelected(category);
+	}
+
+	public static List<Question> getSelected(Category category, String attribute) {
+		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
+		return questionDao.getSelected(category, attribute);
 	}
 	
 	@SuppressWarnings("unchecked")

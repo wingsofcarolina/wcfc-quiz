@@ -2,6 +2,8 @@ package org.wingsofcarolina.quiz.resources;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.List;
+
 import javax.ws.rs.CookieParam;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -147,6 +149,19 @@ public class QuizAPI {
 		}
 	}
 
+
+	@POST
+	@Path("editQuestion")
+	@Produces("text/html")
+	public Response editQuestion(@FormParam("question") String question,
+			@FormParam("discussion") String discussion,
+			@FormParam("attributes") List<String> attributes) throws Exception {
+		LOG.info("Question   --> {}", question);
+		LOG.info("Discussion --> {}", discussion);
+		LOG.info("Attributes --> {}", attributes);
+		return Response.ok().build();
+	}
+	
 	private String getUserCredentials(String name) {
 		User user = User.getByEmail(name);
 		if (user != null) {

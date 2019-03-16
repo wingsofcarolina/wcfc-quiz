@@ -11,6 +11,7 @@ import java.io.Writer;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.CookieParam;
@@ -18,7 +19,6 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Cookie;
@@ -36,8 +36,7 @@ import org.wingsofcarolina.quiz.authentication.Privilege;
 import org.wingsofcarolina.quiz.common.Pages;
 import org.wingsofcarolina.quiz.common.Templates;
 import org.wingsofcarolina.quiz.domain.*;
-import org.wingsofcarolina.quiz.domain.presentation.QuizWrapper;
-import org.wingsofcarolina.quiz.domain.presentation.Wrapper;
+import org.wingsofcarolina.quiz.domain.quiz.Quiz;
 import org.wingsofcarolina.quiz.extensions.*;
 import org.wingsofcarolina.quiz.responses.RedirectResponse;
 
@@ -127,7 +126,7 @@ public class QuizResource {
 	public Response login() throws Exception {
 		String output = "";
 		try {
-			String rendered = render(Templates.LOGIN, new Object()).toString();
+			String rendered = renderFreemarker(Templates.LOGIN, new Object()).toString();
 			output = asciidoctor.convert(rendered, options);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -141,7 +140,7 @@ public class QuizResource {
 	public Response register() throws Exception {
 		String output = "";
 		try {
-			String rendered = render(Templates.REGISTER, new Object()).toString();
+			String rendered = renderFreemarker(Templates.REGISTER, new Object()).toString();
 			output = asciidoctor.convert(rendered, options);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -158,7 +157,7 @@ public class QuizResource {
 			User user = User.getWithClaims(claims);
 			String output = "";
 			if (user != null) {
-				output = render("home.ad", user).toString();
+				output = renderFreemarker("home.ad", user).toString();
 				return Response.ok().entity(output).build();
 			} else {
 				return Response.status(404).build();
@@ -171,34 +170,53 @@ public class QuizResource {
 	@GET
 	@Path("generate")
 	@Produces("text/html")
-	public Response generate(@QueryParam("quiz") String quiz) throws Exception {
+	public Response generate(@QueryParam("quiz") String quizType) throws Exception {
 		String output = "";
 		try {
-			QuizWrapper wrapper = generateQuiz(quiz);
-			output = render(Templates.QUIZ, wrapper).toString();
+			Quiz quiz = new Quiz(quizType);
+			switch (quizType) {
+				case "far": quiz.attribute(Attribute.ALL); break;
+				case "sop-student": quiz.attribute(Attribute.STUDENT).attribute(Attribute.ALL); break;
+				case "sop-pilot": quiz.attribute(Attribute.PILOT).attribute(Attribute.ALL); break;
+				case "sop-instructor": quiz.attribute(Attribute.INSTRUCTOR).attribute(Attribute.ALL); break;
+				case "c152": break;
+				case "c172": break;
+				case "pa28": break;
+				case "m20j": break;
+				default: break;
+			}
+			output = renderFreemarker(Templates.QUIZ, quiz.build()).toString();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return Response.ok().entity(output).build();
 	}
 	
-	private QuizWrapper generateQuiz(String quiz) {
-		QuizWrapper wrapper = new QuizWrapper(null, quiz);
-		switch (quiz) {
-		   case "far":
-		   case "sop-student":
-		   case "sop-pilot":
-		   case "sop-instructor":
-		   case "c152":
-		   case "c172":
-		   case "pa28":
-		   case "m20j":
-		   }
-		return wrapper;
+	@GET
+	@Path("editQuestion")
+	@Produces("text/html")
+	public Response editQuestion(@CookieParam("quiz.token") Cookie cookie) throws Exception, AuthenticationException {
+		if (cookie != null) {
+			Jws<Claims> claims = authUtils.validateUser(cookie.getValue());
+			User user = User.getWithClaims(claims);
+			String output = "";
+			if (user != null) {
+				String rendered = renderFreemarker("editQuestion.ad", user).toString();
+				output = asciidoctor.convert(rendered, options);
+				return Response.ok().entity(output).build();
+			} else {
+				return Response.status(404).build();
+			}
+		} else {
+			return new RedirectResponse(Pages.LOGIN_PAGE).build();
+		}
 	}
-	
-	private Writer render(String template, Object entity) throws IOException {
-		
+
+	private class QuestionWrapper {
+		private User user;
+	}
+
+	private Writer renderFreemarker(String template, Object entity) throws IOException {
 		Template temp = freemarker.getTemplate(template);
 
 		Writer out = new StringWriter();

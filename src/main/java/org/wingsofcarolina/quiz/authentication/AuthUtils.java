@@ -104,6 +104,7 @@ public class AuthUtils {
 		// https://scotch.io/tutorials/the-anatomy-of-a-json-web-token
 		Claims claims = new DefaultClaims();
 		claims.setIssuedAt(new Date());
+		claims.setSubject(user.getEmail());
 		claims.put("email", user.getEmail());
 		claims.put("admin", user.getPrivileges().contains(Privilege.ADMIN));
 		claims.put("userId", user.getUserId());

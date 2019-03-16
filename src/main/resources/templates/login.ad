@@ -31,7 +31,6 @@ Cub member needing a quiz :</p>
    <input type="radio" name="quiz" value="m20j"> M20J Mooney<br>
   </div>
 </div>
-
 </p>
 <input type="submit" value="Generate"></form>
 </p>

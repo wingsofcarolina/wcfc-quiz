@@ -19,10 +19,10 @@ server:
     requestLog:
         appenders:
           - type: file
-            currentLogFilename: log/metar-http.log
+            currentLogFilename: log/quiz-http.log
             threshold: ALL
             archive: true
-            archivedLogFilenamePattern: log/metar-%i-%d-http.log
+            archivedLogFilenamePattern: log/quiz-%i-%d-http.log
             maxFileSize: 500MB
             archivedFileCount: 5
             timeZone: UTC
@@ -42,10 +42,10 @@ logging:
         timeZone: UTC
         target: stdout
       - type: file
-        currentLogFilename: ./log/metar.log
+        currentLogFilename: ./log/quiz.log
         threshold: ALL
         archive: true
-        archivedLogFilenamePattern: ./log/metar-%i-%d.log
+        archivedLogFilenamePattern: ./log/quiz-%i-%d.log
         maxFileSize: 500MB
         archivedFileCount: 5
         timeZone: UTC

@@ -1,9 +1,23 @@
-<h1>${quizName}</h1>
+<#--
+	This template is used to format the quiz output. It is processed
+	by FreeMarker, and is passed a Quiz object which has all the 
+	questions selected and included.
+-->
+<center>
+<h1>Wings of Carolina Flying Club<h1>
+<h2>${quizName} Written Test</h2>
+</center>
 
 <#setting number_format="#0">
 
 <#list questions as question>
-[${question.questionId}] ${question.question}</p>
+${question.index} : ${question.question} <i>{ ${question.questionId} }</i></br>
+&nbsp;&nbsp;&nbsp;
+<i>{ ${question.category}&nbsp;
+<#list question.attributes as attribute>
+${attribute}&nbsp;
+</#list>
+}</i></p>
 
 <#list question.answers as answer>
 <#if question.isBlank()>
@@ -16,6 +30,6 @@ ${answer.index} : ${answer.answer}</br>
 </#if>
 </#if>
 </#list>
-</p>
+</p>&nbsp;</p>
 
 </#list>
