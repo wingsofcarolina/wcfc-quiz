@@ -175,17 +175,18 @@ public class QuizResource {
 		try {
 			Quiz quiz = new Quiz(quizType);
 			switch (quizType) {
-				case "far": quiz.attribute(Attribute.ALL); break;
-				case "sop-student": quiz.attribute(Attribute.STUDENT).attribute(Attribute.ALL); break;
-				case "sop-pilot": quiz.attribute(Attribute.PILOT).attribute(Attribute.ALL); break;
-				case "sop-instructor": quiz.attribute(Attribute.INSTRUCTOR).attribute(Attribute.ALL); break;
+				case "far": quiz.attribute(Attribute.ANY); break;
+				case "sop-student": quiz.attribute(Attribute.STUDENT).attribute(Attribute.ANY); break;
+				case "sop-pilot": quiz.attribute(Attribute.PILOT).attribute(Attribute.ANY); break;
+				case "sop-instructor": quiz.attribute(Attribute.INSTRUCTOR).attribute(Attribute.ANY); break;
 				case "c152": break;
 				case "c172": break;
 				case "pa28": break;
 				case "m20j": break;
 				default: break;
 			}
-			output = renderFreemarker(Templates.QUIZ, quiz.build()).toString();
+			quiz.build();
+			output = renderFreemarker(Templates.QUIZ, quiz).toString();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

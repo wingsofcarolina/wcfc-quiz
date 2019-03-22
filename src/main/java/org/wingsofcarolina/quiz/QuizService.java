@@ -7,11 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wingsofcarolina.quiz.authentication.AuthenticationExceptionMapper;
 import org.wingsofcarolina.quiz.authentication.Privilege;
-import org.wingsofcarolina.quiz.domain.Answer;
-import org.wingsofcarolina.quiz.domain.Category;
-import org.wingsofcarolina.quiz.domain.Question;
-import org.wingsofcarolina.quiz.domain.Attribute;
-import org.wingsofcarolina.quiz.domain.Type;
 import org.wingsofcarolina.quiz.domain.User;
 import org.wingsofcarolina.quiz.domain.persistence.Persistence;
 import org.wingsofcarolina.quiz.healthcheck.MinimalHealthCheck;
@@ -23,6 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.thomaskrille.dropwizard_template_config.TemplateConfigBundle;
 import de.thomaskrille.dropwizard_template_config.TemplateConfigBundleConfiguration;
 import io.dropwizard.Application;
+import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 
@@ -31,13 +27,18 @@ public class QuizService extends Application<QuizConfiguration> {
 
 	public static void main(String[] args) throws Exception {
 		LOG.info("Starting : WCFC Quiz Service");
-		new QuizService().run(args);
+        if (args.length < 2) {
+            new QuizService().run(new String[]{"server", "configuration.ftl"});
+        } else {
+            new QuizService().run(args);
+        }
 	}
 
 	@Override
 	public void initialize(Bootstrap<QuizConfiguration> bootstrap) {
 		// bootstrap.addBundle(new AssetsBundle("/doc", "/doc", "index.html","html"));
 		bootstrap.addBundle(new TemplateConfigBundle(new TemplateConfigBundleConfiguration()));
+        bootstrap.addBundle(new AssetsBundle("/assets/", "/static"));
 		// super.initialize(bootstrap);
 	}
 

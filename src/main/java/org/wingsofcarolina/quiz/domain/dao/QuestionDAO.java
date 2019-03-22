@@ -54,7 +54,7 @@ public class QuestionDAO extends BasicDAO<Question, ObjectId> {
 			query.filter("category = ", category);
 			query.filter("attributes elem", BasicDBObjectBuilder.start("$eq", attribute).get());
 
-		return query.order("questionid").asList();
+			return query.order("questionid").asList();
 		}
 	}
 

@@ -1,6 +1,8 @@
 package org.wingsofcarolina.populate;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,14 +14,18 @@ import org.wingsofcarolina.quiz.domain.Category;
 import org.wingsofcarolina.quiz.domain.Question;
 import org.wingsofcarolina.quiz.domain.Type;
 import org.wingsofcarolina.quiz.domain.persistence.Persistence;
+import org.wingsofcarolina.quiz.domain.quiz.Recipe;
+import org.wingsofcarolina.quiz.domain.quiz.Section;
+import org.wingsofcarolina.quiz.domain.quiz.Selection;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thedeanda.lorem.Lorem;
 import com.thedeanda.lorem.LoremIpsum;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
+
+import org.apache.commons.collections4.ListUtils;
 import org.slf4j.LoggerFactory;
 
 public class Populate {
@@ -39,10 +45,9 @@ public class Populate {
 	}
 	
 	private void run() throws FileNotFoundException, IOException {
-		// Create SOP question bank
-		for (int i = 0; i < 50; i++) {
-			sopQuestion();
-		}
+//		createRecipes();
+		createFARQuestions();
+		sopQuestions();
 		createAirplaneQuestions(Category.C152);
 		createAirplaneQuestions(Category.C172);
 		createAirplaneQuestions(Category.PA28);
@@ -51,19 +56,62 @@ public class Populate {
 		System.out.println("Done.");
 	}
 	
+	private void createRecipes() {
+		Recipe recipe = new Recipe(Category.FAR);
+		Section section = new Section("easy");
+		recipe.addSection(section);
+		section.addSelection(new Selection(50, Arrays.asList(Attribute.ANY)));
+		section.addSelection(new Selection(50, Arrays.asList(Attribute.ANY)));
+		section.addSelection(new Selection(50, Arrays.asList(Attribute.ANY)));
+		
+		ObjectMapper mapper = new ObjectMapper();
+		try {
+			mapper.writeValue(new FileOutputStream("recipe.json"), recipe);
+			
+			File file = new File("recipe.json");
+			Recipe newRecipe = mapper.readValue(file, Recipe.class);
+			
+			System.out.println(recipe);
+			System.out.println(newRecipe);
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private void createFARQuestions() {
+		List<String> attributes = new ArrayList<String>();
+
+		for (int i = 0; i < 100; i++) {
+			attributes.clear();
+			multipleChoice(Category.FAR, Arrays.asList(Attribute.ANY));
+		}
+	}
+
 	private void createAirplaneQuestions(Category category) {
 		List<String> attributes = new ArrayList<String>();
 
-		// Create C152 question bank
 		for (int i = 0; i < 100; i++) {
 			attributes.clear();
 			multipleChoice(category, Attribute.aircraft_attributes);
 		}
 	}
 
-	private Question multipleChoice(Category category, List<String> attributes) {
+	private void multipleChoice(Category category) {
+		multipleChoice(category, null);
+	}
+	
+	private void multipleChoice(Category category, List<String> attributes) {
 		Question question;
 		List<Answer> answers;
+		List<String> attributeList = null;
+		
+		if (attributes != null) {
+			attributeList = Arrays.asList(attributes.get(pick(attributes.size())));
+		}
+
+		attributeList = ListUtils.union(attributeList, Arrays.asList(Attribute.difficulty_attributes.get(pick(3))));
 
 		answers = new ArrayList<Answer>();
 		answers.add(new Answer(1, getWords(5, 15)));
@@ -72,35 +120,32 @@ public class Populate {
 		answers.add(new Answer(4, getWords(5, 15)));
 		answers.get(pick(4)).setCorrect(true);
 		// Select some references
-	    question = new Question(Type.CHOICE, category,
-	    		Arrays.asList(attributes.get(pick(attributes.size()))), 
+	    question = new Question(Type.CHOICE, category, attributeList, 
 				getWords(10, 20), lorem.getWords(1, 3), answers, lorem.getParagraphs(1, 2));
 		question.save();
-		
-		return question;
 	}
 	
-	private Question sopQuestion() {
+	private void sopQuestions() {
 		Question question;
 		List<Answer> answers;
 
-		// Fabricate attributes
-		List<String> attributes = new ArrayList<String>();
-		attributes.add(Attribute.sop_attributes.get(pick(Attribute.sop_attributes.size())));
-		attributes.add(Attribute.level_attributes.get(pick(Attribute.level_attributes.size())));
-
-		answers = new ArrayList<Answer>();
-		int count = pick(4) + 1;
-		for (int i = 0; i < count; i++) {
-			answers.add(new Answer(i+1, getWords(5, 15)));
+		for (int i = 0; i < 100; i++) {
+			// Fabricate attributes
+			List<String> attributes = new ArrayList<String>();
+			attributes.add(Attribute.sop_attributes.get(pick(Attribute.sop_attributes.size())));
+			attributes.add(Attribute.level_attributes.get(pick(Attribute.level_attributes.size())));
+	
+			answers = new ArrayList<Answer>();
+			int count = pick(4) + 1;
+			for (int j = 0; j < count; j++) {
+				answers.add(new Answer(j+1, getWords(5, 15)));
+			}
+			int pick = pick(count);
+			answers.get(pick).setCorrect(true);
+		    question = new Question(Type.BLANK, Category.SOP, attributes, 
+					getWordsWithBlanks(count, 10, 20), lorem.getWords(1, 3), answers, lorem.getParagraphs(1, 2));
+			question.save();
 		}
-		int pick = pick(count);
-		answers.get(pick).setCorrect(true);
-	    question = new Question(Type.BLANK, Category.SOP, attributes, 
-				getWordsWithBlanks(count, 10, 20), lorem.getWords(1, 3), answers, lorem.getParagraphs(1, 2));
-		question.save();
-		
-		return question;
 	}
 	
 	private String getWords(int min, int max) {

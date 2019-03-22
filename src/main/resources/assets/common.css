@@ -1,0 +1,6 @@
+p { font-size: 12pt; }
+body { font-family: Georgia, ‘Times New Roman’, serif; margin: 30px; } 
+.center {
+  text-align: center;
+  border: 3px;
+}

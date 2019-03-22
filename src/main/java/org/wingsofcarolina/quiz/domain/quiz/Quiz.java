@@ -17,7 +17,7 @@ public class Quiz {
 	private List<Question> questions = new ArrayList<Question>();
 	
 	public Quiz(String quizType) {
-		quizId = Persistence.instance().generateAutoIncrement("question", 1000);
+		this.quizId = Persistence.instance().generateAutoIncrement("quiz", 1000);
 		switch (quizType) {
 			case "far":
 				category = Category.FAR;

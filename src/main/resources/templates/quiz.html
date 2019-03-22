@@ -1,19 +1,25 @@
-<#--
-	This template is used to format the quiz output. It is processed
-	by FreeMarker, and is passed a Quiz object which has all the 
-	questions selected and included.
--->
-<center>
-<h1>Wings of Carolina Flying Club<h1>
-<h2>${quizName} Written Test</h2>
-</center>
+<!DOCTYPE html>
 
+<html>
+<head>
+  <link rel="stylesheet" href="/static/common.css">
+</head>
+<body>
 <#setting number_format="#0">
 
+<div class="center">
+<h1>Wings of Carolina Flying Club<h1>
+<h2>${quizName} Written Test</h2>
+<h3>Quiz ID [${quizId}]</h3>
+</div>
+
+<hr>
+
+<div>
 <#list questions as question>
 ${question.index} : ${question.question} <i>{ ${question.questionId} }</i></br>
 &nbsp;&nbsp;&nbsp;
-<i>{ ${question.category}&nbsp;
+<i>{ ${question.category}&nbsp;/&nbsp;
 <#list question.attributes as attribute>
 ${attribute}&nbsp;
 </#list>
@@ -31,5 +37,7 @@ ${answer.index} : ${answer.answer}</br>
 </#if>
 </#list>
 </p>&nbsp;</p>
-
 </#list>
+</div>
+</body>
+</html>

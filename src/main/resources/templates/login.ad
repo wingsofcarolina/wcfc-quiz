@@ -1,13 +1,27 @@
 = WCFC Quiz Service
 
+<#setting number_format="#0">
 ++++
 <center>
+Cub member needing a quiz select from the following choices:</p>
+<div style="text-align: center;">
+  <div style="display: inline-block; text-align:left;">
+   <a href="generate?quiz=far"> FAR 61/91, Pre-Solo</a><br>
+   <a href="generate?quiz=sop-student"> SOP/FS, Student Pilots</a><br>
+   <a href="generate?quiz=sop-pilot"> SOP/FS, Licensed Pilot</a><br>
+   <a href="generate?quiz=sop-instructor"> SOP/FS, Instructor</a><br>
+   <a href="generate?quiz=c152"> C-152</a><br>
+   <a href="generate?quiz=c172"> C-172 Skyhawk</a><br>
+   <a href="generate?quiz=pa28"> PA-28 Warrior</a><br>
+   <a href="generate?quiz=m20j"> M20J Mooney</a><br>
+  </div>
+</div>
+</p>
+<hr>
 <form action="/quiz/api/login" method="post">
 ++++
 
-flash:message[]
-
-Instructors needing to retrieve a quiz key :
+Instructors needing to retrieve a quiz key log in:
 |===
 | Email | pass:[<input type="text" name="email">]
 | Password | pass:[<input type="password" name="password">]
@@ -15,24 +29,6 @@ Instructors needing to retrieve a quiz key :
 ++++
   <input type="submit" name="type" value="Login">
 </form>
-</p>
-<hr>
-Cub member needing a quiz :</p>
-<form action="/quiz/generate" method="get">
-<div style="text-align: center;">
-  <div style="display: inline-block; text-align:left;">
-   <input type="radio" name="quiz" value="far"> FAR 61/91, Pre-Solo<br>
-   <input type="radio" name="quiz" value="sop-student"> SOP/FS, Student Pilots<br>
-   <input type="radio" name="quiz" value="sop-pilot"> SOP/FS, Licensed Pilot<br>
-   <input type="radio" name="quiz" value="sop-instructor"> SOP/FS, Instructor<br>
-   <input type="radio" name="quiz" value="c152"> C-152<br>
-   <input type="radio" name="quiz" value="c172"> C-172 Skyhawk<br>
-   <input type="radio" name="quiz" value="pa28"> PA-28 Warrior<br>
-   <input type="radio" name="quiz" value="m20j"> M20J Mooney<br>
-  </div>
-</div>
-</p>
-<input type="submit" value="Generate"></form>
 </p>
 ++++
 
