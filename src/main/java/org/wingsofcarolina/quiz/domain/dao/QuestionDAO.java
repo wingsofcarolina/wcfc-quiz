@@ -45,16 +45,22 @@ public class QuestionDAO extends BasicDAO<Question, ObjectId> {
 		return result;
 	}
 	
-	public List<Question> getSelected(Category category, String attribute) {
-		if (attribute == null || attribute.isEmpty()) {
+	public List<Question> getSelected(Category category, List<String> attributes) {
+		if (attributes == null || attributes.isEmpty()) {
 			return getSelected(category);
 		} else {
 			Query<Question> query = getDatastore().createQuery(Question.class).disableValidation();
 	
 			query.filter("category = ", category);
-			query.filter("attributes elem", BasicDBObjectBuilder.start("$eq", attribute).get());
-
-			return query.order("questionid").asList();
+			if (attributes.size() == 1) {
+				query.filter("attributes = ", attributes.get(0));
+			} else {
+				query.filter("attributes = ", attributes);
+			}
+			query.get();
+			
+			List<Question> foo = query.order("questionid").asList();
+			return foo;
 		}
 	}
 

@@ -1,4 +1,4 @@
-package org.wingsofcarolina.quiz.domain.quiz;
+package org.wingsofcarolina.quiz.domain;
 
 import java.util.List;
 

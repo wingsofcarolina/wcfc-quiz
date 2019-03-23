@@ -1,8 +1,6 @@
 package org.wingsofcarolina.populate;
 
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,13 +10,13 @@ import org.wingsofcarolina.quiz.domain.Answer;
 import org.wingsofcarolina.quiz.domain.Attribute;
 import org.wingsofcarolina.quiz.domain.Category;
 import org.wingsofcarolina.quiz.domain.Question;
+import org.wingsofcarolina.quiz.domain.Recipe;
+import org.wingsofcarolina.quiz.domain.Section;
+import org.wingsofcarolina.quiz.domain.Selection;
 import org.wingsofcarolina.quiz.domain.Type;
 import org.wingsofcarolina.quiz.domain.persistence.Persistence;
-import org.wingsofcarolina.quiz.domain.quiz.Recipe;
-import org.wingsofcarolina.quiz.domain.quiz.Section;
-import org.wingsofcarolina.quiz.domain.quiz.Selection;
+import org.wingsofcarolina.quiz.domain.quiz.Quiz;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thedeanda.lorem.Lorem;
 import com.thedeanda.lorem.LoremIpsum;
 
@@ -45,7 +43,7 @@ public class Populate {
 	}
 	
 	private void run() throws FileNotFoundException, IOException {
-//		createRecipes();
+		createRecipes();
 		createFARQuestions();
 		sopQuestions();
 		createAirplaneQuestions(Category.C152);
@@ -57,27 +55,22 @@ public class Populate {
 	}
 	
 	private void createRecipes() {
-		Recipe recipe = new Recipe(Category.FAR);
-		Section section = new Section("easy");
+		createRecipe(Quiz.QuizType.FAR, Arrays.asList(Attribute.ANY));
+		createRecipe(Quiz.QuizType.SOP_STUDENT, Arrays.asList(Attribute.ANY));
+		createRecipe(Quiz.QuizType.SOP_PILOT, Arrays.asList(Attribute.ANY));
+		createRecipe(Quiz.QuizType.SOP_INSTRUCTOR, Arrays.asList(Attribute.ANY));
+		createRecipe(Quiz.QuizType.C152, Arrays.asList(Attribute.GENERAL, Attribute.EASY));
+		createRecipe(Quiz.QuizType.C172, Arrays.asList(Attribute.GENERAL));
+		createRecipe(Quiz.QuizType.PA28, Arrays.asList(Attribute.GENERAL));
+		createRecipe(Quiz.QuizType.M20J, Arrays.asList(Attribute.GENERAL));
+	}
+	
+	private void createRecipe(Quiz.QuizType quizType, List<String> attributes) {
+		Recipe recipe = new Recipe(quizType);
+		Section section = new Section("only");
 		recipe.addSection(section);
-		section.addSelection(new Selection(50, Arrays.asList(Attribute.ANY)));
-		section.addSelection(new Selection(50, Arrays.asList(Attribute.ANY)));
-		section.addSelection(new Selection(50, Arrays.asList(Attribute.ANY)));
-		
-		ObjectMapper mapper = new ObjectMapper();
-		try {
-			mapper.writeValue(new FileOutputStream("recipe.json"), recipe);
-			
-			File file = new File("recipe.json");
-			Recipe newRecipe = mapper.readValue(file, Recipe.class);
-			
-			System.out.println(recipe);
-			System.out.println(newRecipe);
-
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		section.addSelection(new Selection(50, attributes));
+		recipe.save();
 	}
 	
 	private void createFARQuestions() {

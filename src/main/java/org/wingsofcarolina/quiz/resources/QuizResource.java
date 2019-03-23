@@ -173,19 +173,12 @@ public class QuizResource {
 	public Response generate(@QueryParam("quiz") String quizType) throws Exception {
 		String output = "";
 		try {
-			Quiz quiz = new Quiz(quizType);
-			switch (quizType) {
-				case "far": quiz.attribute(Attribute.ANY); break;
-				case "sop-student": quiz.attribute(Attribute.STUDENT).attribute(Attribute.ANY); break;
-				case "sop-pilot": quiz.attribute(Attribute.PILOT).attribute(Attribute.ANY); break;
-				case "sop-instructor": quiz.attribute(Attribute.INSTRUCTOR).attribute(Attribute.ANY); break;
-				case "c152": break;
-				case "c172": break;
-				case "pa28": break;
-				case "m20j": break;
-				default: break;
-			}
-			quiz.build();
+			Quiz quiz = new Quiz(quizType).build();
+			
+			// Store the quiz question set for later retrieval
+			// TODO : This is a placeholder for the quiz store capability
+			
+			// Render the output for the club member
 			output = renderFreemarker(Templates.QUIZ, quiz).toString();
 		} catch (IOException e) {
 			e.printStackTrace();

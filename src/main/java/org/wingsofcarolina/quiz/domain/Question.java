@@ -21,7 +21,6 @@ public class Question {
 	private long questionId;
 	private Type type;
 	private Category category;
-	private Difficulty difficulty;
 	private List<String> attributes;
 	private Boolean deployed = false;
 	private long supercededBy = -1;
@@ -37,7 +36,6 @@ public class Question {
 		super();
 		this.type = type;
 		this.category = category;
-		this.difficulty = Difficulty.EASY;
 		this.attributes = attribute;
 		this.question = question;
 		this.references = references;
@@ -163,9 +161,9 @@ public class Question {
 		return questionDao.getSelected(category);
 	}
 
-	public static List<Question> getSelected(Category category, String attribute) {
+	public static List<Question> getSelected(Category category, List<String> attributes) {
 		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
-		return questionDao.getSelected(category, attribute);
+		return questionDao.getSelected(category, attributes);
 	}
 	
 	@SuppressWarnings("unchecked")

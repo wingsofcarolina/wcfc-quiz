@@ -3,45 +3,50 @@ package org.wingsofcarolina.quiz.domain.quiz;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.wingsofcarolina.quiz.domain.Attribute;
 import org.wingsofcarolina.quiz.domain.Category;
 import org.wingsofcarolina.quiz.domain.Question;
+import org.wingsofcarolina.quiz.domain.Recipe;
+import org.wingsofcarolina.quiz.domain.Section;
+import org.wingsofcarolina.quiz.domain.Selection;
 import org.wingsofcarolina.quiz.domain.persistence.Persistence;
 
+
 public class Quiz {
+	public enum QuizType { FAR, SOP_STUDENT, SOP_PILOT, SOP_INSTRUCTOR, C152, C172, PA28, M20J };
 
 	private long quizId;
 	private String quizName;
+	private QuizType quizType;
 	private Category category;
-	private List<String> attributes = new ArrayList<String>();
 	private List<Question> questions = new ArrayList<Question>();
 	
-	public Quiz(String quizType) {
+	public Quiz(String request) {
 		this.quizId = Persistence.instance().generateAutoIncrement("quiz", 1000);
-		switch (quizType) {
+		switch (request) {
 			case "far":
 				category = Category.FAR;
+				quizType = QuizType.FAR;
 				quizName = "FAR 61/91";
 				break;
 			case "sop-student":
 				category = Category.SOP;
+				quizType = QuizType.SOP_STUDENT;
 				quizName = "SOP - Student Pilot";
-				this.attribute(Attribute.STUDENT);
 				break;
 			case "sop-pilot":
 				category = Category.SOP;
+				quizType = QuizType.SOP_PILOT;
 				quizName = "SOP - Licensed Pilot"; 
-				this.attribute(Attribute.PILOT);
 				break;
 			case "sop-instructor":
 				category = Category.SOP;
+				quizType = QuizType.SOP_INSTRUCTOR;
 				quizName = "SOP - Instructor";
-				this.attribute(Attribute.INSTRUCTOR);
 				break;
-			case "c152": category = Category.C152; quizName = "Cessna 152"; break;
-			case "c172": category = Category.C172; quizName = "Cessna 172 Skyhawk"; break;
-			case "pa28": category = Category.PA28; quizName = "Piper PA-28 Warrior"; break;
-			case "m20j": category = Category.M20J; quizName = "Mooney M20J"; break;
+			case "c152": category = Category.C152; quizType = QuizType.C152; quizName = "Cessna 152"; break;
+			case "c172": category = Category.C172; quizType = QuizType.C172; quizName = "Cessna 172 Skyhawk"; break;
+			case "pa28": category = Category.PA28; quizType = QuizType.PA28; quizName = "Piper PA-28 Warrior"; break;
+			case "m20j": category = Category.M20J; quizType = QuizType.M20J; quizName = "Mooney M20J"; break;
 		}			
 	}
 
@@ -60,34 +65,25 @@ public class Quiz {
 	public List<Question>getQuestions() {
 		return questions;
 	}
-
-	public List<String> getAttributes() {
-		return attributes;
-	}
-
-	public void setAttributes(List<String> attributes) {
-		this.attributes = attributes;
-	}
-	
-	public Quiz attribute(String attribute) {
-		if (this.attributes == null) {
-			this.attributes = new ArrayList<String>();
-		}
-		this.attributes.add(attribute);
-		return this;
-	}
 	
 	/**
 	 * Based on a quiz recipe, build a quiz
 	 * @return
 	 */
 	public Quiz build() {
-		// Simulate a recipe retrieval
-		if (attributes.size() == 0) {
-			questions.addAll(Question.getSelected(category));
-		} else {
-			for (String attribute : attributes) {
-				questions.addAll(Question.getSelected(category, attribute));
+		// Pick up the recipe for the desired quiz
+		Recipe recipe = Recipe.getRecipeByType(quizType);
+
+		// Iterate over all sections
+		for (Section section : recipe.getSections()) {
+			// Create a place to deposit all the candidate questions
+			List<Question> candidates = new ArrayList<Question>();
+			
+			// Iterate all selections within the section
+			for (Selection selection : section.getSelections()) {
+				candidates = Question.getSelected(category, selection.getAttributes());
+				// TODO: Eventually pick randomly, but for now add them all
+				questions.addAll(candidates);
 			}
 		}
 		
