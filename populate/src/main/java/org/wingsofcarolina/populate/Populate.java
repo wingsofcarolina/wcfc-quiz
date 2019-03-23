@@ -43,7 +43,7 @@ public class Populate {
 	}
 	
 	private void run() throws FileNotFoundException, IOException {
-		createRecipes();
+		//createRecipes();
 		createFARQuestions();
 		sopQuestions();
 		createAirplaneQuestions(Category.C152);
@@ -69,7 +69,7 @@ public class Populate {
 		Recipe recipe = new Recipe(quizType);
 		Section section = new Section("only");
 		recipe.addSection(section);
-		section.addSelection(new Selection(50, attributes));
+		section.addSelection(new Selection(5, attributes));
 		recipe.save();
 	}
 	
@@ -85,7 +85,7 @@ public class Populate {
 	private void createAirplaneQuestions(Category category) {
 		List<String> attributes = new ArrayList<String>();
 
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < 200; i++) {
 			attributes.clear();
 			multipleChoice(category, Attribute.aircraft_attributes);
 		}

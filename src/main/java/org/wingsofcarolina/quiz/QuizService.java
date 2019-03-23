@@ -57,34 +57,25 @@ public class QuizService extends Application<QuizConfiguration> {
 		// Create the Planez resource object (because it is used in the creation of dummy users)
 		QuizResource quiz = new QuizResource(config);
 
-		ObjectMapper mapper = new ObjectMapper();
-		List<User> users = new ArrayList<User>();
-		
 		// Create some initial dummy data
 		user = createUser(quiz, "George Scheer", "george.scheer@gmail.com", "REDACTED");
-		users.add(user);
 		if (user != null) {
 			user.addPriv(Privilege.ADMIN);
 			user.save();
 		}
 		user = createUser(quiz, "Dwight Frye", "dfrye@planez.co", "REDACTED");
-		users.add(user);
 		if (user != null) {
 			user.addPriv(Privilege.ADMIN);
 			user.save();
 		}
 		user = createUser(quiz, "Sam Evett", "sam_evett@yahoo.com", "REDACTED");
-		users.add(user);
 		if (user != null) {
 			user.save();
 		}
 		user = createUser(quiz, "Heinz McArthur", "Heinz@mcarthur.net", "REDACTED");
-		users.add(user);
 		if (user != null) {
 			user.save();
 		}
-
-		mapper.writeValue(new FileOutputStream("users.json"), users);
 
 		// Set exception mappers
 		env.jersey().register(new AuthenticationExceptionMapper());

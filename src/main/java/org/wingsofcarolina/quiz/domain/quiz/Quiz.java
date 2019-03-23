@@ -82,8 +82,18 @@ public class Quiz {
 			// Iterate all selections within the section
 			for (Selection selection : section.getSelections()) {
 				candidates = Question.getSelected(category, selection.getAttributes());
-				// TODO: Eventually pick randomly, but for now add them all
-				questions.addAll(candidates);
+				int candidateCount = candidates.size();
+				if (candidateCount < selection.getCount()) {
+					throw new RuntimeException("Not enough candidates to satisfy the Recipe. Had " + candidateCount + " and wanted " + selection.getCount());
+				}
+				
+				// Select the desired number of questions from the candidates
+				for (int i = 0; i < selection.getCount(); i++) {
+					int pick = 	(int)(Math.random() * candidates.size());
+					Question candidate = candidates.get(pick);
+					candidates.remove(pick);
+					questions.add(candidate);
+				}
 			}
 		}
 		

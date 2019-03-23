@@ -37,8 +37,12 @@ import org.wingsofcarolina.quiz.common.Pages;
 import org.wingsofcarolina.quiz.common.Templates;
 import org.wingsofcarolina.quiz.domain.*;
 import org.wingsofcarolina.quiz.domain.quiz.Quiz;
+import org.wingsofcarolina.quiz.domain.quiz.Quiz.QuizType;
 import org.wingsofcarolina.quiz.extensions.*;
 import org.wingsofcarolina.quiz.responses.RedirectResponse;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 import de.thomaskrille.dropwizard_template_config.redist.freemarker.template.Configuration;
 import de.thomaskrille.dropwizard_template_config.redist.freemarker.template.Template;
@@ -51,7 +55,7 @@ import io.jsonwebtoken.Jws;
  * @author dwight
  *
  */
-@Path("/quiz")
+@Path("/")
 public class QuizResource {
 	private static final Logger LOG = LoggerFactory.getLogger(QuizResource.class);
 
@@ -120,6 +124,7 @@ public class QuizResource {
 	public static QuizResource instance() {
 		return instance;
 	}
+	
 	@GET
 	@Path("login")
 	@Produces("text/html")
@@ -185,6 +190,49 @@ public class QuizResource {
 		}
 		return Response.ok().entity(output).build();
 	}
+	@GET
+	@Path("recipe")
+	@Produces("text/html")
+	public Response recipe(@QueryParam("quiz") String quiz) throws Exception {
+		Quiz.QuizType quizType = null;
+
+		String output = "";
+		switch (quiz) {
+		case "far":
+			quizType = QuizType.FAR;
+			break;
+		case "sop-student":
+			quizType = QuizType.SOP_STUDENT;
+			break;
+		case "sop-pilot":
+			quizType = QuizType.SOP_PILOT;
+			break;
+		case "sop-instructor":
+			quizType = QuizType.SOP_INSTRUCTOR;
+			break;
+		case "c152":
+			quizType = QuizType.C152;
+			break;
+		case "c172":
+			quizType = QuizType.C172;
+			break;
+		case "pa28":
+			quizType = QuizType.PA28;
+			break;
+		case "m20j":
+			quizType = QuizType.M20J;
+			break;
+		}
+		Recipe recipe = Recipe.getRecipeByType(quizType);
+		
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.enable(SerializationFeature.INDENT_OUTPUT);
+		output = mapper.writeValueAsString(recipe);
+		output = output.replaceAll("(\r\n|\n)", "<br/>");
+		output = output.replaceAll("\\s", "&nbsp;&nbsp;");
+				
+		return Response.ok().entity(output).build();
+	}
 	
 	@GET
 	@Path("editQuestion")
@@ -204,10 +252,6 @@ public class QuizResource {
 		} else {
 			return new RedirectResponse(Pages.LOGIN_PAGE).build();
 		}
-	}
-
-	private class QuestionWrapper {
-		private User user;
 	}
 
 	private Writer renderFreemarker(String template, Object entity) throws IOException {
