@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <link rel="stylesheet" href="/static/common.css">
+</head>
+<body>
+<#setting number_format="#0">
+
+<div class="center">
+<h1>Wings of Carolina Flying Club<h1>
+<h2>${quizName} Answer Key</h2>
+<h3>Quiz ID [${quizId}]</h3>
+</div>
+
+<hr>
+
+<div>
+<#list questions as question>
+${question.index} : ${question.question} <i>{ ${question.questionId} }</i></br>
+&nbsp;&nbsp;&nbsp;
+<i>{ ${question.category}&nbsp;/&nbsp;
+<#list question.attributes as attribute>
+${attribute}&nbsp;
+</#list>
+}</i></p>
+
+<#list question.answers as answer>
+<#if question.isBlank()>
+${answer.index} : ${answer.answer}</br>
+<#else>
+<#if answer.isCorrect()>
+${answer.index} : ${answer.answer}</br>
+</#if>
+</#if>
+</#list>
+</p>&nbsp;</p>
+References : ${question.references}</p>
+CFI Discussion : </br>
+${question.discussion}</p>
+
+</#list>
+</div>
+</body>
+</html>

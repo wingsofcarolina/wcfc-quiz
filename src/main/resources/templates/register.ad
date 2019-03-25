@@ -2,7 +2,7 @@
 
 ++++
 <center>
-<form action="/student/api/register" method="post">
+<form action="/fn/register" method="post">
 ++++
 
 flash:message[]

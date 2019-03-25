@@ -9,7 +9,6 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
@@ -28,8 +27,6 @@ import org.wingsofcarolina.quiz.common.Pages;
 import org.wingsofcarolina.quiz.domain.User;
 import org.wingsofcarolina.quiz.responses.LoginResponse;
 import org.wingsofcarolina.quiz.responses.RedirectResponse;
-import org.wingsofcarolina.quiz.responses.Response404;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 
@@ -37,7 +34,7 @@ import io.jsonwebtoken.Jws;
  * @author dwight
  *
  */
-@Path("/quiz/api")
+@Path("/api")
 public class QuizAPI {
 	private static final Logger LOG = LoggerFactory.getLogger(QuizAPI.class);
 	@SuppressWarnings("unused")
@@ -54,6 +51,8 @@ public class QuizAPI {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response login(@FormParam("email") String email, @FormParam("password") String password,
 			@FormParam("type") String type) throws Exception {
+		
+		LOG.debug("Entered the /api/login method");
 
 		String token = null;
 
@@ -162,8 +161,8 @@ public class QuizAPI {
 		return Response.ok().build();
 	}
 	
-	private String getUserCredentials(String name) {
-		User user = User.getByEmail(name);
+	private String getUserCredentials(String email) {
+		User user = User.getByEmail(email);
 		if (user != null) {
 			return user.getPassword();
 		} else {

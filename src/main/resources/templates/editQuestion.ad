@@ -28,7 +28,7 @@ select {
 }
 </style>
 
-<form action="/quiz/api/editQuestion" method="post">
+<form action="/fn/editQuestion" method="post">
 
 <h2>Question</h2>
 <textarea name="question" rows="4" cols="50">

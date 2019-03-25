@@ -126,6 +126,24 @@ public class QuizResource {
 	}
 	
 	@GET
+	@Produces("text/html")
+	public Response userHome(@CookieParam("quiz.token") Cookie cookie) throws Exception, AuthenticationException {
+		if (cookie != null) {
+			Jws<Claims> claims = authUtils.validateUser(cookie.getValue());
+			User user = User.getWithClaims(claims);
+			String output = "";
+			if (user != null) {
+				output = renderFreemarker("home.ad", user).toString();
+				return Response.ok().entity(output).build();
+			} else {
+				return Response.status(404).build();
+			}
+		} else {
+			return new RedirectResponse(Pages.LOGIN_PAGE).build();
+		}
+	}
+
+	@GET
 	@Path("login")
 	@Produces("text/html")
 	public Response login() throws Exception {
@@ -153,25 +171,6 @@ public class QuizResource {
 		return Response.ok().entity(output).build();
 	}
 	
-	
-	@GET
-	@Produces("text/html")
-	public Response userHome(@CookieParam("quiz.token") Cookie cookie) throws Exception, AuthenticationException {
-		if (cookie != null) {
-			Jws<Claims> claims = authUtils.validateUser(cookie.getValue());
-			User user = User.getWithClaims(claims);
-			String output = "";
-			if (user != null) {
-				output = renderFreemarker("home.ad", user).toString();
-				return Response.ok().entity(output).build();
-			} else {
-				return Response.status(404).build();
-			}
-		} else {
-			return new RedirectResponse(Pages.LOGIN_PAGE).build();
-		}
-	}
-
 	@GET
 	@Path("generate")
 	@Produces("text/html")

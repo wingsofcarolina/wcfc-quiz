@@ -1,8 +1,5 @@
 package org.wingsofcarolina.quiz;
 
-import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wingsofcarolina.quiz.authentication.AuthenticationExceptionMapper;
@@ -12,8 +9,6 @@ import org.wingsofcarolina.quiz.domain.persistence.Persistence;
 import org.wingsofcarolina.quiz.healthcheck.MinimalHealthCheck;
 import org.wingsofcarolina.quiz.resources.QuizAPI;
 import org.wingsofcarolina.quiz.resources.QuizResource;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.thomaskrille.dropwizard_template_config.TemplateConfigBundle;
 import de.thomaskrille.dropwizard_template_config.TemplateConfigBundleConfiguration;
