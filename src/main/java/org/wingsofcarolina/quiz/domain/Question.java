@@ -18,7 +18,7 @@ public class Question {
     private ObjectId id;
     @Transient
     private Integer index;
-	private long questionId;
+	private Long questionId;
 	private Type type;
 	private Category category;
 	private List<String> attributes;
@@ -165,7 +165,12 @@ public class Question {
 		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
 		return questionDao.getSelected(category, attributes);
 	}
-	
+
+	public static Question getByQuestionId(Long id) {
+		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
+		return questionDao.getByQuestionId(id);
+	}
+
 	@SuppressWarnings("unchecked")
 	public void save() {
 		Persistence.instance().get(Question.class).save(this);

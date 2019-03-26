@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.wingsofcarolina.quiz.domain.Category;
 import org.wingsofcarolina.quiz.domain.Question;
+import org.wingsofcarolina.quiz.domain.Record;
 import org.wingsofcarolina.quiz.domain.Recipe;
 import org.wingsofcarolina.quiz.domain.Section;
 import org.wingsofcarolina.quiz.domain.Selection;
@@ -19,6 +20,8 @@ public class Quiz {
 	private QuizType quizType;
 	private Category category;
 	private List<Question> questions = new ArrayList<Question>();
+	
+	public Quiz() {}
 	
 	public Quiz(String request) {
 		this.quizId = Persistence.instance().generateAutoIncrement("quiz", 1000);
@@ -97,10 +100,59 @@ public class Quiz {
 			}
 		}
 		
-		// TODO: Pick-and-choose, rather than list all
+		// Set the sequence numbers for the selected questions
 		for (int i = 0; i < questions.size(); i++) {
 			questions.get(i).setIndex(i + 1);
 		}
 		return this;
+	}
+	
+	/**
+	 * 
+	 */
+	public static Quiz quizFromRecord(Record record) {
+		Quiz quiz = new Quiz();
+		quiz.setQuizId(record.getQuizId());
+		quiz.setQuizName(record.getQuizName());
+		quiz.setCategory(record.getCategory());
+		for (Long id : record.getQuestionIds()) {
+			quiz.addQuestion(Question.getByQuestionId(id));
+		}
+		return quiz;
+	}
+	
+	protected void addQuestion(Question question) {
+		questions.add(question);
+	}
+
+	public QuizType getQuizType() {
+		return quizType;
+	}
+
+	protected void setQuizType(QuizType quizType) {
+		this.quizType = quizType;
+	}
+
+	public void setQuizId(long quizId) {
+		this.quizId = quizId;
+	}
+
+	protected void setQuizName(String quizName) {
+		this.quizName = quizName;
+	}
+
+	public void setCategory(Category category) {
+		this.category = category;
+	}
+
+	/**
+	 * Return the record of selected questions
+	 */
+	public Record getRecord() {
+		Record record = new Record();
+		for (Question question : questions) {
+			record.add(question.getQuestionId());
+		}
+		return record;
 	}
 }

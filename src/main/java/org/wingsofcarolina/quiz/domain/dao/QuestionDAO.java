@@ -31,7 +31,8 @@ public class QuestionDAO extends BasicDAO<Question, ObjectId> {
 		List<Question> result = getDatastore().find(Question.class).order("questionId").asList();
 		return result;
 	}
-	public Question getByQuestionId(String questionId) {
+	
+	public Question getByQuestionId(Long questionId) {
 		List<Question> result = getDatastore().find(Question.class).filter("questionId = ", questionId).order("questionId").asList();
 		if (result.size() > 0) {
 			return result.get(0);
@@ -69,4 +70,5 @@ public class QuestionDAO extends BasicDAO<Question, ObjectId> {
 		query.filter("category = ", category);
 		return query.order("questionid").asList();
 	}
+
 }

@@ -180,7 +180,8 @@ public class QuizResource {
 			Quiz quiz = new Quiz(quizType).build();
 			
 			// Store the quiz question set for later retrieval
-			// TODO : This is a placeholder for the quiz store capability
+			Record record = quiz.getRecord();
+			record.save();
 			
 			// Render the output for the club member
 			output = renderFreemarker(Templates.QUIZ, quiz).toString();
@@ -189,6 +190,7 @@ public class QuizResource {
 		}
 		return Response.ok().entity(output).build();
 	}
+	
 	@GET
 	@Path("recipe")
 	@Produces("text/html")
