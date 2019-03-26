@@ -1,5 +1,10 @@
 package org.wingsofcarolina.quiz;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+
+import org.knowm.dropwizard.sundial.SundialConfiguration;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.dropwizard.Configuration;
@@ -7,7 +12,10 @@ import io.dropwizard.Configuration;
 public class QuizConfiguration extends Configuration {
 	@JsonProperty String mongodb;
 	@JsonProperty String templates;
-
+	@Valid
+	@NotNull
+	public SundialConfiguration sundialConfiguration = new SundialConfiguration();
+	
 	public String getMongodb() {
 		return mongodb;
 	}
@@ -22,5 +30,11 @@ public class QuizConfiguration extends Configuration {
 
 	public void setTemplates(String templates) {
 		this.templates = templates;
+	}
+
+	@JsonProperty("sundial")
+	public SundialConfiguration getSundialConfiguration() {
+
+	  return sundialConfiguration;
 	}
 }

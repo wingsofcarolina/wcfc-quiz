@@ -1,5 +1,7 @@
 package org.wingsofcarolina.quiz;
 
+import org.knowm.dropwizard.sundial.SundialBundle;
+import org.knowm.dropwizard.sundial.SundialConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wingsofcarolina.quiz.authentication.AuthenticationExceptionMapper;
@@ -34,8 +36,14 @@ public class QuizService extends Application<QuizConfiguration> {
 		// bootstrap.addBundle(new AssetsBundle("/doc", "/doc", "index.html","html"));
 		bootstrap.addBundle(new TemplateConfigBundle(new TemplateConfigBundleConfiguration()));
         bootstrap.addBundle(new AssetsBundle("/assets/", "/static"));
-		// super.initialize(bootstrap);
-	}
+        bootstrap.addBundle(new SundialBundle<QuizConfiguration>() {
+
+            @Override
+            public SundialConfiguration getSundialConfiguration(QuizConfiguration configuration) {
+              return configuration.getSundialConfiguration();
+            }
+          });
+        }
 
 	@Override
 	public String getName() {

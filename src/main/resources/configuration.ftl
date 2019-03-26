@@ -26,7 +26,17 @@ server:
             maxFileSize: 500MB
             archivedFileCount: 5
             timeZone: UTC
-    
+
+# Configure the Sundial job management system    
+sundial:
+  thread-pool-size: 10
+  shutdown-on-unload: true
+  start-delay-seconds: 0
+  start-scheduler-on-load: true
+  global-lock-on-load: false
+  annotated-jobs-package-name: org.wingsofcarolina.jobs
+  tasks: [startjob, stopjob]
+  
 # SLF4j Logging settings.
 logging:
   # The default level of all loggers. Can be OFF, ERROR, WARN, INFO, DEBUG, TRACE, or ALL.
