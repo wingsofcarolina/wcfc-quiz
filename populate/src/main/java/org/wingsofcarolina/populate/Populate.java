@@ -1,5 +1,6 @@
 package org.wingsofcarolina.populate;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import org.wingsofcarolina.quiz.domain.Type;
 import org.wingsofcarolina.quiz.domain.persistence.Persistence;
 import org.wingsofcarolina.quiz.domain.quiz.Quiz;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thedeanda.lorem.Lorem;
 import com.thedeanda.lorem.LoremIpsum;
 
@@ -30,7 +32,8 @@ public class Populate {
 
 	Lorem lorem;
 	Persistence persistence;
-	
+	ObjectMapper objectMapper = new ObjectMapper();
+
 	public Populate() {
 		// Set logging level for MongoDB
 		((LoggerContext) LoggerFactory.getILoggerFactory()).getLogger("org.mongodb.driver").setLevel(Level.ERROR);
@@ -63,11 +66,11 @@ public class Populate {
 		createRecipe(Quiz.QuizType.C172, Arrays.asList(Attribute.GENERAL));
 		createRecipe(Quiz.QuizType.PA28, Arrays.asList(Attribute.GENERAL));
 		List<Long> required = new ArrayList<Long>();
-		required.add((long) 1001);
-		required.add((long) 1002);
-		required.add((long) 1003);
-		required.add((long) 1004);
-		required.add((long) 1005);
+		required.add((long) 1960);
+		required.add((long) 1961);
+		required.add((long) 1962);
+		required.add((long) 1963);
+		required.add((long) 1964);
 		createRecipe(Quiz.QuizType.M20J, Arrays.asList(Attribute.GENERAL), required);
 	}
 	
@@ -75,7 +78,7 @@ public class Populate {
 		createRecipe(quizType, attributes, null);
 	}
 	
-	private void createRecipe(Quiz.QuizType quizType, List<String> attributes, List<Long> required) {
+	private Recipe createRecipe(Quiz.QuizType quizType, List<String> attributes, List<Long> required) {
 		Recipe recipe = new Recipe(quizType);
 		Section section = new Section("only");
 		recipe.addSection(section);
@@ -84,6 +87,17 @@ public class Populate {
 			section.setRequired(required);
 		}
 		recipe.save();
+		
+		if (quizType == Quiz.QuizType.M20J) {
+			try {
+				objectMapper.writeValue(new File("recipe.json"), recipe);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		return recipe;
 	}
 	
 	private void createFARQuestions() {
