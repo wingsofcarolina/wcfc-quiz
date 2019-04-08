@@ -16,6 +16,7 @@ public class Question {
     @Id
 	@JsonIgnore
     private ObjectId id;
+    @JsonIgnore
     @Transient
     private Integer index;
 	private Long questionId;
@@ -44,7 +45,8 @@ public class Question {
 		this.questionId = Persistence.instance().generateAutoIncrement("question", 1000);
 	}
 
-	public boolean isBlank() {
+	@JsonIgnore
+	public boolean isFillInTheBlank() {
 		return type == Type.BLANK;
 	}
 	

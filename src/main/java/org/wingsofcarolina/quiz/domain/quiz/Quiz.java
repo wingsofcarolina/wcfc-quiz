@@ -91,7 +91,7 @@ public class Quiz {
 				}
 			}
 			
-			// Iterate all selections within the section
+			// Next iterate over all selections within the section
 			for (Selection selection : section.getSelections()) {
 				candidates = Question.getSelected(category, selection.getAttributes());
 				int candidateCount = candidates.size();

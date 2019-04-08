@@ -19,6 +19,7 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Cookie;
@@ -83,7 +84,7 @@ public class QuizResource {
 				.linkCss(true)
 				.attributes(userAttributes)
 				// TODO: Find a better place for the CSS 
-				.styleSheetName("http://planez.co/css/asciidoctor-default.css")
+				.styleSheetName("http:/static/asciidoctor-default.css")
 				.allowUriRead(true).asMap();
 		options = options()
 				.inPlace(true)
@@ -229,6 +230,22 @@ public class QuizResource {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 		output = mapper.writeValueAsString(recipe);
+		output = output.replaceAll("(\r\n|\n)", "<br/>");
+		output = output.replaceAll("\\s", "&nbsp;&nbsp;");
+				
+		return Response.ok().entity(output).build();
+	}
+	
+	@GET
+	@Path("question/{id}")
+	@Produces("text/html")
+	public Response question(@PathParam("id") String id) throws Exception {
+
+		Question question = Question.getByQuestionId(Long.valueOf(id));
+		
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.enable(SerializationFeature.INDENT_OUTPUT);
+		String output = mapper.writeValueAsString(question);
 		output = output.replaceAll("(\r\n|\n)", "<br/>");
 		output = output.replaceAll("\\s", "&nbsp;&nbsp;");
 				
