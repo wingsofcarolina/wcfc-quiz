@@ -69,6 +69,10 @@ public class Quiz {
 		return questions;
 	}
 	
+	public Double pointsPerQuestion() {
+		return new Double(100.0 / questions.size());
+	}
+	
 	/**
 	 * Based on a quiz recipe, build a quiz
 	 * @return

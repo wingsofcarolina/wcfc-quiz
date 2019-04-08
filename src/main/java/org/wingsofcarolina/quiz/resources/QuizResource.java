@@ -127,6 +127,12 @@ public class QuizResource {
 	}
 	
 	@GET
+	@Path("favicon.ico")
+	public Response favIcon() {
+		return new RedirectResponse("/static/favicon.ico").build();
+	}
+	
+	@GET
 	@Produces("text/html")
 	public Response userHome(@CookieParam("quiz.token") Cookie cookie) throws Exception, AuthenticationException {
 		if (cookie != null) {

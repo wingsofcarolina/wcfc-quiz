@@ -3,16 +3,38 @@
 <html>
 <head>
   <link rel="stylesheet" href="/static/common.css">
+  <link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
 </head>
 <body>
-<#setting number_format="#0">
+<#setting number_format="#0"/>
 
 <div class="center">
-<h1>Wings of Carolina Flying Club<h1>
-<h2>${quizName} Written Test</h2>
-<h3>Quiz ID [${quizId}]</h3>
+	<div class="title">Wings of Carolina Flying Club</div>
+	<div class="subtitle">${quizName} Written Test</div>
+	<div class="subtitle">Quiz ID - ${quizId}</div>
+	<hr>
+	<section class="container">
+    	<div class="left">
+    	Pilot ______________________________________________________<br>
+    	Instructor _________________________________________________
+    	</div>
+    	<div class="right">
+    	Score _____________________________________________________<br>
+    	Date ______________________________________________________
+		</div>
+	</section>
 </div>
 
+<div>
+	<div class="instruction">
+	<b>Instructor</b>: Please note the final score (subtract ${pointsPerQuestion()?string(",##0.00")} points from 100 for each wrong answer) on the checkout
+	form and file the quiz in the Pilot Records folder.
+	</div>
+	<div class="instruction">
+	<b>Pilot</b>: Information required to correctly answer the following questions may be found in FAR Parts 61 and 91,
+	the WCFC SOPs, and club checklists, documents and instructional practices.
+	</div> 
+</div> 
 <hr>
 
 <div>
@@ -30,11 +52,7 @@ ${attribute}&nbsp;
 <#if question.isFillInTheBlank()>
 ${answer.index} : __________________________________________________________________</br>
 <#else>
-<#if answer.isCorrect()>
-<b>${answer.index} : ${answer.answer}</b></br>
-<#else>
 ${answer.index} : ${answer.answer}</br>
-</#if>
 </#if>
 </#list>
 </p>&nbsp;</p>
