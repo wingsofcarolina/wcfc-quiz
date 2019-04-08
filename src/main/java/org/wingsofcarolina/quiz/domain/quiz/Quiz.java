@@ -84,6 +84,13 @@ public class Quiz {
 			// Create a place to deposit all the candidate questions
 			List<Question> candidates = new ArrayList<Question>();
 			
+			// If there are any required questions, pull them into the pool
+			if (section.getRequired() != null) {
+				for (Long id : section.getRequired()) {
+					pool.add(Question.getByQuestionId(id));
+				}
+			}
+			
 			// Iterate all selections within the section
 			for (Selection selection : section.getSelections()) {
 				candidates = Question.getSelected(category, selection.getAttributes());
@@ -92,19 +99,19 @@ public class Quiz {
 					throw new RuntimeException("Not enough candidates to satisfy the Recipe. Had " + candidateCount + " and wanted " + selection.getCount());
 				}
 				
-				// If there are any required questions, pull them into the pool
-				if (section.getRequired() != null) {
-					for (Long id : section.getRequired()) {
-						pool.add(Question.getByQuestionId(id));
-					}
-				}
-				
 				// Select the desired number of questions from the candidates
-				for (int i = 0; i < selection.getCount(); i++) {
+				int i = 0;
+				while (i < selection.getCount()) {
 					int pick = 	(int)(Math.random() * candidates.size());
 					Question candidate = candidates.get(pick);
 					candidates.remove(pick);
-					pool.add(candidate);
+					// If the candidate is _not_ already in the pool (which can
+					// happen due to conflicts with the REQUIRED list) then we
+					// can add it, otherwise we skip it and press on.
+					if (notInPool(candidate, pool)) {
+						pool.add(candidate);
+						i++;
+					}
 				}
 			}
 		}
@@ -119,6 +126,22 @@ public class Quiz {
 			questions.add(entity);
 		}
 		return this;
+	}
+	
+	/**
+	 * Insure that we don't allow duplicates in the pool
+	 * 
+	 * @param candidate
+	 * @param pool
+	 * @return
+	 */
+	public boolean notInPool(Question candidate, List<Question> pool) {
+		for (Question selected : pool) {
+			if (selected.getQuestionId() == candidate.getQuestionId()) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	/**
