@@ -14,6 +14,7 @@ public class Section {
     private ObjectId id;
     
     String name;
+    List<Long> required;
     List<Selection> selections;
     
     public Section() {}
@@ -28,6 +29,21 @@ public class Section {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	public List<Long> getRequired() {
+		return required;
+	}
+
+	public void setRequired(List<Long> required) {
+		this.required = required;
+	}
+
+	public void addRequired(Long required) {
+		if (required == null) {
+			this.required = new ArrayList<Long>();
+		}
+		this.required.add(required);
 	}
 
 	public List<Selection> getSelections() {

@@ -74,6 +74,8 @@ public class Quiz {
 	 * @return
 	 */
 	public Quiz build() {
+		List<Question> pool = new ArrayList<Question>();
+
 		// Pick up the recipe for the desired quiz
 		Recipe recipe = Recipe.getRecipeByType(quizType);
 
@@ -90,19 +92,31 @@ public class Quiz {
 					throw new RuntimeException("Not enough candidates to satisfy the Recipe. Had " + candidateCount + " and wanted " + selection.getCount());
 				}
 				
+				// If there are any required questions, pull them into the pool
+				if (section.getRequired() != null) {
+					for (Long id : section.getRequired()) {
+						pool.add(Question.getByQuestionId(id));
+					}
+				}
+				
 				// Select the desired number of questions from the candidates
 				for (int i = 0; i < selection.getCount(); i++) {
 					int pick = 	(int)(Math.random() * candidates.size());
 					Question candidate = candidates.get(pick);
 					candidates.remove(pick);
-					questions.add(candidate);
+					pool.add(candidate);
 				}
 			}
 		}
 		
-		// Set the sequence numbers for the selected questions
-		for (int i = 0; i < questions.size(); i++) {
-			questions.get(i).setIndex(i + 1);
+		// Pull randomly from the pool, setting sequence number as we go
+		int count = pool.size();
+		for (int i = 0; i < count; i++) {
+			int size = pool.size();
+			int pick = (int)(Math.random() * size);
+			Question entity = pool.remove(pick);
+			entity.setIndex(i + 1);
+			questions.add(entity);
 		}
 		return this;
 	}

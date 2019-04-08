@@ -62,14 +62,27 @@ public class Populate {
 		createRecipe(Quiz.QuizType.C152, Arrays.asList(Attribute.GENERAL, Attribute.EASY));
 		createRecipe(Quiz.QuizType.C172, Arrays.asList(Attribute.GENERAL));
 		createRecipe(Quiz.QuizType.PA28, Arrays.asList(Attribute.GENERAL));
-		createRecipe(Quiz.QuizType.M20J, Arrays.asList(Attribute.GENERAL));
+		List<Long> required = new ArrayList<Long>();
+		required.add((long) 1001);
+		required.add((long) 1002);
+		required.add((long) 1003);
+		required.add((long) 1004);
+		required.add((long) 1005);
+		createRecipe(Quiz.QuizType.M20J, Arrays.asList(Attribute.GENERAL), required);
 	}
 	
 	private void createRecipe(Quiz.QuizType quizType, List<String> attributes) {
+		createRecipe(quizType, attributes, null);
+	}
+	
+	private void createRecipe(Quiz.QuizType quizType, List<String> attributes, List<Long> required) {
 		Recipe recipe = new Recipe(quizType);
 		Section section = new Section("only");
 		recipe.addSection(section);
 		section.addSelection(new Selection(5, attributes));
+		if (required != null) {
+			section.setRequired(required);
+		}
 		recipe.save();
 	}
 	
