@@ -8,7 +8,7 @@ navbar:${userId}[buttons="/quiz/addQuestion:Add Question"]
 navbar:${userId}[]
 </#if>
 
-This page allows a user to retrieve the key for a member's quiz, or
+This page allows an instructor to retrieve the key for a member's quiz, or
 to regenerate that quiz from the saved list of questions. 
 
 Retrieve a quiz key by entering the Quiz ID:

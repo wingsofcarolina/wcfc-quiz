@@ -61,14 +61,13 @@ public class QuizService extends Application<QuizConfiguration> {
 		QuizResource quiz = new QuizResource(config);
 
 		// Create some initial dummy data
-		user = createUser(quiz, "George Scheer", "george.scheer@gmail.com", "REDACTED");
+		user = createUser(quiz, "Dwight Frye", "dfrye@planez.co", "REDACTED");
 		if (user != null) {
 			user.addPriv(Privilege.ADMIN);
 			user.save();
 		}
-		user = createUser(quiz, "Dwight Frye", "dfrye@planez.co", "REDACTED");
+		user = createUser(quiz, "George Scheer", "george.scheer@gmail.com", "REDACTED");
 		if (user != null) {
-			user.addPriv(Privilege.ADMIN);
 			user.save();
 		}
 		user = createUser(quiz, "Sam Evett", "sam_evett@yahoo.com", "REDACTED");
