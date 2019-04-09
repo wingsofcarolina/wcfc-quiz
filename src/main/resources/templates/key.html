@@ -17,7 +17,8 @@
 
 <div>
 <#list questions as question>
-<b>${question.index}</b> : ${question.question} <i>{ ${question.questionId} }</i></br>
+<b>${question.index}</b> : ${question.question} 
+	<i>{ <a href="http:/question/${question.questionId}">${question.questionId}</a> }</i></br>
 &nbsp;&nbsp;&nbsp;
 <i>{ ${question.category}&nbsp;/&nbsp;
 <#list question.attributes as attribute>

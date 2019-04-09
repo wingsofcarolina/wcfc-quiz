@@ -194,13 +194,16 @@ public class QuizAPI {
 		LOG.info("Quiz {} retrieved by {}", quizId, user.getFullname());
 		
 		Record record = Record.getByQuizId(quizId);
-		if (type.equals("Key")) {
+		if (record != null) {
 			Quiz quiz = Quiz.quizFromRecord(record);
-			output = renderFreemarker(Templates.KEY, quiz).toString();
-		} else {
-			
+			if (type.equals("Key")) {
+				output = renderFreemarker(Templates.KEY, quiz).toString();
+			} else {
+				output = renderFreemarker(Templates.QUIZ, quiz).toString();
+			}
+			return Response.ok().entity(output).build();
 		}
-		return Response.ok().entity(output).build();
+		return Response.ok().build();
 	}
 
 	@POST
