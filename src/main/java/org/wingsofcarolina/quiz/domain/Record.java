@@ -7,7 +7,9 @@ import java.util.List;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Id;
 import org.wingsofcarolina.quiz.domain.dao.QuestionDAO;
+import org.wingsofcarolina.quiz.domain.dao.RecordDAO;
 import org.wingsofcarolina.quiz.domain.persistence.Persistence;
+import org.wingsofcarolina.quiz.domain.quiz.Quiz;
 import org.wingsofcarolina.quiz.domain.quiz.Quiz.QuizType;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -23,6 +25,18 @@ public class Record {
 	private Category category;
 	private Date createdDate = new Date();
     private List<Long> questionIds = new ArrayList<Long>();
+
+	public Record() {}
+	
+	public Record(Quiz quiz) {
+		this.quizId = quiz.getQuizId();
+		this.quizName = quiz.getQuizName();
+		this.quizType = quiz.getQuizType();
+		this.category = quiz.getCategory();
+		for (Question question : quiz.getQuestions()) {
+			questionIds.add(question.getQuestionId());
+		}
+	}
 
 	public long getQuizId() {
 		return quizId;
@@ -71,9 +85,9 @@ public class Record {
 	/*
 	 * Database Management Functionality
 	 */
-	public static Question getByQuizId(Long id) {
-		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
-		return questionDao.getByQuestionId(id);
+	public static Record getByQuizId(Long id) {
+		RecordDAO recordDAO = (RecordDAO) Persistence.instance().get(Record.class);
+		return recordDAO.getByQuizId(id);
 	}
 
 	@SuppressWarnings("unchecked")

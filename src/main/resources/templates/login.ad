@@ -20,7 +20,6 @@ Cub member needing a quiz select from the following choices:</p>
 <hr>
 <form action="/api/login" method="post">
 ++++
-
 Instructors needing to retrieve a quiz key log in:
 |===
 | Email | pass:[<input type="text" name="email">]

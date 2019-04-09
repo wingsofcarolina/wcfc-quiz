@@ -18,8 +18,8 @@ public class RecordDAO extends BasicDAO<Record, ObjectId> {
 		super(Record.class, ds);
 	}
 
-	public Question getByQuizId(Long questionId) {
-		List<Question> result = getDatastore().find(Question.class).filter("quizId = ", questionId).order("quizId").asList();
+	public Record getByQuizId(Long questionId) {
+		List<Record> result = getDatastore().find(Record.class).filter("quizId = ", questionId).order("quizId").asList();
 		if (result.size() > 0) {
 			return result.get(0);
 		} else {

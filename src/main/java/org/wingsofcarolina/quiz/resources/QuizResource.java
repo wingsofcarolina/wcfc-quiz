@@ -140,7 +140,8 @@ public class QuizResource {
 			User user = User.getWithClaims(claims);
 			String output = "";
 			if (user != null) {
-				output = renderFreemarker("home.ad", user).toString();
+				String rendered = renderFreemarker("home.ad", user).toString();
+				output = asciidoctor.convert(rendered, options);
 				return Response.ok().entity(output).build();
 			} else {
 				return Response.status(404).build();

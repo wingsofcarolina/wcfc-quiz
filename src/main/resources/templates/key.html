@@ -3,21 +3,21 @@
 <html>
 <head>
   <link rel="stylesheet" href="/static/common.css">
+  <link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
 </head>
 <body>
-<#setting number_format="#0">
+<#setting number_format="#0"/>
 
 <div class="center">
-<h1>Wings of Carolina Flying Club<h1>
-<h2>${quizName} Answer Key</h2>
-<h3>Quiz ID [${quizId}]</h3>
+	<div class="title">Wings of Carolina Flying Club</div>
+	<div class="subtitle">${quizName} Written Test</div>
+	<div class="subtitle">Quiz ID - ${quizId}</div>
 </div>
-
 <hr>
 
 <div>
 <#list questions as question>
-${question.index} : ${question.question} <i>{ ${question.questionId} }</i></br>
+<b>${question.index}</b> : ${question.question} <i>{ ${question.questionId} }</i></br>
 &nbsp;&nbsp;&nbsp;
 <i>{ ${question.category}&nbsp;/&nbsp;
 <#list question.attributes as attribute>
@@ -26,19 +26,19 @@ ${attribute}&nbsp;
 }</i></p>
 
 <#list question.answers as answer>
-<#if question.isBlank()>
+<#if question.isFillInTheBlank()>
 ${answer.index} : ${answer.answer}</br>
 <#else>
 <#if answer.isCorrect()>
-${answer.index} : ${answer.answer}</br>
+<b>Answer is :</b></br>
+${answer.index} : ${answer.answer}</p>
 </#if>
 </#if>
 </#list>
-</p>&nbsp;</p>
-References : ${question.references}</p>
-CFI Discussion : </br>
+<b>References :</b> ${question.references}</p>
+<b>CFI Discussion :</b> </br>
 ${question.discussion}</p>
-
+<hr>
 </#list>
 </div>
 </body>

@@ -76,7 +76,7 @@ public class NavigationBar extends InlineMacroProcessor {
 			}
 		}
 		sb.append("<a href=\"/student/profile/" + target + "\">Profile</a>\n");
-		sb.append("<div style=\"float:right\"><a href=\"/student/api/logout\">Logout</a></div>\n</div>");
+		sb.append("<div style=\"float:right\"><a href=\"/api/logout\">Logout</a></div>\n</div>");
 		
 		String flash = FlashMessage.message();
 		if (flash != null) {

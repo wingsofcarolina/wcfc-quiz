@@ -70,6 +70,9 @@ public class User {
 	public List<Privilege> getPrivs() {
 		return privileges;
 	}
+	public boolean isAdmin() {
+		return privileges.contains(Privilege.ADMIN);
+	}
 	public String getPassword() {
 		return password;
 	}

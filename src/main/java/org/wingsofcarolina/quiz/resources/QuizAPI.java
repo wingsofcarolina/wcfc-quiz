@@ -1,5 +1,9 @@
 package org.wingsofcarolina.quiz.resources;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.List;
@@ -24,9 +28,17 @@ import org.wingsofcarolina.quiz.authentication.HashUtils;
 import org.wingsofcarolina.quiz.authentication.Privilege;
 import org.wingsofcarolina.quiz.common.FlashMessage;
 import org.wingsofcarolina.quiz.common.Pages;
+import org.wingsofcarolina.quiz.common.Templates;
+import org.wingsofcarolina.quiz.domain.Record;
 import org.wingsofcarolina.quiz.domain.User;
+import org.wingsofcarolina.quiz.domain.quiz.Quiz;
 import org.wingsofcarolina.quiz.responses.LoginResponse;
 import org.wingsofcarolina.quiz.responses.RedirectResponse;
+
+import de.thomaskrille.dropwizard_template_config.redist.freemarker.template.Configuration;
+import de.thomaskrille.dropwizard_template_config.redist.freemarker.template.Template;
+import de.thomaskrille.dropwizard_template_config.redist.freemarker.template.TemplateException;
+import de.thomaskrille.dropwizard_template_config.redist.freemarker.template.TemplateExceptionHandler;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 
@@ -40,10 +52,33 @@ public class QuizAPI {
 	@SuppressWarnings("unused")
 	private QuizConfiguration config;
 	private AuthUtils authUtils;
+	private Configuration freemarker;	// FreeMarker configuration
 
-	public QuizAPI(QuizConfiguration config) {
+	public QuizAPI(QuizConfiguration config) throws IOException {
 		this.config = config;
 		authUtils = new AuthUtils();
+		
+		// Create your Configuration instance, and specify if up to what FreeMarker
+		// version (here 2.3.27) do you want to apply the fixes that are not 100%
+		// backward-compatible. See the Configuration JavaDoc for details.
+		freemarker = new Configuration(Configuration.VERSION_2_3_22);
+
+		// Specify the source where the template files come from. Here I set a
+		// plain directory for it, but non-file-system sources are possible too:
+		// TODO: Make this a configuration option
+		freemarker.setDirectoryForTemplateLoading(new File(config.getTemplates()));
+		freemarker.setTemplateUpdateDelay(0);  // TODO: Change this for "production"
+
+		// Set the preferred charset template files are stored in. UTF-8 is
+		// a good choice in most applications:
+		freemarker.setDefaultEncoding("UTF-8");
+
+		// Sets how errors will appear.
+		// During web page *development* TemplateExceptionHandler.HTML_DEBUG_HANDLER is better.
+		freemarker.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+
+		// Don't log exceptions inside FreeMarker that it will thrown at you anyway:
+		freemarker.setLogTemplateExceptions(false);
 	}
 
 	@POST
@@ -52,8 +87,6 @@ public class QuizAPI {
 	public Response login(@FormParam("email") String email, @FormParam("password") String password,
 			@FormParam("type") String type) throws Exception {
 		
-		LOG.debug("Entered the /api/login method");
-
 		String token = null;
 
 		if (email == null || password == null) {
@@ -148,6 +181,27 @@ public class QuizAPI {
 		}
 	}
 
+	@POST
+	@Path("retrieve")
+	@Produces("text/html")
+	public Response retrieve(@CookieParam("quiz.token") Cookie cookie,
+			@FormParam("quizId") long quizId,
+			@FormParam("type") String type) throws AuthenticationException, IOException {
+		
+		String output = "";
+		Jws<Claims> claims = authUtils.validateUser(cookie.getValue());
+		User user = User.getWithClaims(claims);
+		LOG.info("Quiz {} retrieved by {}", quizId, user.getFullname());
+		
+		Record record = Record.getByQuizId(quizId);
+		if (type.equals("Key")) {
+			Quiz quiz = Quiz.quizFromRecord(record);
+			output = renderFreemarker(Templates.KEY, quiz).toString();
+		} else {
+			
+		}
+		return Response.ok().entity(output).build();
+	}
 
 	@POST
 	@Path("editQuestion")
@@ -168,5 +222,20 @@ public class QuizAPI {
 		} else {
 			return null;
 		}
+	}
+	
+
+	private Writer renderFreemarker(String template, Object entity) throws IOException {
+		Template temp = freemarker.getTemplate(template);
+
+		Writer out = new StringWriter();
+		try {
+			temp.process(entity, out);
+		} catch (TemplateException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return out;
 	}
 }

@@ -156,8 +156,11 @@ public class Quiz {
 		quiz.setQuizId(record.getQuizId());
 		quiz.setQuizName(record.getQuizName());
 		quiz.setCategory(record.getCategory());
+		int i = 1;
 		for (Long id : record.getQuestionIds()) {
-			quiz.addQuestion(Question.getByQuestionId(id));
+			Question question = Question.getByQuestionId(id);
+			question.setIndex(i++);
+			quiz.addQuestion(question);
 		}
 		return quiz;
 	}
@@ -190,10 +193,7 @@ public class Quiz {
 	 * Return the record of selected questions
 	 */
 	public Record getRecord() {
-		Record record = new Record();
-		for (Question question : questions) {
-			record.add(question.getQuestionId());
-		}
+		Record record = new Record(this);
 		return record;
 	}
 }
