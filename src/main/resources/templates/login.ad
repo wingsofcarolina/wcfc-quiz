@@ -18,7 +18,7 @@ Cub member needing a quiz select from the following choices:</p>
 </div>
 </p>
 <hr>
-<form action="/api/login" method="post">
+<form action="/api/login" method="post" target="_blank">
 ++++
 Instructors needing to retrieve a quiz key log in:
 |===

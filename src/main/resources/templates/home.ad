@@ -13,7 +13,7 @@ to regenerate that quiz from the saved list of questions.
 
 Retrieve a quiz key by entering the Quiz ID:
 ++++
-<form action="/api/retrieve" method="post">
+<form action="/api/retrieve" method="post" target="_blank">
 ++++
 |===
 | Quiz ID | pass:[<input type="text" name="quizId">]

@@ -91,7 +91,12 @@ public class Quiz {
 			// If there are any required questions, pull them into the pool
 			if (section.getRequired() != null) {
 				for (Long id : section.getRequired()) {
-					pool.add(Question.getByQuestionId(id));
+					Question candidate = Question.getByQuestionId(id);
+					pool.add(candidate);
+					if ( ! candidate.getDeployed()) {
+						candidate.setDeployed(true);
+						candidate.save();
+					}
 				}
 			}
 			
@@ -114,6 +119,10 @@ public class Quiz {
 					// can add it, otherwise we skip it and press on.
 					if (notInPool(candidate, pool)) {
 						pool.add(candidate);
+						if ( ! candidate.getDeployed()) {
+							candidate.setDeployed(true);
+							candidate.save();
+						}
 						i++;
 					}
 				}
