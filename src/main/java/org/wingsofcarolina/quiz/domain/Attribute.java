@@ -6,6 +6,7 @@ import java.util.List;
 public class Attribute {
 	// General attributes
 	public static String REQUIRED = "REQUIRED";
+	public static String TEST = "TEST";		// Denotes a test question, not to be used in production
 
 	// Difficulty attributes
 	public static String EASY = "EASY";

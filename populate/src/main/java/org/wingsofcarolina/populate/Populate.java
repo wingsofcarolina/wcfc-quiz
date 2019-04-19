@@ -132,6 +132,7 @@ public class Populate {
 		}
 
 		attributeList = ListUtils.union(attributeList, Arrays.asList(Attribute.difficulty_attributes.get(pick(3))));
+		attributeList.add(Attribute.TEST);
 
 		answers = new ArrayList<Answer>();
 		answers.add(new Answer(1, getWords(5, 15)));
@@ -154,7 +155,8 @@ public class Populate {
 			List<String> attributes = new ArrayList<String>();
 			attributes.add(Attribute.sop_attributes.get(pick(Attribute.sop_attributes.size())));
 			attributes.add(Attribute.level_attributes.get(pick(Attribute.level_attributes.size())));
-	
+			attributes.add(Attribute.TEST);
+
 			answers = new ArrayList<Answer>();
 			int count = pick(4) + 1;
 			for (int j = 0; j < count; j++) {
