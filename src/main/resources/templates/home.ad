@@ -3,7 +3,7 @@
 <#setting number_format="#0">
 
 <#if isAdmin()>
-navbar:${userId}[buttons="/quiz/addQuestion:Add Question"]
+navbar:${userId}[buttons="/addQuestion:Add Question;/editQuestion:Modify Question"]
 <#else>
 navbar:${userId}[]
 </#if>
@@ -33,7 +33,7 @@ been identified as an administrator for the system with
 additional operations and privileges. Use your power
 wisely.</p>
 
-<a href="generate?quiz=far">Do some administrative task</a><br>
+<a href="api/backupQuestions">Generate Question Backup Files</a><br>
 <a href="generate?quiz=far">Do another administrative task</a><br>
 <a href="generate?quiz=far">Do yet another administrative task</a><br>
 </p>

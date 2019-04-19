@@ -29,11 +29,14 @@ import org.wingsofcarolina.quiz.authentication.Privilege;
 import org.wingsofcarolina.quiz.common.FlashMessage;
 import org.wingsofcarolina.quiz.common.Pages;
 import org.wingsofcarolina.quiz.common.Templates;
+import org.wingsofcarolina.quiz.domain.Question;
 import org.wingsofcarolina.quiz.domain.Record;
 import org.wingsofcarolina.quiz.domain.User;
 import org.wingsofcarolina.quiz.domain.quiz.Quiz;
 import org.wingsofcarolina.quiz.responses.LoginResponse;
 import org.wingsofcarolina.quiz.responses.RedirectResponse;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.thomaskrille.dropwizard_template_config.redist.freemarker.template.Configuration;
 import de.thomaskrille.dropwizard_template_config.redist.freemarker.template.Template;
@@ -53,10 +56,16 @@ public class QuizAPI {
 	private QuizConfiguration config;
 	private AuthUtils authUtils;
 	private Configuration freemarker;	// FreeMarker configuration
+	private ObjectMapper objectMapper;
+	private String dataDir;
+	private String questionDir;
 
 	public QuizAPI(QuizConfiguration config) throws IOException {
 		this.config = config;
 		authUtils = new AuthUtils();
+		objectMapper = new ObjectMapper();
+		dataDir = config.getDataDirectory();
+		questionDir = dataDir + "/questions";
 		
 		// Create your Configuration instance, and specify if up to what FreeMarker
 		// version (here 2.3.27) do you want to apply the fixes that are not 100%
@@ -206,6 +215,29 @@ public class QuizAPI {
 		return Response.ok().build();
 	}
 
+	@GET
+	@Path("backupQuestions")
+	public Response backupQuestions(@CookieParam("quiz.token") Cookie cookie) throws AuthenticationException {
+		Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
+		User user = User.getWithClaims(claims);
+		
+		// Make the directory if it doesn't exist
+		new File(dataDir).mkdir();
+		new File(questionDir).mkdir();
+		
+		List<Question> questions = Question.getAllQuestions();
+		for (Question question : questions) {
+			String name = questionDir + "/" + question.getQuestionId() + ".json";
+			try {
+				objectMapper.writeValue(new File(name), question);
+			} catch (IOException e) {
+				LOG.info("IOException writing question {}", name, e);
+			}
+		}
+		
+		return new RedirectResponse(Pages.HOME_PAGE).build();
+	}
+	
 	@POST
 	@Path("editQuestion")
 	@Produces("text/html")

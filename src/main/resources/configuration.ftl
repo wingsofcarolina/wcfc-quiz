@@ -8,6 +8,9 @@ mongodb: ${MONGODB!'mongodb'}
 # Location of the template directory
 templates: ${TEMPLATES!'./templates'}
 
+# Location of the data backup/restore directory
+dataDirectory: ${DATADIR!'./data'}
+
 # Configure ports used by DropWizard
 server:
     type: simple

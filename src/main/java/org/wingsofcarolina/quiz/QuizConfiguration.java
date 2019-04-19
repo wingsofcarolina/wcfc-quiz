@@ -12,6 +12,8 @@ import io.dropwizard.Configuration;
 public class QuizConfiguration extends Configuration {
 	@JsonProperty String mongodb;
 	@JsonProperty String templates;
+	@JsonProperty String dataDirectory;
+	
 	@Valid
 	@NotNull
 	public SundialConfiguration sundialConfiguration = new SundialConfiguration();
@@ -36,5 +38,13 @@ public class QuizConfiguration extends Configuration {
 	public SundialConfiguration getSundialConfiguration() {
 
 	  return sundialConfiguration;
+	}
+
+	public String getDataDirectory() {
+		return dataDirectory;
+	}
+
+	public void setDataDirectory(String dataDirectory) {
+		this.dataDirectory = dataDirectory;
 	}
 }
