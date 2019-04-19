@@ -212,7 +212,8 @@ public class QuizAPI {
 			}
 			return Response.ok().entity(output).build();
 		}
-		return Response.ok().build();
+		FlashMessage.set("Requested quiz not found.");
+		return new RedirectResponse(Pages.HOME_PAGE).build();
 	}
 
 	@GET

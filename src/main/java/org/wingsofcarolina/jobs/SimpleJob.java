@@ -6,7 +6,7 @@ import org.knowm.sundial.exceptions.JobInterruptException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@CronTrigger(cron = "0/10 * * * * ?")
+@CronTrigger(cron = "0/100 * * * * ?")
 public class SimpleJob extends Job {
 	private static final Logger LOG = LoggerFactory.getLogger(SimpleJob.class);
 
