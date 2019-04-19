@@ -60,25 +60,6 @@ public class QuizService extends Application<QuizConfiguration> {
 		// Create the Planez resource object (because it is used in the creation of dummy users)
 		QuizResource quiz = new QuizResource(config);
 
-		// Create some initial dummy data
-		user = createUser(quiz, "Dwight Frye", "dfrye@planez.co", "REDACTED");
-		if (user != null) {
-			user.addPriv(Privilege.ADMIN);
-			user.save();
-		}
-		user = createUser(quiz, "George Scheer", "george.scheer@gmail.com", "REDACTED");
-		if (user != null) {
-			user.save();
-		}
-		user = createUser(quiz, "Sam Evett", "sam_evett@yahoo.com", "REDACTED");
-		if (user != null) {
-			user.save();
-		}
-		user = createUser(quiz, "Heinz McArthur", "Heinz@mcarthur.net", "REDACTED");
-		if (user != null) {
-			user.save();
-		}
-
 		// Set exception mappers
 		env.jersey().register(new AuthenticationExceptionMapper());
 //        env.jersey().register(new RuntimeExceptionMapper());
@@ -87,14 +68,5 @@ public class QuizService extends Application<QuizConfiguration> {
 		env.jersey().register(quiz);
 		env.jersey().register(new QuizAPI(config));
 		env.healthChecks().register("check", new MinimalHealthCheck());
-	}
-	
-	private User createUser(QuizResource quiz, String name, String email, String password) {
-		User user = null;
-		if (User.getByEmail(email) == null) {
-			user = quiz.addUser(name, email, password, Privilege.USER);
-			user.save();
-		}
-		return user;
 	}
 }

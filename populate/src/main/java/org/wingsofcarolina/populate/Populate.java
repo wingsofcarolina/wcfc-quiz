@@ -3,10 +3,14 @@ package org.wingsofcarolina.populate;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.wingsofcarolina.quiz.authentication.HashUtils;
+import org.wingsofcarolina.quiz.authentication.Privilege;
 import org.wingsofcarolina.quiz.domain.Answer;
 import org.wingsofcarolina.quiz.domain.Attribute;
 import org.wingsofcarolina.quiz.domain.Category;
@@ -15,8 +19,10 @@ import org.wingsofcarolina.quiz.domain.Recipe;
 import org.wingsofcarolina.quiz.domain.Section;
 import org.wingsofcarolina.quiz.domain.Selection;
 import org.wingsofcarolina.quiz.domain.Type;
+import org.wingsofcarolina.quiz.domain.User;
 import org.wingsofcarolina.quiz.domain.persistence.Persistence;
 import org.wingsofcarolina.quiz.domain.quiz.Quiz;
+import org.wingsofcarolina.quiz.resources.QuizResource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thedeanda.lorem.Lorem;
@@ -46,6 +52,7 @@ public class Populate {
 	}
 	
 	private void run() throws FileNotFoundException, IOException {
+		createUsers();
 		createRecipes();
 		createFARQuestions();
 		sopQuestions();
@@ -55,6 +62,69 @@ public class Populate {
 		createAirplaneQuestions(Category.M20J);
 		
 		System.out.println("Done.");
+	}
+	
+	private void createUsers() {
+		// Create some initial dummy data
+		User user = createUser("Dwight Frye", "dfrye@planez.co", "REDACTED");
+		if (user != null) {
+			user.addPriv(Privilege.ADMIN);
+			user.save();
+		}
+		user = createUser("George Scheer", "george.scheer@gmail.com", "REDACTED");
+		if (user != null) {
+			user.addPriv(Privilege.ADMIN);
+			user.save();
+		}
+		user = createUser("Sam Evett", "sam_evett@yahoo.com", "REDACTED");
+		if (user != null) {
+			user.save();
+		}
+		user = createUser("Heinz McArthur", "Heinz@mcarthur.net", "REDACTED");
+		if (user != null) {
+			user.save();
+		}
+	}
+	
+	private User createUser(String name, String email, String password) {
+		User user = null;
+		if (User.getByEmail(email) == null) {
+			user = addUser(name, email, password, Privilege.USER);
+			user.save();
+		}
+		return user;
+	}
+	
+	public User addUser(String name, String email, String password, Privilege priv) {
+		String hashedPw = null;
+		try {
+			if (password != null) {
+				hashedPw = HashUtils.generateStrongPasswordHash(password);
+			}
+			
+			User user = User.getByEmail(email);
+			if (user == null) {
+				if (hashedPw == null) {
+					user = new User(email);
+				} else {
+					user = new User(email, hashedPw);
+				}
+				if (name == null) {
+					name = "none";
+				}
+				user.setFullname(name);
+				user.addPriv(priv);
+				user.save();
+				System.out.println("New user  : " + user);
+			} else {
+				System.out.println("User '" + user.getEmail() + "' already exists.");
+			}
+
+			return user;
+		} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 	
 	private void createRecipes() {
