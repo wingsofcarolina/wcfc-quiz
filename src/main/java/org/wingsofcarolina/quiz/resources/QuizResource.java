@@ -26,6 +26,7 @@ import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.Response;
 
 import org.asciidoctor.Asciidoctor;
+import org.asciidoctor.SafeMode;
 import org.asciidoctor.extension.JavaExtensionRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,6 +88,7 @@ public class QuizResource {
 				.styleSheetName("http:/static/asciidoctor-default.css")
 				.allowUriRead(true).asMap();
 		options = options()
+				.safe(SafeMode.SERVER)
 				.inPlace(true)
 				.backend("html5")
 				.headerFooter(true)
@@ -98,7 +100,8 @@ public class QuizResource {
 		extensionRegistry.inlineMacro("flash", Flash.class);
 		extensionRegistry.inlineMacro("button", Button.class);
 		extensionRegistry.inlineMacro("color", Color.class);
-		
+		extensionRegistry.docinfoProcessor(new CssHeaderProcessor(new HashMap<String, Object>())); 
+
 		// Create your Configuration instance, and specify if up to what FreeMarker
 		// version (here 2.3.27) do you want to apply the fixes that are not 100%
 		// backward-compatible. See the Configuration JavaDoc for details.
@@ -134,7 +137,7 @@ public class QuizResource {
 	
 	@GET
 	@Produces("text/html")
-	public Response userHome(@CookieParam("quiz.token") Cookie cookie) throws Exception, AuthenticationException {
+	public Response home(@CookieParam("quiz.token") Cookie cookie) throws Exception, AuthenticationException {
 		if (cookie != null) {
 			Jws<Claims> claims = authUtils.validateUser(cookie.getValue());
 			User user = User.getWithClaims(claims);
