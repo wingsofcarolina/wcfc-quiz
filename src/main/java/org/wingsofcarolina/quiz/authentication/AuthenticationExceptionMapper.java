@@ -15,7 +15,7 @@ public class AuthenticationExceptionMapper implements ExceptionMapper<Authentica
 
     public Response toResponse(AuthenticationException exception) {
     	LOG.info("Authentication exception for : {}", exception.getMessage());
-		return new RedirectResponse(Pages.LOGIN_PAGE).build();
+		return new RedirectResponse(Pages.HOME_PAGE).build();
 
     }
 }

@@ -8,6 +8,7 @@ import javax.ws.rs.core.Cookie;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wingsofcarolina.quiz.common.FlashMessage;
 import org.wingsofcarolina.quiz.domain.User;
 
 import io.jsonwebtoken.Claims;
@@ -79,7 +80,8 @@ public class AuthUtils {
 						}
 						List<Privilege> privs = user.getPrivs();
 						if ( ! (privs.contains(Privilege.ADMIN) || privs.contains(privilege))) {
-							throw new AuthenticationException(403, "User forbidden to perform operation");
+							FlashMessage.set("User not authorized to perform operation.");
+							throw new AuthenticationException(403, "User not authorized to perform operation");
 						}
 					} else {
 						throw new AuthenticationException();
