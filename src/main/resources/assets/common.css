@@ -32,6 +32,10 @@ body { font-family: Georgia, ‘Times New Roman’, serif; margin: 30px; }
   overflow: hidden;
 }
 
+#footer {
+  border-radius: 10px;
+}
+
 /* Add a black background color to the top navigation */
 .topnav {
   border-radius: 10px;

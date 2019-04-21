@@ -13,9 +13,13 @@ public class Flash extends InlineMacroProcessor {
 
 	@Override
 	public String process(ContentNode parent, String target, Map<String, Object> attributes) {
+		StringBuffer sb = new StringBuffer();
 		String flash = org.wingsofcarolina.quiz.common.FlashMessage.message();
 		if (flash != null) {
-			return("<div style=\"background-color:#87162d; color:white; padding:10px; overflow:hidden;\" >" + flash + "</div>");
+			sb.append("<link rel=\"stylesheet\" href=\"/static/common.css\">");
+			sb.append("<div id=\"flash\">" + flash + "</div>\n");
+			sb.append("<script>setInterval(function(){$(\"#flash\").hide('slow');}, 10000);</script>");
+			return sb.toString();
 		} else {
 			return null;
 		}
