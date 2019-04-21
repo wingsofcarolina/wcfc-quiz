@@ -24,7 +24,7 @@ body { font-family: Georgia, ‘Times New Roman’, serif; margin: 30px; }
     font-size: 12pt;
 }
 
-.flash {
+#flash {
   border-radius: 10px;
   background-color: #87162d;
   color: white;

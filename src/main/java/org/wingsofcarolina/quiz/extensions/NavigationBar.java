@@ -9,47 +9,6 @@ import org.asciidoctor.extension.InlineMacroProcessor;
 import org.wingsofcarolina.quiz.common.FlashMessage;
 
 public class NavigationBar extends InlineMacroProcessor {
-	
-	// TODO: Move this to the .css file, eventually
-//	private String style = "<style>\n" + 
-//			"/* Create background for flash messages */\n" + 
-//			".flash {\n" + 
-//			"  border-radius: 25px;\n" + 
-//			"  background-color: #87162d;\n" + 
-//			"  color: white;\n" + 
-//			"  padding: 10px;\n" + 
-//			"  overflow: hidden;\n" + 
-//			"}\n" + 
-//			"\n" + 
-//			"/* Add a black background color to the top navigation */\n" + 
-//			".topnav {\n" + 
-//			"  border-radius: 25px;\n" + 
-//			"  background-color: #555;\n" + 
-//			"  overflow: hidden;\n" + 
-//			"}\n" + 
-//			"\n" + 
-//			"/* Style the links inside the navigation bar */\n" + 
-//			".topnav a {\n" + 
-//			"  float: left;\n" + 
-//			"  color: #f2f2f2;\n" + 
-//			"  text-align: center;\n" + 
-//			"  padding: 14px 16px;\n" + 
-//			"  text-decoration: none;\n" + 
-//			"  font-size: 17px;\n" + 
-//			"}\n" + 
-//			"\n" + 
-//			"/* Change the color of links on hover */\n" + 
-//			".topnav a:hover {\n" + 
-//			"  background-color: #ddd;\n" + 
-//			"  color: black;\n" + 
-//			"}\n" + 
-//			"\n" + 
-//			"/* Add a color to the active/current link */\n" + 
-//			".topnav a.active {\n" + 
-//			"  background-color: #4CAF50;\n" + 
-//			"  color: white;\n" + 
-//			"}\n" + 
-//			"</style>\n";
 
 	public NavigationBar(String macroName) {
 		super(macroName);
@@ -65,7 +24,6 @@ public class NavigationBar extends InlineMacroProcessor {
 		}
 
 		StringBuffer sb = new StringBuffer();
-//		sb.append(style);
 		sb.append("<link rel=\"stylesheet\" href=\"/static/common.css\">");
 		sb.append("<div class=\"topnav\">\n" + 
 				"<a class=\"active\" href=\"/\">Home</a>\n");
@@ -84,12 +42,8 @@ public class NavigationBar extends InlineMacroProcessor {
 		
 		String flash = FlashMessage.message();
 		if (flash != null) {
-			sb.append("<div id=\"flash\" class=\"flash\">" + flash + "</div>\n");
-			sb.append("<script>setInterval(function(){document.getElementById(\"flash\").style.display = \"none\";}, 10000);</script>");
-//			sb.append("<script>\n" + 
-//					"document.getElementById(\"flash\").innerHTML = \"Hello JavaScript!\";\n" + 
-//					"</script>");
-					
+			sb.append("<div id=\"flash\">" + flash + "</div>\n");
+			sb.append("<script>setInterval(function(){$(\"#flash\").hide('slow');}, 10000);</script>");
 		}
 		return sb.toString();
 	}
