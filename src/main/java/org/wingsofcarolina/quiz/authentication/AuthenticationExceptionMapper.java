@@ -1,5 +1,6 @@
 package org.wingsofcarolina.quiz.authentication;
 
+import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
@@ -15,7 +16,9 @@ public class AuthenticationExceptionMapper implements ExceptionMapper<Authentica
 
     public Response toResponse(AuthenticationException exception) {
     	LOG.info("Authentication exception for : {}", exception.getMessage());
-		return new RedirectResponse(Pages.HOME_PAGE).build();
+		NewCookie newCookie = new NewCookie("quiz.token", "", "/", "", "Quiz Login Token", 0, false);
+
+		return new RedirectResponse(Pages.LOGIN_PAGE).cookie(newCookie).build();
 
     }
 }
