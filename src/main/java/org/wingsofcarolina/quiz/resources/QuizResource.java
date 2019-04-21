@@ -84,7 +84,6 @@ public class QuizResource {
 		Map<String, Object> attributes = attributes()
 				.linkCss(true)
 				.attributes(userAttributes)
-				// TODO: Find a better place for the CSS 
 				.styleSheetName("http:/static/asciidoctor-default.css")
 				.allowUriRead(true).asMap();
 		options = options()
@@ -96,11 +95,11 @@ public class QuizResource {
 		
 		// Add custom extensions
 		JavaExtensionRegistry extensionRegistry = this.asciidoctor.javaExtensionRegistry(); 
+		extensionRegistry.docinfoProcessor(new CssHeaderProcessor(new HashMap<String, Object>())); 
 		extensionRegistry.inlineMacro("navbar", NavigationBar.class);
 		extensionRegistry.inlineMacro("flash", Flash.class);
 		extensionRegistry.inlineMacro("button", Button.class);
 		extensionRegistry.inlineMacro("color", Color.class);
-		extensionRegistry.docinfoProcessor(new CssHeaderProcessor(new HashMap<String, Object>())); 
 
 		// Create your Configuration instance, and specify if up to what FreeMarker
 		// version (here 2.3.27) do you want to apply the fixes that are not 100%
@@ -182,6 +181,26 @@ public class QuizResource {
 		return Response.ok().entity(output).build();
 	}
 	
+	@GET
+	@Path("profile")
+	@Produces("text/html")
+	public Response profile(@CookieParam("quiz.token") Cookie cookie) throws Exception, AuthenticationException {
+		if (cookie != null) {
+			Jws<Claims> claims = authUtils.validateUser(cookie.getValue());
+			User user = User.getWithClaims(claims);
+			String output = "";
+			if (user != null) {
+				String rendered = renderFreemarker("profile.ad", user).toString();
+				output = asciidoctor.convert(rendered, options);
+				return Response.ok().entity(output).build();
+			} else {
+				return Response.status(404).build();
+			}
+		} else {
+			return new RedirectResponse(Pages.LOGIN_PAGE).build();
+		}
+	}
+
 	@GET
 	@Path("generate")
 	@Produces("text/html")
@@ -289,7 +308,6 @@ public class QuizResource {
 		try {
 			temp.process(entity, out);
 		} catch (TemplateException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
