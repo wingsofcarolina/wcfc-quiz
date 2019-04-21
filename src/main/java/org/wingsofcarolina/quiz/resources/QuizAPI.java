@@ -6,6 +6,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.CookieParam;
@@ -13,6 +14,7 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
@@ -29,8 +31,12 @@ import org.wingsofcarolina.quiz.authentication.Privilege;
 import org.wingsofcarolina.quiz.common.FlashMessage;
 import org.wingsofcarolina.quiz.common.Pages;
 import org.wingsofcarolina.quiz.common.Templates;
+import org.wingsofcarolina.quiz.domain.Answer;
+import org.wingsofcarolina.quiz.domain.Attribute;
+import org.wingsofcarolina.quiz.domain.Category;
 import org.wingsofcarolina.quiz.domain.Question;
 import org.wingsofcarolina.quiz.domain.Record;
+import org.wingsofcarolina.quiz.domain.Type;
 import org.wingsofcarolina.quiz.domain.User;
 import org.wingsofcarolina.quiz.domain.quiz.Quiz;
 import org.wingsofcarolina.quiz.responses.LoginResponse;
@@ -240,15 +246,68 @@ public class QuizAPI {
 	}
 	
 	@POST
-	@Path("editQuestion")
+	@Path("question")
 	@Produces("text/html")
-	public Response editQuestion(@FormParam("question") String question,
+	public Response editQuestion(@CookieParam("quiz.token") Cookie cookie,
+			@FormParam("questionId") String questionId,
+			@FormParam("type") String type,
+			@FormParam("category") String category,
+			@FormParam("question") String question,
 			@FormParam("discussion") String discussion,
-			@FormParam("attributes") List<String> attributes) throws Exception {
+			@FormParam("references") String references,
+			@FormParam("difficulty") String difficulty,
+			@FormParam("attributes") List<String> attributes,
+			@FormParam("correct") Integer correct, 
+			@FormParam("answer1") String answer1,
+			@FormParam("answer2") String answer2,
+			@FormParam("answer3") String answer3,
+			@FormParam("answer4") String answer4,
+			@FormParam("answer5") String answer5
+			) throws Exception, AuthenticationException {
+		
+		Question q = null;
+
+		LOG.info("QuestionID --> {}", questionId);
+		LOG.info("Type       --> {}", type);
+		LOG.info("Category   --> {}", category);
 		LOG.info("Question   --> {}", question);
 		LOG.info("Discussion --> {}", discussion);
+		LOG.info("References --> {}", references);
 		LOG.info("Attributes --> {}", attributes);
-		return Response.ok().build();
+		LOG.info("Correct    --> {}", correct);
+		LOG.info("Answer1    --> {}", answer1);
+		LOG.info("Answer2    --> {}", answer2);
+		LOG.info("Answer3    --> {}", answer3);
+		LOG.info("Answer4    --> {}", answer4);
+		LOG.info("Answer5    --> {}", answer5);
+		
+		Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
+		User user = User.getWithClaims(claims);
+		
+		List<Answer> answers = new ArrayList<Answer>();
+		if ( ! answer1.isEmpty()) answers.add(new Answer(1,answer1));
+		if ( ! answer2.isEmpty()) answers.add(new Answer(2,answer2));
+		if ( ! answer3.isEmpty()) answers.add(new Answer(3,answer3));
+		if ( ! answer4.isEmpty()) answers.add(new Answer(4,answer4));
+		if ( ! answer5.isEmpty()) answers.add(new Answer(5,answer5));
+		answers.get(correct).setCorrect(true);
+		
+		if (category.toUpperCase().equals("SOP")) {
+		    q = new Question(Type.BLANK, Category.SOP, attributes, 
+					question, references, answers, discussion);
+		} else {
+			if (type.equals("fib")) {
+			    q = new Question(Type.BLANK, Category.valueOf(category.toUpperCase()), attributes, 
+						question, references, answers, discussion);
+			} else {
+			    q = new Question(Type.CHOICE, Category.valueOf(category.toUpperCase()), attributes, 
+						question, references, answers, discussion);
+			}
+		}
+		LOG.info("Question : {}", q);
+		q.save();
+		
+		return new RedirectResponse(Pages.HOME_PAGE).build();
 	}
 	
 	private String getUserCredentials(String email) {
@@ -260,7 +319,14 @@ public class QuizAPI {
 		}
 	}
 	
-
+	@GET
+	@Path("attributes/{category}")
+	@Produces("application/json")
+	public Response attributes(@PathParam("category") String category) {
+		List<String> attributes = Attribute.attributes(category);
+		return Response.ok().entity(attributes).build();
+	}
+	
 	private Writer renderFreemarker(String template, Object entity) throws IOException {
 		Template temp = freemarker.getTemplate(template);
 

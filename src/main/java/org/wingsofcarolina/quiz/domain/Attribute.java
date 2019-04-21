@@ -1,5 +1,6 @@
 package org.wingsofcarolina.quiz.domain;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -44,4 +45,37 @@ public class Attribute {
 	public static String ANY = "ANY";
 	public static List<String> sop_attributes = Arrays.asList(SOP_I, SOP_II, SOP_III, SOP_IV, SOP_V, SOP_VI, SOP_VII, FS);
 	public static List<String> level_attributes = Arrays.asList(STUDENT, INSTRUCTOR, PILOT, ANY);
+	
+	public static List<String> attributes(String category) {
+		switch (category.toLowerCase()) {
+		case "sop" : return sopAttributes();
+		case "c152" :
+		case "c172" :
+		case "pa28" :
+		case "m20j" :
+			return aircraftAttributes();
+		case "difficulty" : return difficultyAttributes();
+		default : return null;
+		}
+	}
+
+	private static List<String> difficultyAttributes() {
+		return difficulty_attributes;
+	}
+
+	private static List<String> aircraftAttributes() {
+		List<String> attributeList = new ArrayList<String>();
+		attributeList.add(REQUIRED);
+		attributeList.addAll(aircraft_attributes);
+		attributeList.addAll(level_attributes);
+		return attributeList;
+	}
+
+	private static List<String> sopAttributes() {
+		List<String> attributeList = new ArrayList<String>();
+		attributeList.add(REQUIRED);
+		attributeList.addAll(sop_attributes);
+		attributeList.addAll(level_attributes);
+		return attributeList;
+	}
 }

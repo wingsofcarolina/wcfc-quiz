@@ -21,7 +21,7 @@ Club member needing a quiz select from the following choices:</p>
 </div>
 </p>
 <hr>
-<form action="/api/login" method="post" target="_blank">
+<form action="/api/login" method="post">
 ++++
 Instructors needing to retrieve a quiz key log in:
 |===

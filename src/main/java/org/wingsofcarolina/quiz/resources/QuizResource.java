@@ -38,6 +38,7 @@ import org.wingsofcarolina.quiz.authentication.Privilege;
 import org.wingsofcarolina.quiz.common.Pages;
 import org.wingsofcarolina.quiz.common.Templates;
 import org.wingsofcarolina.quiz.domain.*;
+import org.wingsofcarolina.quiz.domain.presentation.QuestionWrapper;
 import org.wingsofcarolina.quiz.domain.quiz.Quiz;
 import org.wingsofcarolina.quiz.domain.quiz.Quiz.QuizType;
 import org.wingsofcarolina.quiz.extensions.*;
@@ -282,6 +283,27 @@ public class QuizResource {
 	}
 	
 	@GET
+	@Path("addQuestion")
+	@Produces("text/html")
+	public Response addQuestion(@CookieParam("quiz.token") Cookie cookie) throws Exception, AuthenticationException {
+		if (cookie != null) {
+			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
+			User user = User.getWithClaims(claims);
+			String output = "";
+			if (user != null) {
+				QuestionWrapper wrapper = new QuestionWrapper(user);
+				String rendered = renderFreemarker("question.ad", wrapper).toString();
+				output = asciidoctor.convert(rendered, options);
+				return Response.ok().entity(output).build();
+			} else {
+				return Response.status(404).build();
+			}
+		} else {
+			return new RedirectResponse(Pages.LOGIN_PAGE).build();
+		}
+	}
+
+	@GET
 	@Path("editQuestion")
 	@Produces("text/html")
 	public Response editQuestion(@CookieParam("quiz.token") Cookie cookie) throws Exception, AuthenticationException {
@@ -290,7 +312,8 @@ public class QuizResource {
 			User user = User.getWithClaims(claims);
 			String output = "";
 			if (user != null) {
-				String rendered = renderFreemarker("editQuestion.ad", user).toString();
+				QuestionWrapper wrapper = new QuestionWrapper(user);
+				String rendered = renderFreemarker("question.ad", wrapper).toString();
 				output = asciidoctor.convert(rendered, options);
 				return Response.ok().entity(output).build();
 			} else {

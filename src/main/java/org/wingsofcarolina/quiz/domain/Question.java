@@ -50,6 +50,11 @@ public class Question {
 		return type == Type.BLANK;
 	}
 	
+	@JsonIgnore
+	public boolean isMultipleChoice() {
+		return type != Type.BLANK;
+	}
+	
 	public long getQuestionId() {
 		return questionId;
 	}
@@ -183,4 +188,9 @@ public class Question {
 		Persistence.instance().get(Question.class).delete(this);
 	}
 
+	@Override
+	public String toString() {
+		return "Question [questionId=" + questionId + ", type=" + type + ", category=" + category + ", attributes="
+				+ attributes + "]";
+	}
 }
