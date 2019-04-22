@@ -12,7 +12,7 @@ public class SimpleJob extends Job {
 
 	@Override
 	public void doRun() throws JobInterruptException {
-		LOG.info("SimpleJob triggered ..... do some work!");
+		LOG.debug("SimpleJob triggered ..... do some work!");
 	}
 
 }

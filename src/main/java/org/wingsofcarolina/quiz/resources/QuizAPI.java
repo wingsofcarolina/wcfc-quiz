@@ -7,6 +7,7 @@ import java.io.Writer;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.ws.rs.CookieParam;
@@ -246,10 +247,9 @@ public class QuizAPI {
 	}
 	
 	@POST
-	@Path("question")
+	@Path("addQuestion")
 	@Produces("text/html")
-	public Response editQuestion(@CookieParam("quiz.token") Cookie cookie,
-			@FormParam("questionId") String questionId,
+	public Response addQuestion(@CookieParam("quiz.token") Cookie cookie,
 			@FormParam("type") String type,
 			@FormParam("category") String category,
 			@FormParam("question") String question,
@@ -257,7 +257,7 @@ public class QuizAPI {
 			@FormParam("references") String references,
 			@FormParam("difficulty") String difficulty,
 			@FormParam("attributes") List<String> attributes,
-			@FormParam("correct") Integer correct, 
+			@FormParam("answer") String answer, 
 			@FormParam("answer1") String answer1,
 			@FormParam("answer2") String answer2,
 			@FormParam("answer3") String answer3,
@@ -267,14 +267,13 @@ public class QuizAPI {
 		
 		Question q = null;
 
-		LOG.info("QuestionID --> {}", questionId);
 		LOG.info("Type       --> {}", type);
 		LOG.info("Category   --> {}", category);
 		LOG.info("Question   --> {}", question);
 		LOG.info("Discussion --> {}", discussion);
 		LOG.info("References --> {}", references);
 		LOG.info("Attributes --> {}", attributes);
-		LOG.info("Correct    --> {}", correct);
+		LOG.info("Answer     --> {}", answer);
 		LOG.info("Answer1    --> {}", answer1);
 		LOG.info("Answer2    --> {}", answer2);
 		LOG.info("Answer3    --> {}", answer3);
@@ -285,12 +284,22 @@ public class QuizAPI {
 		User user = User.getWithClaims(claims);
 		
 		List<Answer> answers = new ArrayList<Answer>();
-		if ( ! answer1.isEmpty()) answers.add(new Answer(1,answer1));
-		if ( ! answer2.isEmpty()) answers.add(new Answer(2,answer2));
-		if ( ! answer3.isEmpty()) answers.add(new Answer(3,answer3));
-		if ( ! answer4.isEmpty()) answers.add(new Answer(4,answer4));
-		if ( ! answer5.isEmpty()) answers.add(new Answer(5,answer5));
-		answers.get(correct).setCorrect(true);
+		if ( ! answer.isEmpty()) answers.add(new Answer(-1,answer,true));
+		if ( ! answer1.isEmpty()) answers.add(new Answer(answer1));
+		if ( ! answer2.isEmpty()) answers.add(new Answer(answer2));
+		if ( ! answer3.isEmpty()) answers.add(new Answer(answer3));
+		if ( ! answer4.isEmpty()) answers.add(new Answer(answer4));
+		if ( ! answer5.isEmpty()) answers.add(new Answer(answer5));
+		if (type.toUpperCase().contentEquals("MULTI")) {
+			LOG.info("Randomize multiple-choice answers");
+			Collections.shuffle(answers);
+		}
+		
+		// Reset the indexes to the current order
+		int i = 1;
+		for (Answer a : answers) {
+			a.setIndex(i++);
+		}
 		
 		if (category.toUpperCase().equals("SOP")) {
 		    q = new Question(Type.BLANK, Category.SOP, attributes, 

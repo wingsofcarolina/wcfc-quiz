@@ -24,7 +24,11 @@ public class Answer {
 	public Answer(Integer index, String answer) {
 		this(index, answer, false);
 	}
-	
+
+	public Answer(String answer) {
+		this(-1, answer, false);
+	}
+
 	public ObjectId getId() {
 		return id;
 	}
