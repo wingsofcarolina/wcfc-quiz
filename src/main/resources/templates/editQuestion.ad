@@ -1,9 +1,9 @@
-= Add/Modify Question
+= Modify Question
 
 <#setting number_format="#0">
 
 <#if user.isAdmin()>
-navbar:${user.userId}[buttons="/addQuestion:Add Question;/editQuestion:Modify Question"]
+navbar:${user.userId}[buttons="AddNavButton;EditNavButton"]
 <#else>
 navbar:${user.userId}[]
 </#if>
@@ -84,11 +84,7 @@ function toggleAnswers(sel) {
 <script src="static/question-form-validation.js"></script>
 
 <form name="question" action="/api/addQuestion" method="post">
-<#if myOptionalVar??>
 <input type="hidden" value="questionId" name="${questionId}" />
-<#else>
-<input type="hidden" value="questionId" name="NEW" />
-</#if>
 
 <table>
 <tr><td>Type</td><td>

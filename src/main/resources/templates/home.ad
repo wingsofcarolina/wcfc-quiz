@@ -3,7 +3,7 @@
 <#setting number_format="#0">
 
 <#if isAdmin()>
-navbar:${userId}[buttons="/addQuestion:Add Question;/editQuestion:Modify Question"]
+navbar:${userId}[buttons="AddNavButton;EditNavButton"]
 <#else>
 navbar:${userId}[]
 </#if>

@@ -7,6 +7,7 @@ import java.util.Map;
 import org.asciidoctor.ast.ContentNode;
 import org.asciidoctor.extension.InlineMacroProcessor;
 import org.wingsofcarolina.quiz.common.FlashMessage;
+import org.wingsofcarolina.quiz.extensions.navbuttons.NavButton;
 
 public class NavigationBar extends InlineMacroProcessor {
 
@@ -29,12 +30,14 @@ public class NavigationBar extends InlineMacroProcessor {
 				"<a class=\"active\" href=\"/\">Home</a>\n");
 		if (items != null) {
 			for (String item : items) {
-				List<String> components = Arrays.asList(item.split("\\s*:\\s*"));
-				sb.append("<a href=\"");
-				sb.append(components.get(0));
-				sb.append("\">");
-				sb.append(components.get(1));
-				sb.append("</a>\n");
+				Class<?> clazz;
+				try {
+					clazz = Class.forName("org.wingsofcarolina.quiz.extensions.navbuttons." + item);
+					NavButton button = (NavButton) clazz.newInstance();
+					sb.append(button.html());
+				} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		sb.append("<a href=\"/profile\">Profile</a>\n");

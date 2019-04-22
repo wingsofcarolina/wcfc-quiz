@@ -292,7 +292,7 @@ public class QuizResource {
 			String output = "";
 			if (user != null) {
 				QuestionWrapper wrapper = new QuestionWrapper(user);
-				String rendered = renderFreemarker("question.ad", wrapper).toString();
+				String rendered = renderFreemarker("addQuestion.ad", wrapper).toString();
 				output = asciidoctor.convert(rendered, options);
 				return Response.ok().entity(output).build();
 			} else {
@@ -313,7 +313,7 @@ public class QuizResource {
 			String output = "";
 			if (user != null) {
 				QuestionWrapper wrapper = new QuestionWrapper(user);
-				String rendered = renderFreemarker("question.ad", wrapper).toString();
+				String rendered = renderFreemarker("editQuestion.ad", wrapper).toString();
 				output = asciidoctor.convert(rendered, options);
 				return Response.ok().entity(output).build();
 			} else {

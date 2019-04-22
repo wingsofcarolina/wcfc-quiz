@@ -1,0 +1,140 @@
+= Add Question
+
+<#setting number_format="#0">
+
+<#if user.isAdmin()>
+navbar:${user.userId}[buttons="AddNavButton;EditNavButton"]
+<#else>
+navbar:${user.userId}[]
+</#if>
+
+++++
+<style>
+select {
+  width: 300px;
+}
+
+.select-checkbox option::before {
+  content: "\2610";
+  width: 1.3em;
+  text-align: center;
+  display: inline-block;
+}
+.select-checkbox option:checked::before {
+  content: "\2611";
+}
+
+.select-checkbox-fa option::before {
+  font-family: FontAwesome;
+  content: "\f096";
+  width: 1.3em;
+  display: inline-block;
+  margin-left: 2px;
+}
+.select-checkbox-fa option:checked::before {
+  content: "\f046";
+}
+</style>
+<script>
+$(document).ready(function(){
+	$("#optional").hide();
+	loadAttributes("c152");
+	loadDifficultyAttributes();
+});
+
+function loadAttributes(sel)
+{
+	var url = "api/attributes/" + sel;
+    var $el = $("#attributes");
+	$el.empty(); // remove old options
+	$.getJSON( url , function( data ) {
+		$.each(data, function(key, value) {
+		  $el.append($("<option></option>")
+		     .attr("key", value).text(value));
+		});
+	});
+}
+
+function loadDifficultyAttributes()
+{
+	var url = "api/attributes/difficulty";
+    var $el = $("#difficulty");
+	$el.empty(); // remove old options
+	$.getJSON( url , function( data ) {
+		$.each(data, function(key, value) {
+		  $el.append($("<option></option>")
+		     .attr("key", value).text(value));
+		});
+	});
+}
+
+
+function toggleAnswers(sel) {
+	if (sel == "fib") {
+		$("#answer").hide();
+		$("#optional").show();
+		$("#answerLabel").html("Answers</br>(Max 5)");
+	} else {
+		$("#answer").show();
+		$("#optional").hide();
+		$("#answerLabel").html("Distractors</br>(Max 4)");
+	}
+}
+</script>
+<script src="static/question-form-validation.js"></script>
+
+<form name="question" action="/api/addQuestion" method="post">
+
+<table>
+<tr><td>Type</td><td>
+<select id="q-type" name="type" onchange=toggleAnswers(this.value)>
+  <option value="multi">Multiple Choice</option>
+  <option value="fib">Fill in the Blank</option>
+</select>
+</td></tr>
+<tr><td>Category</td><td>
+<select id="q-category" name="category" onchange=loadAttributes(this.value)>
+  <option value="c152">C-152</option>
+  <option value="c172">C-172 Skyhawk</option>
+  <option value="pa28">PA-28 Warrior</option>
+  <option value="m20j">M20J Mooney</option>
+  <option value="sop">FAR/SOP</option>
+</select>
+<tr><td valign="top">Question</td><td><textarea name="question" rows="4" cols="70" placeholder=" Enter the question here."></textarea></td></tr>
+<tr><td valign="top">Discussion</td><td><textarea name="discussion" rows="4" cols="70" placeholder=" Enter the CFI discussion here."></textarea></td></tr>
+<tr><td valign="top">References</td><td><input type="text" name="references" size="70" placeholder=" Enter any references here."></td></tr>
+<tr><td valign="top">Difficulty</td><td><select id="difficulty" name="difficulty" multiple="" class="form-control select-checkbox" size="3"></select></td></tr>
+<tr><td valign="top">Attributes</td><td><select id="attributes" name="attributes" multiple="" class="form-control select-checkbox" size="10"></select></td></tr>
+<tr><td></td><td><i>Control-click to select multiple attributes.</td></tr>
+<tr><td colspan=2><hr></td></tr>
+<tr id="answer"><td valign="top">Answer</td><td><input type="text" name="answer" size="70" placeholder=" Enter the correct answer here."></td></tr>
+<tr><td valign="top" id="answerLabel">Distractors</br>(Max 4)</td><td>
+	<table id="answerlist">
+	<tr><td><input type="text" name="answer1" size=70></td></tr>
+	<tr><td><input type="text" name="answer2" size=70></td></tr>
+	<tr><td><input type="text" name="answer3" size=70></td></tr>
+	<tr><td><input type="text" name="answer4" size=70></td></tr>
+	<tr id="optional"><td><input type="text" name="answer5" size=70></td></tr>
+	</table>
+</td></tr>
+</table>
+<script>
+    $('#question').validate({
+        rules: {
+            difficulty: {
+                selectcheck: true
+            },
+         	 attributes: {
+                selectcheck: true
+            }
+        }
+    });
+    
+    jQuery.validator.addMethod('selectcheck', function (value) {
+        return (value != '0');
+    }, "selection required");
+</script>
+</p>
+<input type="submit" value="Add/Update Question"></form>
+</p>
+++++
