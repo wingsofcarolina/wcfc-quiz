@@ -29,7 +29,7 @@ import org.wingsofcarolina.quiz.authentication.AuthUtils;
 import org.wingsofcarolina.quiz.authentication.AuthenticationException;
 import org.wingsofcarolina.quiz.authentication.HashUtils;
 import org.wingsofcarolina.quiz.authentication.Privilege;
-import org.wingsofcarolina.quiz.common.FlashMessage;
+import org.wingsofcarolina.quiz.common.Flash;
 import org.wingsofcarolina.quiz.common.Pages;
 import org.wingsofcarolina.quiz.common.Templates;
 import org.wingsofcarolina.quiz.domain.Answer;
@@ -106,7 +106,7 @@ public class QuizAPI {
 		String token = null;
 
 		if (email == null || password == null) {
-			FlashMessage.set("Either email or password missing, try again");
+			Flash.add(Flash.Code.ERROR, "Either email or password missing, try again");
 			return new RedirectResponse(Pages.LOGIN_PAGE).build();
 		}
 
@@ -115,12 +115,12 @@ public class QuizAPI {
 		try {
 			if (storedPassword == null || !HashUtils.validatePassword(password, storedPassword)) {
 				LOG.info("User not found : {}", email);
-				FlashMessage.set("User not found, try again");
+				Flash.add(Flash.Code.ERROR, "User not found, try again");
 				return new RedirectResponse(Pages.LOGIN_PAGE).build();
 			}
 		} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
 			e.printStackTrace();
-			FlashMessage.set("User not found, try again");
+			Flash.add(Flash.Code.ERROR, "User not found, try again");
 			return new RedirectResponse(Pages.LOGIN_PAGE).build();
 		}
 
@@ -172,10 +172,10 @@ public class QuizAPI {
 			String token = null;
 
 			if (email == null || password == null) {
-				FlashMessage.set("No email or password provided, try again");
+				Flash.add(Flash.Code.ERROR, "No email or password provided, try again");
 				return new RedirectResponse(Pages.REGISTER_PAGE).build();
 			} else if (! password.equals(passwordVerify)) {
-				FlashMessage.set("Passwords do not match");
+				Flash.add(Flash.Code.ERROR, "Passwords do not match");
 				return new RedirectResponse(Pages.REGISTER_PAGE).build();
 			}
 
@@ -219,7 +219,7 @@ public class QuizAPI {
 			}
 			return Response.ok().entity(output).build();
 		}
-		FlashMessage.set("Requested quiz not found.");
+		Flash.add(Flash.Code.ERROR, "Requested quiz not found.");
 		return new RedirectResponse(Pages.HOME_PAGE).build();
 	}
 
@@ -316,6 +316,7 @@ public class QuizAPI {
 		LOG.info("Question : {}", q);
 		q.save();
 		
+		Flash.add(Flash.Code.SUCCESS, "Created new question with ID : " + q.getQuestionId());
 		return new RedirectResponse(Pages.HOME_PAGE).build();
 	}
 	

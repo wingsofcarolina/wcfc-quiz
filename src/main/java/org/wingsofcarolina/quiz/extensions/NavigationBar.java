@@ -6,7 +6,8 @@ import java.util.Map;
 
 import org.asciidoctor.ast.ContentNode;
 import org.asciidoctor.extension.InlineMacroProcessor;
-import org.wingsofcarolina.quiz.common.FlashMessage;
+import org.wingsofcarolina.quiz.common.Flash;
+import org.wingsofcarolina.quiz.common.Flash.Message;
 import org.wingsofcarolina.quiz.extensions.navbuttons.NavButton;
 
 public class NavigationBar extends InlineMacroProcessor {
@@ -43,9 +44,9 @@ public class NavigationBar extends InlineMacroProcessor {
 		sb.append("<a href=\"/profile\">Profile</a>\n");
 		sb.append("<div style=\"float:right\"><a href=\"/api/logout\">Logout</a></div>\n</div>");
 		
-		String flash = FlashMessage.message();
+		Message flash = Flash.message();
 		if (flash != null) {
-			sb.append("<div id=\"flash\">" + flash + "</div>\n");
+			sb.append(flash.getDiv());
 			sb.append("<script>setInterval(function(){$(\"#flash\").hide('slow');}, 10000);</script>");
 		}
 		return sb.toString();

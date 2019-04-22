@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.asciidoctor.ast.ContentNode;
 import org.asciidoctor.extension.InlineMacroProcessor;
+import org.wingsofcarolina.quiz.common.Flash.Message;
 
 public class Flash extends InlineMacroProcessor {
 	
@@ -14,10 +15,10 @@ public class Flash extends InlineMacroProcessor {
 	@Override
 	public String process(ContentNode parent, String target, Map<String, Object> attributes) {
 		StringBuffer sb = new StringBuffer();
-		String flash = org.wingsofcarolina.quiz.common.FlashMessage.message();
+		Message flash = org.wingsofcarolina.quiz.common.Flash.message();
 		if (flash != null) {
 			sb.append("<link rel=\"stylesheet\" href=\"/static/common.css\">");
-			sb.append("<div id=\"flash\">" + flash + "</div>\n");
+			sb.append(flash.getDiv());
 			sb.append("<script>setInterval(function(){$(\"#flash\").hide('slow');}, 10000);</script>");
 			return sb.toString();
 		} else {

@@ -24,12 +24,23 @@ body { font-family: Georgia, ‘Times New Roman’, serif; margin: 30px; }
     font-size: 12pt;
 }
 
-#flash {
+.flash {
   border-radius: 10px;
   background-color: #87162d;
   color: white;
   padding: 10px;
   overflow: hidden;
+}
+
+.flash-success {
+	background-color: #436b1d;
+}
+
+.flash-warn {
+	background-color: #c4a000;
+}
+.flash-error {
+	background-color: #87162d;
 }
 
 #footer {
