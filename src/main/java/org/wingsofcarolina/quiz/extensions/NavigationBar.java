@@ -26,7 +26,7 @@ public class NavigationBar extends InlineMacroProcessor {
 		}
 
 		StringBuffer sb = new StringBuffer();
-		sb.append("<link rel=\"stylesheet\" href=\"/static/common.css\">");
+		sb.append("<link rel=\"stylesheet\" href=\"static/quiz-style.css\">");
 		sb.append("<div class=\"topnav\">\n" + 
 				"<a class=\"active\" href=\"/\">Home</a>\n");
 		if (items != null) {

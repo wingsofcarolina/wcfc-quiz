@@ -17,7 +17,7 @@ public class Flash extends InlineMacroProcessor {
 		StringBuffer sb = new StringBuffer();
 		Message flash = org.wingsofcarolina.quiz.common.Flash.message();
 		if (flash != null) {
-			sb.append("<link rel=\"stylesheet\" href=\"/static/common.css\">");
+			sb.append("<link rel=\"stylesheet\" href=\"static/quiz-style.css\">");
 			sb.append(flash.getDiv());
 			sb.append("<script>setInterval(function(){$(\"#flash\").hide('slow');}, 10000);</script>");
 			return sb.toString();
