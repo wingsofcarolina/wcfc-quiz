@@ -257,12 +257,16 @@ public class QuizAPI {
 			@FormParam("references") String references,
 			@FormParam("difficulty") String difficulty,
 			@FormParam("attributes") List<String> attributes,
-			@FormParam("answer") String answer, 
 			@FormParam("answer1") String answer1,
 			@FormParam("answer2") String answer2,
 			@FormParam("answer3") String answer3,
 			@FormParam("answer4") String answer4,
-			@FormParam("answer5") String answer5
+			@FormParam("answer5") String answer5,
+			@FormParam("correct1") Boolean correct1,
+			@FormParam("correct2") Boolean correct2,
+			@FormParam("correct3") Boolean correct3,
+			@FormParam("correct4") Boolean correct4,
+			@FormParam("correct5") Boolean correct5
 			) throws Exception, AuthenticationException {
 		
 		Question q = null;
@@ -273,7 +277,6 @@ public class QuizAPI {
 		LOG.info("Discussion --> {}", discussion);
 		LOG.info("References --> {}", references);
 		LOG.info("Attributes --> {}", attributes);
-		LOG.info("Answer     --> {}", answer);
 		LOG.info("Answer1    --> {}", answer1);
 		LOG.info("Answer2    --> {}", answer2);
 		LOG.info("Answer3    --> {}", answer3);
@@ -283,17 +286,19 @@ public class QuizAPI {
 		Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
 		User user = User.getWithClaims(claims);
 		
+		// Remove any nulls
+		correct1 = (correct1 == null) ? new Boolean(false) : correct1;
+		correct2 = (correct2 == null) ? new Boolean(false) : correct2;
+		correct3 = (correct3 == null) ? new Boolean(false) : correct3;
+		correct4 = (correct4 == null) ? new Boolean(false) : correct4;
+		correct5 = (correct5 == null) ? new Boolean(false) : correct5;
+		
 		List<Answer> answers = new ArrayList<Answer>();
-		if ( ! answer.isEmpty()) answers.add(new Answer(-1,answer,true));
-		if ( ! answer1.isEmpty()) answers.add(new Answer(answer1));
-		if ( ! answer2.isEmpty()) answers.add(new Answer(answer2));
-		if ( ! answer3.isEmpty()) answers.add(new Answer(answer3));
-		if ( ! answer4.isEmpty()) answers.add(new Answer(answer4));
-		if ( ! answer5.isEmpty()) answers.add(new Answer(answer5));
-		if (type.toUpperCase().contentEquals("MULTI")) {
-			LOG.info("Randomize multiple-choice answers");
-			Collections.shuffle(answers);
-		}
+		if ( ! answer1.isEmpty()) answers.add(new Answer(answer1, correct1));
+		if ( ! answer2.isEmpty()) answers.add(new Answer(answer2, correct2));
+		if ( ! answer3.isEmpty()) answers.add(new Answer(answer3, correct3));
+		if ( ! answer4.isEmpty()) answers.add(new Answer(answer4, correct4));
+		if ( ! answer5.isEmpty()) answers.add(new Answer(answer5, correct5));
 		
 		// Reset the indexes to the current order
 		int i = 1;

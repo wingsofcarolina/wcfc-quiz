@@ -21,6 +21,11 @@ public class Answer {
 		this.correct = correct;
 	}
 
+	public Answer(String answer, boolean correct) {
+		this(answer);
+		this.correct = correct;
+	}
+	
 	public Answer(Integer index, String answer) {
 		this(index, answer, false);
 	}

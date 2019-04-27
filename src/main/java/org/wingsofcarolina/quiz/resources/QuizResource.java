@@ -39,6 +39,7 @@ import org.wingsofcarolina.quiz.common.Pages;
 import org.wingsofcarolina.quiz.common.Templates;
 import org.wingsofcarolina.quiz.domain.*;
 import org.wingsofcarolina.quiz.domain.presentation.QuestionWrapper;
+import org.wingsofcarolina.quiz.domain.presentation.Wrapper;
 import org.wingsofcarolina.quiz.domain.quiz.Quiz;
 import org.wingsofcarolina.quiz.domain.quiz.Quiz.QuizType;
 import org.wingsofcarolina.quiz.extensions.*;
@@ -85,7 +86,7 @@ public class QuizResource {
 		Map<String, Object> attributes = attributes()
 				.linkCss(true)
 				.attributes(userAttributes)
-				.styleSheetName("http:/static/asciidoctor-default.css")
+				.styleSheetName("/static/default.css")
 				.allowUriRead(true).asMap();
 		options = options()
 				.safe(SafeMode.SERVER)
@@ -143,7 +144,7 @@ public class QuizResource {
 			User user = User.getWithClaims(claims);
 			String output = "";
 			if (user != null) {
-				String rendered = renderFreemarker("home.ad", user).toString();
+				String rendered = renderFreemarker("home.ad", new Wrapper(user)).toString();
 				output = asciidoctor.convert(rendered, options);
 				return Response.ok().entity(output).build();
 			} else {
@@ -191,7 +192,7 @@ public class QuizResource {
 			User user = User.getWithClaims(claims);
 			String output = "";
 			if (user != null) {
-				String rendered = renderFreemarker("profile.ad", user).toString();
+				String rendered = renderFreemarker("profile.ad", new Wrapper(user)).toString();
 				output = asciidoctor.convert(rendered, options);
 				return Response.ok().entity(output).build();
 			} else {
@@ -304,15 +305,17 @@ public class QuizResource {
 	}
 
 	@GET
-	@Path("editQuestion")
+	@Path("editQuestion/{questionId}")
 	@Produces("text/html")
-	public Response editQuestion(@CookieParam("quiz.token") Cookie cookie) throws Exception, AuthenticationException {
+	public Response editQuestion(@CookieParam("quiz.token") Cookie cookie,
+			@PathParam("questionId") Long questionId) throws Exception, AuthenticationException {
 		if (cookie != null) {
 			Jws<Claims> claims = authUtils.validateUser(cookie.getValue());
 			User user = User.getWithClaims(claims);
 			String output = "";
-			if (user != null) {
-				QuestionWrapper wrapper = new QuestionWrapper(user);
+			Question question = Question.getByQuestionId(questionId);
+			if (user != null || question == null) {
+				QuestionWrapper wrapper = new QuestionWrapper(user, question);
 				String rendered = renderFreemarker("editQuestion.ad", wrapper).toString();
 				output = asciidoctor.convert(rendered, options);
 				return Response.ok().entity(output).build();

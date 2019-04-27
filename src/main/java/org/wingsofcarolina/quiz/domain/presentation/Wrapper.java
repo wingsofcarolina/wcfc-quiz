@@ -4,17 +4,17 @@ import org.wingsofcarolina.quiz.authentication.Privilege;
 import org.wingsofcarolina.quiz.domain.User;
 
 public class Wrapper {
-	private User requester;
+	private User user;
 	
-	public Wrapper(User requester) {
-		this.requester = requester;
+	public Wrapper(User user) {
+		this.user = user;
 	}
 	
 	public boolean isAdmin() {
-		return requester.getPrivileges().contains(Privilege.ADMIN);
+		return user.getPrivileges().contains(Privilege.ADMIN);
 	}
 
-	public User getRequester() {
-		return requester;
+	public User getUser() {
+		return user;
 	}
 }

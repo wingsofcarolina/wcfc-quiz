@@ -2,10 +2,10 @@
 
 <#setting number_format="#0">
 
-<#if isAdmin()>
-navbar:${userId}[buttons="AddNavButton;EditNavButton"]
+<#if user.isAdmin()>
+navbar:${user.userId}[buttons="ViewNavButton;AddNavButton;EditNavButton"]
 <#else>
-navbar:${userId}[]
+navbar:${user.userId}[]
 </#if>
 
 This page allows an instructor to retrieve the key for a member's quiz, or
