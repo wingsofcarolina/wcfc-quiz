@@ -1,0 +1,39 @@
+= Browse Questions
+
+<#setting number_format="#0">
+
+<#if user.isAdmin()>
+navbar:${user.userId}[buttons="ViewNavButton;AddNavButton;EditNavButton"]
+<#else>
+navbar:${user.userId}[]
+</#if>
+
+button:/browseQuestions/${skip()}[label="Next 10 Questions", method="get"]
+++++
+<form action="/browseQuestions" method="post">
+  <input type="submit" name="action" value="Jump To Question">
+  <input type="text" name="questionId">
+</form>
+</p>
+++++
+button:/browseQuestions/${skipBack()}[label="Previous 10 Questions", method="get"]
+++++
+<ul>
+++++
+<#list questions as question>
+++++
+<li><a href="/question/${question.questionId}">${question.questionId}</a> : ${question.question}</br>
+${question.category} / 
+<#if question.attributes??>
+<#list question.attributes as attribute>
+${attribute}&nbsp;
+</#list>
+<#else>
+No Attributes Assigned!
+</#if>
+++++
+</#list>
+++++
+</ul>
+
+++++

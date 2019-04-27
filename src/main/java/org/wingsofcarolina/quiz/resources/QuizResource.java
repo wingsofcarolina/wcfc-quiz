@@ -38,6 +38,7 @@ import org.wingsofcarolina.quiz.authentication.Privilege;
 import org.wingsofcarolina.quiz.common.Pages;
 import org.wingsofcarolina.quiz.common.Templates;
 import org.wingsofcarolina.quiz.domain.*;
+import org.wingsofcarolina.quiz.domain.presentation.QuestionListWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.QuestionWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.Wrapper;
 import org.wingsofcarolina.quiz.domain.quiz.Quiz;
@@ -72,6 +73,8 @@ public class QuizResource {
 	private Asciidoctor asciidoctor;
 	private Map<String, Object> options;
 	private AuthUtils authUtils;
+
+	private static final Integer pageCount = 10;
 
 	public QuizResource(QuizConfiguration config) throws IOException {
 		QuizResource.instance = this;
@@ -294,6 +297,50 @@ public class QuizResource {
 			if (user != null) {
 				QuestionWrapper wrapper = new QuestionWrapper(user);
 				String rendered = renderFreemarker("addQuestion.ad", wrapper).toString();
+				output = asciidoctor.convert(rendered, options);
+				return Response.ok().entity(output).build();
+			} else {
+				return Response.status(404).build();
+			}
+		} else {
+			return new RedirectResponse(Pages.LOGIN_PAGE).build();
+		}
+	}
+	
+	@GET
+	@Path("browseQuestions")
+	@Produces("text/html")
+	public Response browseFirstQuestions(@CookieParam("quiz.token") Cookie cookie) throws Exception, AuthenticationException {
+		return browseQuestions(cookie, 0);
+	}
+	
+	@GET
+	@Path("browseQuestions/{skip}")
+	@Produces("text/html")
+	public Response browseNextQuestions(@CookieParam("quiz.token") Cookie cookie,
+			@PathParam("skip") Integer skip) throws Exception, AuthenticationException {
+		return browseQuestions(cookie, skip);
+	}
+	
+	@POST
+	@Path("browseQuestions")
+	@Produces("text/html")
+	public Response browseQuestionsSkip(@CookieParam("quiz.token") Cookie cookie,
+			@FormParam("questionId") Integer questionId) throws Exception, AuthenticationException {
+		int skip = questionId - 1000;
+		skip = skip < 0 ? 0 : skip;
+		return browseQuestions(cookie, skip);
+	}
+	
+	public Response browseQuestions(Cookie cookie, Integer skip) throws Exception, AuthenticationException {
+		if (cookie != null) {
+			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
+			User user = User.getWithClaims(claims);
+			String output = "";
+			if (user != null) {
+				List<Question> questions = Question.getQuestionsLimited(skip, pageCount);
+				QuestionListWrapper wrapper = new QuestionListWrapper(user, questions, skip, pageCount);
+				String rendered = renderFreemarker("browseQuestions.ad", wrapper).toString();
 				output = asciidoctor.convert(rendered, options);
 				return Response.ok().entity(output).build();
 			} else {

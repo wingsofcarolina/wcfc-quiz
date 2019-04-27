@@ -163,6 +163,12 @@ public class Question {
 		return questionDao.getAllQuestions();
 	}
 
+
+	public static List<Question> getQuestionsLimited(int skip, int count) {
+		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
+		return questionDao.getQuestionsLimited(skip, count);
+	}
+	
 	public static Collection<? extends Question> getSelected(Category category) {
 		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
 		return questionDao.getSelected(category);
@@ -193,4 +199,5 @@ public class Question {
 		return "Question [questionId=" + questionId + ", type=" + type + ", category=" + category + ", attributes="
 				+ attributes + "]";
 	}
+
 }

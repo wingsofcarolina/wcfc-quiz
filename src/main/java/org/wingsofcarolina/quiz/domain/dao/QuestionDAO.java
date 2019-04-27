@@ -4,6 +4,7 @@ import java.util.List;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.dao.BasicDAO;
+import org.mongodb.morphia.query.FindOptions;
 import org.mongodb.morphia.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +30,12 @@ public class QuestionDAO extends BasicDAO<Question, ObjectId> {
 
 	public List<Question> getAllQuestions() {
 		List<Question> result = getDatastore().find(Question.class).order("questionId").asList();
+		return result;
+	}
+	
+
+	public List<Question> getQuestionsLimited(int skip, int count) {
+		List<Question> result = getDatastore().find(Question.class).order("questionId").asList(new FindOptions().skip(skip).limit(10));
 		return result;
 	}
 	
@@ -70,5 +77,4 @@ public class QuestionDAO extends BasicDAO<Question, ObjectId> {
 		query.filter("category = ", category);
 		return query.order("questionid").asList();
 	}
-
 }

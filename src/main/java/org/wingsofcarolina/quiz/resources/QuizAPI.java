@@ -277,11 +277,11 @@ public class QuizAPI {
 		LOG.info("Discussion --> {}", discussion);
 		LOG.info("References --> {}", references);
 		LOG.info("Attributes --> {}", attributes);
-		LOG.info("Answer1    --> {}", answer1);
-		LOG.info("Answer2    --> {}", answer2);
-		LOG.info("Answer3    --> {}", answer3);
-		LOG.info("Answer4    --> {}", answer4);
-		LOG.info("Answer5    --> {}", answer5);
+		LOG.info("Answer1    --> {}, ()", answer1, correct1);
+		LOG.info("Answer2    --> {}, ()", answer2, correct2);
+		LOG.info("Answer3    --> {}, ()", answer3, correct3);
+		LOG.info("Answer4    --> {}, ()", answer4, correct4);
+		LOG.info("Answer5    --> {}, ()", answer5, correct5);
 		
 		Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
 		User user = User.getWithClaims(claims);
