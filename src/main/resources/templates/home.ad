@@ -3,9 +3,9 @@
 <#setting number_format="#0">
 
 <#if user.isAdmin()>
-navbar:${user.userId}[buttons="ViewNavButton;AddNavButton;EditNavButton"]
+navbar:${user.userId}[buttons="HomeNavButton;ViewNavButton;AddNavButton;EditNavButton;ProfileNavButton", active="HomeNavButton"]
 <#else>
-navbar:${user.userId}[]
+navbar:${user.userId}[buttons="HomeNavButton;ProfileNavButton", active="HomeNavButton"]
 </#if>
 
 This page allows an instructor to retrieve the key for a member's quiz, or
@@ -33,9 +33,10 @@ been identified as an administrator for the system with
 additional operations and privileges. Use your power
 wisely.</p>
 
-<a href="api/backupQuestions">Generate Question Backup Files</a><br>
-<a href="browseQuestions">Browse questions</a><br>
-<a href="generate?quiz=far">Do yet another administrative task</a><br>
+<ul>
+<li><a href="api/backupQuestions">Generate Question Backup Files</a><br>
+<li><a href="browseQuestions">Browse questions</a><br>
+</ul>
 </p>
 ++++
 </#if>

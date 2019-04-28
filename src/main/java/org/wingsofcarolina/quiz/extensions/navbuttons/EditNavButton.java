@@ -9,7 +9,9 @@ public class EditNavButton extends NavButton {
 				+ "var questionId = prompt(\"Question ID\");"
 				+ "if (questionId != null) { window.location.href = \"/editQuestion/\" + questionId + \"\";\n" + 
 				" } }</script>");
-		sb.append("<a onclick=modifyQuestion()>Modify Question</a>\n");
+		sb.append("<a ");
+		if (active) sb.append("class=\"active\"");
+		sb.append(" onclick=modifyQuestion()>Edit Question</a>\n");
 		return sb.toString();
 	}
 }

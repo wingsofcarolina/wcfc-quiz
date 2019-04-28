@@ -3,9 +3,10 @@
 <#setting number_format="#0">
 
 <#if user.isAdmin()>
-navbar:${user.userId}[buttons="ViewNavButton;AddNavButton;EditNavButton"]
+navbar:${user.userId}[buttons="HomeNavButton;ViewNavButton;AddNavButton;EditNavButton;ProfileNavButton"]
+tton;AddNavButton;EditNavButton"]
 <#else>
-navbar:${user.userId}[]
+navbar:${user.userId}[buttons="HomeNavButton;ProfileNavButton", active="HomeNavButton"]
 </#if>
 
 button:/browseQuestions/${skip()}[label="Next 10 Questions", method="get"]

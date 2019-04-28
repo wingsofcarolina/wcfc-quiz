@@ -24,24 +24,27 @@ public class NavigationBar extends InlineMacroProcessor {
 			String buttons = (String) attributes.get("buttons");
 			items = Arrays.asList(buttons.split("\\s*;\\s*"));
 		}
-
+		String active = (String)attributes.get("active");
+		if (active == null) {
+			active = "HomeNavButton";
+		}
+		
 		StringBuffer sb = new StringBuffer();
 		sb.append("<link rel=\"stylesheet\" href=\"/static/quiz-style.css\">");
-		sb.append("<div class=\"topnav\">\n" + 
-				"<a class=\"active\" href=\"/\">Home</a>\n");
+		sb.append("<div class=\"topnav\">\n");
 		if (items != null) {
 			for (String item : items) {
 				Class<?> clazz;
 				try {
 					clazz = Class.forName("org.wingsofcarolina.quiz.extensions.navbuttons." + item);
 					NavButton button = (NavButton) clazz.newInstance();
+					if (item.contentEquals(active)) button.setActive();
 					sb.append(button.html());
 				} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
 					e.printStackTrace();
 				}
 			}
 		}
-		sb.append("<a href=\"/profile\">Profile</a>\n");
 		sb.append("<div style=\"float:right\"><a href=\"/api/logout\">Logout</a></div>\n</div>");
 		
 		Message flash = Flash.message();

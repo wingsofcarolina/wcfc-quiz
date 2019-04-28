@@ -322,7 +322,7 @@ public class QuizAPI {
 		q.save();
 		
 		Flash.add(Flash.Code.SUCCESS, "Created new question with ID : " + q.getQuestionId());
-		return new RedirectResponse(Pages.HOME_PAGE).build();
+		return new RedirectResponse(Pages.ADD_QUESTION_PAGE).build();
 	}
 	
 	private String getUserCredentials(String email) {
