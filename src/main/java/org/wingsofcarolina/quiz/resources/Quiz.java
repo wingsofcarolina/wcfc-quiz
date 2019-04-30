@@ -1,8 +1,11 @@
-package org.wingsofcarolina.quiz.domain.quiz;
+package org.wingsofcarolina.quiz.resources;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
+import org.mongodb.morphia.annotations.Transient;
 import org.wingsofcarolina.quiz.domain.Category;
 import org.wingsofcarolina.quiz.domain.Question;
 import org.wingsofcarolina.quiz.domain.Record;
@@ -15,12 +18,16 @@ import org.wingsofcarolina.quiz.domain.persistence.Persistence;
 public class Quiz {
 	public enum QuizType { FAR, SOP_STUDENT, SOP_PILOT, SOP_INSTRUCTOR, C152, C172, PA28, M20J };
 
+	public final static Integer MONTHS_TO_LIVE = 3;
+	
 	private long quizId;
 	private String quizName;
 	private QuizType quizType;
 	private Category category;
 	private List<Question> questions = new ArrayList<Question>();
-	
+	@Transient
+	private Date createdDate = new Date();
+
 	public Quiz() {}
 	
 	public Quiz(String request) {
@@ -69,6 +76,21 @@ public class Quiz {
 		return questions;
 	}
 	
+	public Date getCreatedDate() {
+		return createdDate;
+	}
+
+	public Date getSunsetDate() {
+	       // convert date to calendar
+        Calendar c = Calendar.getInstance();
+        c.setTime(createdDate);
+
+        // manipulate date
+        c.add(Calendar.MONTH, MONTHS_TO_LIVE);
+
+		return c.getTime();
+	}
+
 	public Double pointsPerQuestion() {
 		return new Double(100.0 / questions.size());
 	}

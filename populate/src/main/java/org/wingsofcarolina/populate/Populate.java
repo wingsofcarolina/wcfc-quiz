@@ -21,7 +21,7 @@ import org.wingsofcarolina.quiz.domain.Selection;
 import org.wingsofcarolina.quiz.domain.Type;
 import org.wingsofcarolina.quiz.domain.User;
 import org.wingsofcarolina.quiz.domain.persistence.Persistence;
-import org.wingsofcarolina.quiz.domain.quiz.Quiz;
+import org.wingsofcarolina.quiz.resources.Quiz;
 import org.wingsofcarolina.quiz.resources.QuizResource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;

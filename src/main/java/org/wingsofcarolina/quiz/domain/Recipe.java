@@ -7,7 +7,7 @@ import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Id;
 import org.wingsofcarolina.quiz.domain.dao.RecipeDAO;
 import org.wingsofcarolina.quiz.domain.persistence.Persistence;
-import org.wingsofcarolina.quiz.domain.quiz.Quiz;
+import org.wingsofcarolina.quiz.resources.Quiz;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 

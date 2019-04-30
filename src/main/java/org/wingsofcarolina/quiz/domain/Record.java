@@ -9,8 +9,8 @@ import org.mongodb.morphia.annotations.Id;
 import org.wingsofcarolina.quiz.domain.dao.QuestionDAO;
 import org.wingsofcarolina.quiz.domain.dao.RecordDAO;
 import org.wingsofcarolina.quiz.domain.persistence.Persistence;
-import org.wingsofcarolina.quiz.domain.quiz.Quiz;
-import org.wingsofcarolina.quiz.domain.quiz.Quiz.QuizType;
+import org.wingsofcarolina.quiz.resources.Quiz;
+import org.wingsofcarolina.quiz.resources.Quiz.QuizType;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 

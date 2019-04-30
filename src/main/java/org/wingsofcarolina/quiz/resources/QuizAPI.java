@@ -39,7 +39,6 @@ import org.wingsofcarolina.quiz.domain.Question;
 import org.wingsofcarolina.quiz.domain.Record;
 import org.wingsofcarolina.quiz.domain.Type;
 import org.wingsofcarolina.quiz.domain.User;
-import org.wingsofcarolina.quiz.domain.quiz.Quiz;
 import org.wingsofcarolina.quiz.responses.LoginResponse;
 import org.wingsofcarolina.quiz.responses.RedirectResponse;
 

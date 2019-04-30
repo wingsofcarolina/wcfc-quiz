@@ -41,9 +41,8 @@ import org.wingsofcarolina.quiz.domain.*;
 import org.wingsofcarolina.quiz.domain.presentation.QuestionListWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.QuestionWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.Wrapper;
-import org.wingsofcarolina.quiz.domain.quiz.Quiz;
-import org.wingsofcarolina.quiz.domain.quiz.Quiz.QuizType;
 import org.wingsofcarolina.quiz.extensions.*;
+import org.wingsofcarolina.quiz.resources.Quiz.QuizType;
 import org.wingsofcarolina.quiz.responses.RedirectResponse;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
