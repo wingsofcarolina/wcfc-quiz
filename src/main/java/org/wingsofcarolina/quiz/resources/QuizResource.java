@@ -1,19 +1,9 @@
 package org.wingsofcarolina.quiz.resources;
 
-import static org.asciidoctor.Asciidoctor.Factory.create;
-import static org.asciidoctor.AttributesBuilder.attributes;
-import static org.asciidoctor.OptionsBuilder.options;
-
-import java.io.File;
 import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 import javax.ws.rs.CookieParam;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -25,9 +15,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.Response;
 
-import org.asciidoctor.Asciidoctor;
-import org.asciidoctor.SafeMode;
-import org.asciidoctor.extension.JavaExtensionRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wingsofcarolina.quiz.QuizConfiguration;
@@ -41,17 +28,12 @@ import org.wingsofcarolina.quiz.domain.*;
 import org.wingsofcarolina.quiz.domain.presentation.QuestionListWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.QuestionWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.Wrapper;
-import org.wingsofcarolina.quiz.extensions.*;
 import org.wingsofcarolina.quiz.resources.Quiz.QuizType;
 import org.wingsofcarolina.quiz.responses.RedirectResponse;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-import de.thomaskrille.dropwizard_template_config.redist.freemarker.template.Configuration;
-import de.thomaskrille.dropwizard_template_config.redist.freemarker.template.Template;
-import de.thomaskrille.dropwizard_template_config.redist.freemarker.template.TemplateException;
-import de.thomaskrille.dropwizard_template_config.redist.freemarker.template.TemplateExceptionHandler;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 
@@ -67,65 +49,19 @@ public class QuizResource {
 	
 	@SuppressWarnings("unused")
 	private QuizConfiguration config;	// Dropwizard configuration
-	private Configuration freemarker;	// FreeMarker configuration
-	
-	private Asciidoctor asciidoctor;
-	private Map<String, Object> options;
 	private AuthUtils authUtils;
+
+	private Renderer renderer;
 
 	private static final Integer pageCount = 10;
 
 	public QuizResource(QuizConfiguration config) throws IOException {
 		QuizResource.instance = this;
-		
+
 		this.config = config;
 		authUtils = new AuthUtils();
 
-		Map<String, Object> userAttributes = new HashMap<String,Object>();
-		userAttributes.put("lesson-version","1.2.3");
-
-		asciidoctor = create();
-		Map<String, Object> attributes = attributes()
-				.linkCss(true)
-				.attributes(userAttributes)
-				.styleSheetName("/static/default.css")
-				.allowUriRead(true).asMap();
-		options = options()
-				.safe(SafeMode.SERVER)
-				.inPlace(true)
-				.backend("html5")
-				.headerFooter(true)
-				.attributes(attributes).asMap();
-		
-		// Add custom extensions
-		JavaExtensionRegistry extensionRegistry = this.asciidoctor.javaExtensionRegistry(); 
-		extensionRegistry.docinfoProcessor(new CssHeaderProcessor(new HashMap<String, Object>())); 
-		extensionRegistry.inlineMacro("navbar", NavigationBar.class);
-		extensionRegistry.inlineMacro("flash", Flash.class);
-		extensionRegistry.inlineMacro("button", Button.class);
-		extensionRegistry.inlineMacro("color", Color.class);
-
-		// Create your Configuration instance, and specify if up to what FreeMarker
-		// version (here 2.3.27) do you want to apply the fixes that are not 100%
-		// backward-compatible. See the Configuration JavaDoc for details.
-		freemarker = new Configuration(Configuration.VERSION_2_3_22);
-
-		// Specify the source where the template files come from. Here I set a
-		// plain directory for it, but non-file-system sources are possible too:
-		// TODO: Make this a configuration option
-		freemarker.setDirectoryForTemplateLoading(new File(config.getTemplates()));
-		freemarker.setTemplateUpdateDelay(0);  // TODO: Change this for "production"
-
-		// Set the preferred charset template files are stored in. UTF-8 is
-		// a good choice in most applications:
-		freemarker.setDefaultEncoding("UTF-8");
-
-		// Sets how errors will appear.
-		// During web page *development* TemplateExceptionHandler.HTML_DEBUG_HANDLER is better.
-		freemarker.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
-
-		// Don't log exceptions inside FreeMarker that it will thrown at you anyway:
-		freemarker.setLogTemplateExceptions(false);
+		renderer = new Renderer(config);
 	}
 	
 	public static QuizResource instance() {
@@ -144,10 +80,8 @@ public class QuizResource {
 		if (cookie != null) {
 			Jws<Claims> claims = authUtils.validateUser(cookie.getValue());
 			User user = User.getWithClaims(claims);
-			String output = "";
 			if (user != null) {
-				String rendered = renderFreemarker("home.ad", new Wrapper(user)).toString();
-				output = asciidoctor.convert(rendered, options);
+				String output = renderer.render("home.ad", new Wrapper(user));
 				return Response.ok().entity(output).build();
 			} else {
 				return Response.status(404).build();
@@ -163,8 +97,7 @@ public class QuizResource {
 	public Response login() throws Exception {
 		String output = "";
 		try {
-			String rendered = renderFreemarker(Templates.LOGIN, new Object()).toString();
-			output = asciidoctor.convert(rendered, options);
+			output = renderer.render(Templates.LOGIN, new Object()).toString();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -177,8 +110,7 @@ public class QuizResource {
 	public Response register() throws Exception {
 		String output = "";
 		try {
-			String rendered = renderFreemarker(Templates.REGISTER, new Object()).toString();
-			output = asciidoctor.convert(rendered, options);
+			output = renderer.render(Templates.REGISTER, new Object()).toString();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -192,10 +124,8 @@ public class QuizResource {
 		if (cookie != null) {
 			Jws<Claims> claims = authUtils.validateUser(cookie.getValue());
 			User user = User.getWithClaims(claims);
-			String output = "";
 			if (user != null) {
-				String rendered = renderFreemarker("profile.ad", new Wrapper(user)).toString();
-				output = asciidoctor.convert(rendered, options);
+				String output = renderer.render("profile.ad", new Wrapper(user)).toString();
 				return Response.ok().entity(output).build();
 			} else {
 				return Response.status(404).build();
@@ -218,7 +148,7 @@ public class QuizResource {
 			record.save();
 			
 			// Render the output for the club member
-			output = renderFreemarker(Templates.QUIZ, quiz).toString();
+			output = renderer.render(Templates.QUIZ, quiz).toString();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -292,11 +222,9 @@ public class QuizResource {
 		if (cookie != null) {
 			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
 			User user = User.getWithClaims(claims);
-			String output = "";
 			if (user != null) {
 				QuestionWrapper wrapper = new QuestionWrapper(user);
-				String rendered = renderFreemarker("addQuestion.ad", wrapper).toString();
-				output = asciidoctor.convert(rendered, options);
+				String output = renderer.render("addQuestion.ad", wrapper).toString();
 				return Response.ok().entity(output).build();
 			} else {
 				return Response.status(404).build();
@@ -335,12 +263,10 @@ public class QuizResource {
 		if (cookie != null) {
 			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
 			User user = User.getWithClaims(claims);
-			String output = "";
 			if (user != null) {
 				List<Question> questions = Question.getQuestionsLimited(skip, pageCount);
 				QuestionListWrapper wrapper = new QuestionListWrapper(user, questions, skip, pageCount);
-				String rendered = renderFreemarker("browseQuestions.ad", wrapper).toString();
-				output = asciidoctor.convert(rendered, options);
+				String output = renderer.render("browseQuestions.ad", wrapper).toString();
 				return Response.ok().entity(output).build();
 			} else {
 				return Response.status(404).build();
@@ -358,12 +284,10 @@ public class QuizResource {
 		if (cookie != null) {
 			Jws<Claims> claims = authUtils.validateUser(cookie.getValue());
 			User user = User.getWithClaims(claims);
-			String output = "";
 			Question question = Question.getByQuestionId(questionId);
 			if (user != null || question == null) {
 				QuestionWrapper wrapper = new QuestionWrapper(user, question);
-				String rendered = renderFreemarker("editQuestion.ad", wrapper).toString();
-				output = asciidoctor.convert(rendered, options);
+				String output = renderer.render("editQuestion.ad", wrapper).toString();
 				return Response.ok().entity(output).build();
 			} else {
 				return Response.status(404).build();
@@ -373,19 +297,6 @@ public class QuizResource {
 		}
 	}
 
-	private Writer renderFreemarker(String template, Object entity) throws IOException {
-		Template temp = freemarker.getTemplate(template);
-
-		Writer out = new StringWriter();
-		try {
-			temp.process(entity, out);
-		} catch (TemplateException e) {
-			e.printStackTrace();
-		}
-		
-		return out;
-	}
-	
 	public User addUser(String email) {
 		return this.addUser(null, email, null, Privilege.USER);
 	}

@@ -52,14 +52,14 @@ public class Populate {
 	}
 	
 	private void run() throws FileNotFoundException, IOException {
-		createUsers();
+//		createUsers();
 		createRecipes();
-		createFARQuestions();
-		sopQuestions();
-		createAirplaneQuestions(Category.C152);
-		createAirplaneQuestions(Category.C172);
-		createAirplaneQuestions(Category.PA28);
-		createAirplaneQuestions(Category.M20J);
+//		createFARQuestions();
+//		sopQuestions();
+//		createAirplaneQuestions(Category.C152);
+//		createAirplaneQuestions(Category.C172);
+//		createAirplaneQuestions(Category.PA28);
+//		createAirplaneQuestions(Category.M20J);
 		
 		System.out.println("Done.");
 	}
@@ -140,7 +140,7 @@ public class Populate {
 		required.add((long) 1961);
 		required.add((long) 1962);
 		required.add((long) 1963);
-		required.add((long) 1964);
+		required.add((long) 3000);
 		createRecipe(Quiz.QuizType.M20J, Arrays.asList(Attribute.GENERAL), required);
 	}
 	

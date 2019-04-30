@@ -2,12 +2,9 @@ package org.wingsofcarolina.quiz.resources;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.ws.rs.CookieParam;
@@ -44,10 +41,6 @@ import org.wingsofcarolina.quiz.responses.RedirectResponse;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import de.thomaskrille.dropwizard_template_config.redist.freemarker.template.Configuration;
-import de.thomaskrille.dropwizard_template_config.redist.freemarker.template.Template;
-import de.thomaskrille.dropwizard_template_config.redist.freemarker.template.TemplateException;
-import de.thomaskrille.dropwizard_template_config.redist.freemarker.template.TemplateExceptionHandler;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 
@@ -61,10 +54,10 @@ public class QuizAPI {
 	@SuppressWarnings("unused")
 	private QuizConfiguration config;
 	private AuthUtils authUtils;
-	private Configuration freemarker;	// FreeMarker configuration
 	private ObjectMapper objectMapper;
 	private String dataDir;
 	private String questionDir;
+	private Renderer renderer;
 
 	public QuizAPI(QuizConfiguration config) throws IOException {
 		this.config = config;
@@ -72,28 +65,7 @@ public class QuizAPI {
 		objectMapper = new ObjectMapper();
 		dataDir = config.getDataDirectory();
 		questionDir = dataDir + "/questions";
-		
-		// Create your Configuration instance, and specify if up to what FreeMarker
-		// version (here 2.3.27) do you want to apply the fixes that are not 100%
-		// backward-compatible. See the Configuration JavaDoc for details.
-		freemarker = new Configuration(Configuration.VERSION_2_3_22);
-
-		// Specify the source where the template files come from. Here I set a
-		// plain directory for it, but non-file-system sources are possible too:
-		// TODO: Make this a configuration option
-		freemarker.setDirectoryForTemplateLoading(new File(config.getTemplates()));
-		freemarker.setTemplateUpdateDelay(0);  // TODO: Change this for "production"
-
-		// Set the preferred charset template files are stored in. UTF-8 is
-		// a good choice in most applications:
-		freemarker.setDefaultEncoding("UTF-8");
-
-		// Sets how errors will appear.
-		// During web page *development* TemplateExceptionHandler.HTML_DEBUG_HANDLER is better.
-		freemarker.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
-
-		// Don't log exceptions inside FreeMarker that it will thrown at you anyway:
-		freemarker.setLogTemplateExceptions(false);
+		renderer = new Renderer(config);
 	}
 
 	@POST
@@ -212,9 +184,9 @@ public class QuizAPI {
 		if (record != null) {
 			Quiz quiz = Quiz.quizFromRecord(record);
 			if (type.equals("Key")) {
-				output = renderFreemarker(Templates.KEY, quiz).toString();
+				output = renderer.render(Templates.KEY, quiz).toString();
 			} else {
-				output = renderFreemarker(Templates.QUIZ, quiz).toString();
+				output = renderer.render(Templates.QUIZ, quiz).toString();
 			}
 			return Response.ok().entity(output).build();
 		}
@@ -339,19 +311,5 @@ public class QuizAPI {
 	public Response attributes(@PathParam("category") String category) {
 		List<String> attributes = Attribute.attributes(category);
 		return Response.ok().entity(attributes).build();
-	}
-	
-	private Writer renderFreemarker(String template, Object entity) throws IOException {
-		Template temp = freemarker.getTemplate(template);
-
-		Writer out = new StringWriter();
-		try {
-			temp.process(entity, out);
-		} catch (TemplateException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		return out;
 	}
 }

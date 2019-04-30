@@ -41,7 +41,7 @@
 
 <div>
 <#list questions as question>
-${question.index} : ${question.question}
+${question.index} : ${question.getQuestionAsHtml()}
 	<i>{ <a href="http:/question/${question.questionId}">${question.questionId}</a> }</i></br>
 &nbsp;&nbsp;&nbsp;
 <i>{ ${question.category}&nbsp;/&nbsp;
