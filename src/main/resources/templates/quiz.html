@@ -40,25 +40,42 @@
 <hr>
 
 <div>
-<#list questions as question>
-${question.index} : ${question.getQuestionAsHtml()}
-	<i>{ <a href="http:/question/${question.questionId}">${question.questionId}</a> }</i></br>
-&nbsp;&nbsp;&nbsp;
-<i>{ ${question.category}&nbsp;/&nbsp;
-<#list question.attributes as attribute>
-${attribute}&nbsp;
-</#list>
-}</i></p>
 
+<style>
+
+</style>
+<div class="quizBody">
+<#list questions as question>
+<div class="table">
+<div class="row">
+	<div class="tableCell index">${question.index}:</div>
+	<div class="tableCell question">${question.getQuestionAsHtml()}
+	<i>[ <a href="http:/question/${question.questionId}">${question.questionId}</a> ]</i></div>
+</div>
+
+<div class="row">
+	<div class="tableCell">&nbsp;</div>
+	<div class="tableCell">&nbsp;</div>
+</div>
 <#list question.answers as answer>
 <#if question.isFillInTheBlank()>
-${answer.index} : __________________________________________________________________</br>
+<div class="row">
+	<div class="tableCell index"${answer.index}:</div>
+	<div class="tableCell">__________________________________________________________________</div>
+</div>
 <#else>
-${answer.index} : ${answer.answer}</br>
+<div class="row">
+	<div class="tableCell index">${answer.index}:</div>
+	<div class="tableCell">${answer.answer}</div>
+</div>
 </#if>
 </#list>
+</div>
+
 </p>&nbsp;</p>
+
 </#list>
+</div>
 </div>
 </body>
 </html>

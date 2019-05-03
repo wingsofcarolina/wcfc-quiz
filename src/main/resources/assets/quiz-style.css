@@ -75,3 +75,19 @@ body { font-family: Georgia, ‘Times New Roman’, serif; margin: 30px; }
   background-color: #4CAF50;
   color: white;
 }
+
+/* Quiz Body Formatting */
+.quizBody {
+	margin: 20px;
+}
+.tableCell {
+  display: inline-block;
+  word-break: break-all; word-wrap: break-word;
+  vertical-align: top;
+}
+.index {
+	width: 30px;
+}
+.question {
+  width: 800px;
+}
