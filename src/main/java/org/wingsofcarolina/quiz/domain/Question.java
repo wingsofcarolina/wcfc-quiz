@@ -99,6 +99,15 @@ public class Question {
 		this.attributes.add(attribute);
 	}
 
+	public boolean hasAttribute(String attribute) {
+		for (String att : attributes) {
+			if (att.equals(attribute) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public Boolean getDeployed() {
 		return deployed;
 	}
@@ -147,6 +156,14 @@ public class Question {
 		return answers;
 	}
 
+	public Answer getAnswerAt(int index) {
+		if (index-1 < answers.size()) {
+			return answers.get(index-1);
+		} else {
+			return new EmptyAnswer();
+		}
+	}
+	
 	public void setAnswers(List<Answer> answers) {
 		this.answers = answers;
 	}
@@ -235,5 +252,4 @@ public class Question {
 		return "Question [questionId=" + questionId + ", type=" + type + ", category=" + category + ", attributes="
 				+ attributes + "]";
 	}
-
 }

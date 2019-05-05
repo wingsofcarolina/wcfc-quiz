@@ -56,7 +56,7 @@ function loadAttributes(sel)
 
 function loadDifficultyAttributes()
 {
-	var url = "api/attributes/difficulty";
+	var url = "api/difficulty";
     var $el = $("#difficulty");
 	$el.empty(); // remove old options
 	$.getJSON( url , function( data ) {

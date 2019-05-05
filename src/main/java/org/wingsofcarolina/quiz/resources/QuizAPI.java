@@ -248,21 +248,26 @@ public class QuizAPI {
 		LOG.info("Discussion --> {}", discussion);
 		LOG.info("References --> {}", references);
 		LOG.info("Attributes --> {}", attributes);
-		LOG.info("Answer1    --> {}, ()", answer1, correct1);
-		LOG.info("Answer2    --> {}, ()", answer2, correct2);
-		LOG.info("Answer3    --> {}, ()", answer3, correct3);
-		LOG.info("Answer4    --> {}, ()", answer4, correct4);
-		LOG.info("Answer5    --> {}, ()", answer5, correct5);
 		
 		Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
 		User user = User.getWithClaims(claims);
 		
+		// Add the difficulty to the attributes
+		attributes.add(difficulty);
+		LOG.info("Combined Attributes --> {}", attributes);
+
 		// Remove any nulls
 		correct1 = (correct1 == null) ? new Boolean(false) : correct1;
 		correct2 = (correct2 == null) ? new Boolean(false) : correct2;
 		correct3 = (correct3 == null) ? new Boolean(false) : correct3;
 		correct4 = (correct4 == null) ? new Boolean(false) : correct4;
 		correct5 = (correct5 == null) ? new Boolean(false) : correct5;
+
+		LOG.info("Answer1    --> {}, {}", answer1, correct1);
+		LOG.info("Answer2    --> {}, {}", answer2, correct2);
+		LOG.info("Answer3    --> {}, {}", answer3, correct3);
+		LOG.info("Answer4    --> {}, {}", answer4, correct4);
+		LOG.info("Answer5    --> {}, {}", answer5, correct5);
 		
 		List<Answer> answers = new ArrayList<Answer>();
 		if ( ! answer1.isEmpty()) answers.add(new Answer(answer1, correct1));
@@ -293,7 +298,96 @@ public class QuizAPI {
 		q.save();
 		
 		Flash.add(Flash.Code.SUCCESS, "Created new question with ID : " + q.getQuestionId());
-		return new RedirectResponse(Pages.ADD_QUESTION_PAGE).build();
+		return new RedirectResponse(Pages.HOME_PAGE).build();
+	}
+	
+	@POST
+	@Path("updateQuestion")
+	@Produces("text/html")
+	public Response updateQuestion(@CookieParam("quiz.token") Cookie cookie,
+			@FormParam("questionId") Long questionId,
+			@FormParam("type") String type,
+			@FormParam("category") String category,
+			@FormParam("question") String question,
+			@FormParam("discussion") String discussion,
+			@FormParam("references") String references,
+			@FormParam("difficulty") String difficulty,
+			@FormParam("attributes") List<String> attributes,
+			@FormParam("answer1") String answer1,
+			@FormParam("answer2") String answer2,
+			@FormParam("answer3") String answer3,
+			@FormParam("answer4") String answer4,
+			@FormParam("answer5") String answer5,
+			@FormParam("correct1") Boolean correct1,
+			@FormParam("correct2") Boolean correct2,
+			@FormParam("correct3") Boolean correct3,
+			@FormParam("correct4") Boolean correct4,
+			@FormParam("correct5") Boolean correct5
+			) throws Exception, AuthenticationException {
+		
+		Question q = null;
+
+		LOG.info("QuestionId --> {}", questionId);
+		LOG.info("Type       --> {}", type);
+		LOG.info("Category   --> {}", category);
+		LOG.info("Question   --> {}", question);
+		LOG.info("Discussion --> {}", discussion);
+		LOG.info("References --> {}", references);
+		LOG.info("Attributes --> {}", attributes);
+		
+		Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
+		User user = User.getWithClaims(claims);
+		
+		// Get the existing question, and see if it has been deployed
+		Question original = Question.getByQuestionId(questionId);
+		
+		// Add the difficulty to the attributes
+		attributes.add(difficulty);
+		LOG.info("Combined Attributes --> {}", attributes);
+
+		// Remove any nulls
+		correct1 = (correct1 == null) ? new Boolean(false) : correct1;
+		correct2 = (correct2 == null) ? new Boolean(false) : correct2;
+		correct3 = (correct3 == null) ? new Boolean(false) : correct3;
+		correct4 = (correct4 == null) ? new Boolean(false) : correct4;
+		correct5 = (correct5 == null) ? new Boolean(false) : correct5;
+
+		LOG.info("Answer1    --> {}, {}", answer1, correct1);
+		LOG.info("Answer2    --> {}, {}", answer2, correct2);
+		LOG.info("Answer3    --> {}, {}", answer3, correct3);
+		LOG.info("Answer4    --> {}, {}", answer4, correct4);
+		LOG.info("Answer5    --> {}, {}", answer5, correct5);
+		
+		List<Answer> answers = new ArrayList<Answer>();
+		if ( ! answer1.isEmpty()) answers.add(new Answer(answer1, correct1));
+		if ( ! answer2.isEmpty()) answers.add(new Answer(answer2, correct2));
+		if ( ! answer3.isEmpty()) answers.add(new Answer(answer3, correct3));
+		if ( ! answer4.isEmpty()) answers.add(new Answer(answer4, correct4));
+		if ( ! answer5.isEmpty()) answers.add(new Answer(answer5, correct5));
+		
+		// Reset the indexes to the current order
+		int i = 1;
+		for (Answer a : answers) {
+			a.setIndex(i++);
+		}
+		
+		if (category.toUpperCase().equals("SOP")) {
+		    q = new Question(Type.BLANK, Category.SOP, attributes, 
+					question, references, answers, discussion);
+		} else {
+			if (type.equals("fib")) {
+			    q = new Question(Type.BLANK, Category.valueOf(category.toUpperCase()), attributes, 
+						question, references, answers, discussion);
+			} else {
+			    q = new Question(Type.CHOICE, Category.valueOf(category.toUpperCase()), attributes, 
+						question, references, answers, discussion);
+			}
+		}
+		LOG.info("Question : {}", q);
+		q.save();
+		
+		Flash.add(Flash.Code.SUCCESS, "Created new question with ID : " + q.getQuestionId());
+		return new RedirectResponse(Pages.HOME_PAGE).build();
 	}
 	
 	private String getUserCredentials(String email) {
@@ -306,10 +400,79 @@ public class QuizAPI {
 	}
 	
 	@GET
+	@Path("difficulty")
+	@Produces("application/json")
+	public Response difficulty() {
+		List<String> attributes = Attribute.attributes("difficulty");
+		return Response.ok().entity(attributes).build();
+	}
+	
+	@GET
+	@Path("question/difficulty/{id}")
+	@Produces("application/json")
+	public Response questionDifficulty(@PathParam("id") Long id) {
+		Question question = Question.getByQuestionId(id);
+		List<String> difficulties = Attribute.attributes("difficulty");
+		List<AttributeResponse> attributes = new ArrayList<AttributeResponse>();
+		for (String a: difficulties) {
+			if (question.hasAttribute(a)) {
+				attributes.add(new AttributeResponse(a, true));
+			} else {
+				attributes.add(new AttributeResponse(a, false));
+			}
+		}
+		return Response.ok().entity(attributes).build();
+	}
+	
+	@GET
+	@Path("question/attributes/{id}")
+	@Produces("application/json")
+	public Response questionAttributes(@PathParam("id") Long id) {
+		Question question = Question.getByQuestionId(id);
+		List<String> categoryAttributes = Attribute.attributes(question.getCategory().name());
+		List<AttributeResponse> attributes = new ArrayList<AttributeResponse>();
+		for (String att: categoryAttributes) {
+			if (question.hasAttribute(att)) {
+				attributes.add(new AttributeResponse(att, true));
+			} else {
+				attributes.add(new AttributeResponse(att, false));
+			}
+		}
+		return Response.ok().entity(attributes).build();
+	}
+	
+	@GET
 	@Path("attributes/{category}")
 	@Produces("application/json")
 	public Response attributes(@PathParam("category") String category) {
 		List<String> attributes = Attribute.attributes(category);
 		return Response.ok().entity(attributes).build();
+	}
+
+	
+	class AttributeResponse {
+		private String label;
+		public boolean checked;
+		
+		public AttributeResponse(String label, boolean checked) {
+			this.label = label;
+			this.checked = checked;
+		}
+
+		public String getLabel() {
+			return label;
+		}
+
+		public void setLabel(String label) {
+			this.label = label;
+		}
+
+		public boolean isChecked() {
+			return checked;
+		}
+
+		public void setChecked(boolean checked) {
+			this.checked = checked;
+		}
 	}
 }

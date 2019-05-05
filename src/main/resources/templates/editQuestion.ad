@@ -37,39 +37,50 @@ select {
 </style>
 <script>
 $(document).ready(function(){
-	loadAttributes("c152");
+	loadAttributes();
 	loadDifficultyAttributes();
 });
 
-function loadAttributes(sel)
+function loadAttributes()
 {
-	var url = "/api/attributes/" + sel;
+	var url = "/api/question/attributes/${question.questionId}";
     var $el = $("#attributes");
 	$el.empty(); // remove old options
 	$.getJSON( url , function( data ) {
 		$.each(data, function(key, value) {
-		  $el.append($("<option></option>")
-		     .attr("key", value).text(value));
+		  if (value.checked == true) {
+		    $el.append($("<option selected></option>")
+		       .attr("key", value).text(value.label));
+		  } else {
+		    $el.append($("<option></option>")
+		       .attr("key", value).text(value.label));
+		  }
 		});
 	});
 }
 
 function loadDifficultyAttributes()
 {
-	var url = "/api/attributes/difficulty";
+	var url = "/api/question/difficulty/${question.questionId}";
+	console.log(url);
     var $el = $("#difficulty");
 	$el.empty(); // remove old options
 	$.getJSON( url , function( data ) {
 		$.each(data, function(key, value) {
-		  $el.append($("<option></option>")
-		     .attr("key", value).text(value));
+		  if (value.checked == true) {
+		    $el.append($("<option selected></option>")
+		       .attr("key", value).text(value.label));
+		  } else {
+		    $el.append($("<option></option>")
+		       .attr("key", value).text(value.label));
+		  }
 		});
 	});
 }
 </script>
 <script src="/static/question-form-validation.js"></script>
 
-<form name="question" action="/api/addQuestion" method="post">
+<form name="question" action="/api/updateQuestion" method="post">
 <input type="hidden" value="questionId" name="${question.questionId}" />
 
 <table>
@@ -87,20 +98,33 @@ function loadDifficultyAttributes()
   <option value="m20j">M20J Mooney</option>
   <option value="sop">FAR/SOP</option>
 </select>
-<tr><td valign="top">Question</td><td><textarea name="question" rows="4" cols="70" value=${question.question}></textarea></td></tr>
-<tr><td valign="top">Discussion</td><td><textarea name="discussion" rows="4" cols="70" placeholder=" Enter the CFI discussion here."></textarea></td></tr>
-<tr><td valign="top">References</td><td><input type="text" name="references" size="70" placeholder=" Enter any references here."></td></tr>
+<tr><td valign="top">Question</td><td><textarea name="question" rows="4" cols="70">${question.question}</textarea></td></tr>
+<tr><td valign="top">Discussion</td><td><textarea name="discussion" rows="4" cols="70">${question.discussion}</textarea></td></tr>
+<tr><td valign="top">References</td><td><input type="text" name="references" size="70" value="${question.references}"></td></tr>
+
 <tr><td valign="top">Difficulty</td><td><select id="difficulty" name="difficulty" multiple="" class="form-control select-checkbox" size="3"></select></td></tr>
+
 <tr><td valign="top">Attributes</td><td><select id="attributes" name="attributes" multiple="" class="form-control select-checkbox" size="10"></select></td></tr>
 <tr><td></td><td><i>Control-click to select multiple attributes.</td></tr>
+
 <tr><td colspan=2><hr></td></tr>
 <tr><td valign="top" id="answerLabel">Answers</br>(Max 5)</br></br>Select</br>correct</br>answer.</td><td>
 	<table id="answerlist">
-	<tr><td><input type="checkbox" name="correct1" onclick=setCorrect(this)></td><td>A</td><td><textarea name="answer1" rows="2" cols="70"></textarea></td></tr>
-	<tr><td><input type="checkbox" name="correct2" onclick=setCorrect(this)></td><td>B</td><td><textarea name="answer2" rows="2" cols="70"></textarea></td></tr>
-	<tr><td><input type="checkbox" name="correct3" onclick=setCorrect(this)></td><td>C</td><td><textarea name="answer3" rows="2" cols="70"></textarea></td></tr>
-	<tr><td><input type="checkbox" name="correct4" onclick=setCorrect(this)></td><td>D</td><td><textarea name="answer4" rows="2" cols="70"></textarea></td></tr>
-	<tr><td><input type="checkbox" name="correct5" onclick=setCorrect(this)></td><td>E</td><td><textarea name="answer5" rows="2" cols="70"></textarea></td></tr>
+	<tr><td><input type="checkbox" name="correct1" onclick=setCorrect(this)
+	<#if question.getAnswerAt(1).isCorrect()>checked value="true"<#else>value="false"</#if>
+	></td><td>A</td><td><textarea name="answer1" rows="2" cols="70">${question.getAnswerAt(1).getAnswer()}</textarea></td></tr>
+	<tr><td><input type="checkbox" name="correct2" onclick=setCorrect(this)
+	<#if question.getAnswerAt(2).isCorrect()>checked value="true"<#else>value="false"</#if>
+	></td><td>B</td><td><textarea name="answer2" rows="2" cols="70">${question.getAnswerAt(2).getAnswer()}</textarea></td></tr>
+	<tr><td><input type="checkbox" name="correct3" onclick=setCorrect(this)
+	<#if question.getAnswerAt(3).isCorrect()>checked value="true"<#else>value="false"</#if>
+	></td><td>C</td><td><textarea name="answer3" rows="2" cols="70">${question.getAnswerAt(3).getAnswer()}</textarea></td></tr>
+	<tr><td><input type="checkbox" name="correct4" onclick=setCorrect(this)
+	<#if question.getAnswerAt(4).isCorrect()>checked value="true"<#else>value="false"</#if>
+	></td><td>D</td><td><textarea name="answer4" rows="2" cols="70">${question.getAnswerAt(4).getAnswer()}</textarea></td></tr>
+	<tr><td><input type="checkbox" name="correct5" onclick=setCorrect(this)
+	<#if question.getAnswerAt(5).isCorrect()>checked value="true"<#else>value="false"</#if>
+	></td><td>E</td><td><textarea name="answer5" rows="2" cols="70">${question.getAnswerAt(5).getAnswer()}</textarea></td></tr>
 	</table>
 </td></tr>
 </table>
@@ -112,6 +136,7 @@ function loadDifficultyAttributes()
 		        this.checked = false; 
 		});
 		item.checked = true;
+		item.value = true;
 	}
     $('#question').validate({
         rules: {
