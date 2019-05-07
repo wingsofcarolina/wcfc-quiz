@@ -1,5 +1,9 @@
 = Add Question
 
++++
+<script src="/static/jsoneditor.js"></script>
++++
+
 <#setting number_format="#0">
 
 <#if user.isAdmin()>

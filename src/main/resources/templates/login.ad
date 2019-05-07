@@ -5,6 +5,7 @@
 flash:true[]
 
 ++++
+<link rel="stylesheet" href="/static/quiz-style.css">
 <center>
 Club member needing a quiz select from the following choices:</p>
 <div style="text-align: center;">
@@ -41,7 +42,7 @@ Instructors needing to retrieve a quiz key log in:
 This system uses cookies to implement advanced functionality. 
 When registering with or logging into the system the user agrees to
 accept the use of cookies for the purposes of site administration
-and functionality.
+and functionality. Cookies are _not_ used when generating quizzes.
 ====
 ****
  

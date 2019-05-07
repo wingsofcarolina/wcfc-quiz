@@ -33,6 +33,7 @@ import org.wingsofcarolina.quiz.domain.Answer;
 import org.wingsofcarolina.quiz.domain.Attribute;
 import org.wingsofcarolina.quiz.domain.Category;
 import org.wingsofcarolina.quiz.domain.Question;
+import org.wingsofcarolina.quiz.domain.QuestionDetails;
 import org.wingsofcarolina.quiz.domain.Record;
 import org.wingsofcarolina.quiz.domain.Type;
 import org.wingsofcarolina.quiz.domain.User;
@@ -221,8 +222,8 @@ public class QuizAPI {
 	@Path("addQuestion")
 	@Produces("text/html")
 	public Response addQuestion(@CookieParam("quiz.token") Cookie cookie,
-			@FormParam("type") String type,
-			@FormParam("category") String category,
+			@FormParam("type") String typeName,
+			@FormParam("category") String categoryName,
 			@FormParam("question") String question,
 			@FormParam("discussion") String discussion,
 			@FormParam("references") String references,
@@ -240,61 +241,39 @@ public class QuizAPI {
 			@FormParam("correct5") Boolean correct5
 			) throws Exception, AuthenticationException {
 		
-		Question q = null;
-
-		LOG.info("Type       --> {}", type);
-		LOG.info("Category   --> {}", category);
+		LOG.info("Type       --> {}", typeName);
+		LOG.info("Category   --> {}", categoryName);
 		LOG.info("Question   --> {}", question);
 		LOG.info("Discussion --> {}", discussion);
 		LOG.info("References --> {}", references);
 		LOG.info("Attributes --> {}", attributes);
 		
+
+		// Add the difficulty to the attributes
+		attributes.add(difficulty);
+		LOG.info("Attributes --> {}", attributes);
+		
 		Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
 		User user = User.getWithClaims(claims);
 		
-		// Add the difficulty to the attributes
-		attributes.add(difficulty);
-		LOG.info("Combined Attributes --> {}", attributes);
-
-		// Remove any nulls
-		correct1 = (correct1 == null) ? new Boolean(false) : correct1;
-		correct2 = (correct2 == null) ? new Boolean(false) : correct2;
-		correct3 = (correct3 == null) ? new Boolean(false) : correct3;
-		correct4 = (correct4 == null) ? new Boolean(false) : correct4;
-		correct5 = (correct5 == null) ? new Boolean(false) : correct5;
-
-		LOG.info("Answer1    --> {}, {}", answer1, correct1);
-		LOG.info("Answer2    --> {}, {}", answer2, correct2);
-		LOG.info("Answer3    --> {}, {}", answer3, correct3);
-		LOG.info("Answer4    --> {}, {}", answer4, correct4);
-		LOG.info("Answer5    --> {}, {}", answer5, correct5);
-		
-		List<Answer> answers = new ArrayList<Answer>();
-		if ( ! answer1.isEmpty()) answers.add(new Answer(answer1, correct1));
-		if ( ! answer2.isEmpty()) answers.add(new Answer(answer2, correct2));
-		if ( ! answer3.isEmpty()) answers.add(new Answer(answer3, correct3));
-		if ( ! answer4.isEmpty()) answers.add(new Answer(answer4, correct4));
-		if ( ! answer5.isEmpty()) answers.add(new Answer(answer5, correct5));
-		
-		// Reset the indexes to the current order
-		int i = 1;
-		for (Answer a : answers) {
-			a.setIndex(i++);
-		}
-		
-		if (category.toUpperCase().equals("SOP")) {
-		    q = new Question(Type.BLANK, Category.SOP, attributes, 
-					question, references, answers, discussion);
+		Type type = null;
+		Category category = null;
+		if (categoryName.toUpperCase().equals("SOP")) {
+		    type = Type.BLANK;
+		    category = Category.SOP;
 		} else {
-			if (type.equals("fib")) {
-			    q = new Question(Type.BLANK, Category.valueOf(category.toUpperCase()), attributes, 
-						question, references, answers, discussion);
+			if (typeName.equals("fib")) {
+			    type = Type.BLANK;
+			    category = Category.valueOf(categoryName.toUpperCase());
 			} else {
-			    q = new Question(Type.CHOICE, Category.valueOf(category.toUpperCase()), attributes, 
-						question, references, answers, discussion);
+			    type = Type.CHOICE;
+			    category = Category.valueOf(categoryName.toUpperCase());
 			}
 		}
-		LOG.info("Question : {}", q);
+		
+		Question q = new Question(type, category, attributes, new QuestionDetails(question, discussion, references, answer1,
+				answer2, answer3, answer4, answer5, correct1, correct2, correct3, correct4, correct5));
+		LOG.info("Created Question : {}", q);
 		q.save();
 		
 		Flash.add(Flash.Code.SUCCESS, "Created new question with ID : " + q.getQuestionId());
@@ -325,14 +304,10 @@ public class QuizAPI {
 			@FormParam("correct5") Boolean correct5
 			) throws Exception, AuthenticationException {
 		
-		Question q = null;
-
 		LOG.info("QuestionId --> {}", questionId);
-		LOG.info("Type       --> {}", type);
-		LOG.info("Category   --> {}", category);
-		LOG.info("Question   --> {}", question);
-		LOG.info("Discussion --> {}", discussion);
-		LOG.info("References --> {}", references);
+
+		// Add the difficulty to the attributes
+		attributes.add(difficulty);
 		LOG.info("Attributes --> {}", attributes);
 		
 		Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
@@ -341,52 +316,14 @@ public class QuizAPI {
 		// Get the existing question, and see if it has been deployed
 		Question original = Question.getByQuestionId(questionId);
 		
-		// Add the difficulty to the attributes
-		attributes.add(difficulty);
-		LOG.info("Combined Attributes --> {}", attributes);
-
-		// Remove any nulls
-		correct1 = (correct1 == null) ? new Boolean(false) : correct1;
-		correct2 = (correct2 == null) ? new Boolean(false) : correct2;
-		correct3 = (correct3 == null) ? new Boolean(false) : correct3;
-		correct4 = (correct4 == null) ? new Boolean(false) : correct4;
-		correct5 = (correct5 == null) ? new Boolean(false) : correct5;
-
-		LOG.info("Answer1    --> {}, {}", answer1, correct1);
-		LOG.info("Answer2    --> {}, {}", answer2, correct2);
-		LOG.info("Answer3    --> {}, {}", answer3, correct3);
-		LOG.info("Answer4    --> {}, {}", answer4, correct4);
-		LOG.info("Answer5    --> {}, {}", answer5, correct5);
-		
-		List<Answer> answers = new ArrayList<Answer>();
-		if ( ! answer1.isEmpty()) answers.add(new Answer(answer1, correct1));
-		if ( ! answer2.isEmpty()) answers.add(new Answer(answer2, correct2));
-		if ( ! answer3.isEmpty()) answers.add(new Answer(answer3, correct3));
-		if ( ! answer4.isEmpty()) answers.add(new Answer(answer4, correct4));
-		if ( ! answer5.isEmpty()) answers.add(new Answer(answer5, correct5));
-		
-		// Reset the indexes to the current order
-		int i = 1;
-		for (Answer a : answers) {
-			a.setIndex(i++);
+		boolean changed = original.update(new QuestionDetails(question, discussion, references, answer1,
+				answer2, answer3, answer4, answer5, correct1, correct2, correct3, correct4, correct5));
+		LOG.info("Updated Question : {}", original);
+		if (changed) {
+			original.save();
 		}
 		
-		if (category.toUpperCase().equals("SOP")) {
-		    q = new Question(Type.BLANK, Category.SOP, attributes, 
-					question, references, answers, discussion);
-		} else {
-			if (type.equals("fib")) {
-			    q = new Question(Type.BLANK, Category.valueOf(category.toUpperCase()), attributes, 
-						question, references, answers, discussion);
-			} else {
-			    q = new Question(Type.CHOICE, Category.valueOf(category.toUpperCase()), attributes, 
-						question, references, answers, discussion);
-			}
-		}
-		LOG.info("Question : {}", q);
-		q.save();
-		
-		Flash.add(Flash.Code.SUCCESS, "Created new question with ID : " + q.getQuestionId());
+		Flash.add(Flash.Code.SUCCESS, "Updated existing question with ID : " + original.getQuestionId());
 		return new RedirectResponse(Pages.HOME_PAGE).build();
 	}
 	

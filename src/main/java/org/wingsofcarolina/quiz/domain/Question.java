@@ -19,29 +19,30 @@ public class Question {
     @JsonIgnore
     @Transient
     private Integer index;
-	private Long questionId;
-	private Type type;
-	private Category category;
+    private Type type;
+    private Category category;
+    private QuestionDetails details;
 	private List<String> attributes;
+	private Long questionId;
 	private Boolean deployed = false;
 	private long supercededBy = -1;
 	private Date createdDate = new Date();
-	private String question;
-	private String references;
-	private List<Answer> answers;
-	private String discussion;
-	
+
 	public Question() {}
 	
-	public Question(Type type, Category category, List<String> attribute, String question, String references, List<Answer> answers, String discussion) {
+	public Question(Type type, Category category,  List<String> attributes, QuestionDetails details) {
+		this.type = type;
+		this.category = category;
+		this.attributes = attributes;
+		this.details = details;
+	}
+	
+	public Question(Type type, Category category, List<String> attributes, String question, String references, List<Answer> answers, String discussion) {
 		super();
 		this.type = type;
 		this.category = category;
-		this.attributes = attribute;
-		this.question = question;
-		this.references = references;
-		this.answers = answers;
-		this.discussion = discussion;
+		this.attributes = attributes;
+		this.details = new QuestionDetails(question, references, answers, discussion);
 		this.questionId = Persistence.instance().generateAutoIncrement("question", 1000);
 	}
 
@@ -94,9 +95,9 @@ public class Question {
 	public void setAttributes(List<String> attributes) {
 		this.attributes = attributes;
 	}
-	
+
 	public void addAttribute(String attribute) {
-		this.attributes.add(attribute);
+		attributes.add(attribute);
 	}
 
 	public boolean hasAttribute(String attribute) {
@@ -133,49 +134,55 @@ public class Question {
 	}
 
 	public String getQuestion() {
-		return question;
+		return details.getQuestion();
 	}
 
 	public String getQuestionAsHtml() {
-		return toHtml(question);
+		return toHtml(details.getQuestion());
 	}
 
 	public void setQuestion(String question) {
-		this.question = question;
+		details.setQuestion(question);
 	}
 
 	public String getReferences() {
-		return references;
+		return details.getReference();
 	}
 
 	public void setReferences(String references) {
-		this.references = references;
+		details.setReference(references);
 	}
 
 	public List<Answer> getAnswers() {
-		return answers;
+		return details.getAnswers();
 	}
 
 	public Answer getAnswerAt(int index) {
-		if (index-1 < answers.size()) {
-			return answers.get(index-1);
+		if (index-1 < details.getAnswers().size()) {
+			return details.getAnswers().get(index-1);
 		} else {
 			return new EmptyAnswer();
 		}
 	}
 	
 	public void setAnswers(List<Answer> answers) {
-		this.answers = answers;
+		details.setAnswers(answers);
 	}
 
 	public String getDiscussion() {
-		return discussion;
+		return details.getDiscussion();
 	}
 
 	public void setDiscussion(String discussion) {
-		this.discussion = discussion;
+		details.setDiscussion(discussion);
 	}
 
+
+	public boolean update(QuestionDetails questionDetails) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+	
 	private String toHtml(String s) {
 	    StringBuilder builder = new StringBuilder();
 	    boolean previousWasASpace = false;
@@ -249,7 +256,7 @@ public class Question {
 
 	@Override
 	public String toString() {
-		return "Question [questionId=" + questionId + ", type=" + type + ", category=" + category + ", attributes="
-				+ attributes + "]";
+		return "Question [id=" + id + ", index=" + index + ", details=" + details + ", questionId=" + questionId
+				+ ", deployed=" + deployed + ", supercededBy=" + supercededBy + ", createdDate=" + createdDate + "]";
 	}
 }
