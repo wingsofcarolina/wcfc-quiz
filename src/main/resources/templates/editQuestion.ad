@@ -84,20 +84,8 @@ function loadDifficultyAttributes()
 <input type="hidden" value="questionId" name="${question.questionId}" />
 
 <table>
-<tr><td>Type</td><td>
-<select id="q-type" name="type" onchange=toggleAnswers(this.value)>
-  <option value="multi">Multiple Choice</option>
-  <option value="fib">Fill in the Blank</option>
-</select>
-</td></tr>
-<tr><td>Category</td><td>
-<select id="q-category" name="category" onchange=loadAttributes(this.value)>
-  <option value="c152">C-152</option>
-  <option value="c172">C-172 Skyhawk</option>
-  <option value="pa28">PA-28 Warrior</option>
-  <option value="m20j">M20J Mooney</option>
-  <option value="sop">FAR/SOP</option>
-</select>
+<tr><td>Type</td><td><strong>${question.type}</strong></td></tr>
+<tr><td>Category</td><td><strong>${question.category}</strong></td></tr>
 <tr><td valign="top">Question</td><td><textarea name="question" rows="4" cols="70">${question.question}</textarea></td></tr>
 <tr><td valign="top">Discussion</td><td><textarea name="discussion" rows="4" cols="70">${question.discussion}</textarea></td></tr>
 <tr><td valign="top">References</td><td><input type="text" name="references" size="70" value="${question.references}"></td></tr>

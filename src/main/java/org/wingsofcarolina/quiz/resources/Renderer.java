@@ -44,6 +44,7 @@ public class Renderer {
 		Map<String, Object> attributes = attributes()
 				.linkCss(true)
 				.attributes(userAttributes)
+				.noFooter(true)
 				.styleSheetName("/static/default.css")
 				.allowUriRead(true).asMap();
 		options = options()

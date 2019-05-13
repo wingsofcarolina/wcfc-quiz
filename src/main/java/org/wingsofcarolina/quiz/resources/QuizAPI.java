@@ -304,6 +304,7 @@ public class QuizAPI {
 			@FormParam("correct5") Boolean correct5
 			) throws Exception, AuthenticationException {
 		
+		boolean changed = false;
 		LOG.info("QuestionId --> {}", questionId);
 
 		// Add the difficulty to the attributes
@@ -315,15 +316,27 @@ public class QuizAPI {
 		
 		// Get the existing question, and see if it has been deployed
 		Question original = Question.getByQuestionId(questionId);
-		
-		boolean changed = original.update(new QuestionDetails(question, discussion, references, answer1,
-				answer2, answer3, answer4, answer5, correct1, correct2, correct3, correct4, correct5));
-		LOG.info("Updated Question : {}", original);
-		if (changed) {
-			original.save();
+	
+		if (original == null) {
+			// Update Attributes, detecting changes
+			// TODO: Implement attribute changing
+			
+			// Update user-changeable details, detecting changes
+			QuestionDetails details = new QuestionDetails(question, discussion, references, answer1,
+					answer2, answer3, answer4, answer5, correct1, correct2, correct3, correct4, correct5);
+			if (details.update(original)) { changed = true; }
+			
+			if (changed) {
+				LOG.info("Updated Question : {}", original.getQuestionId());
+				original.save();
+			} else {
+				LOG.info("No changes detected for : {}", original.getQuestionId());
+			}
+			
+			Flash.add(Flash.Code.SUCCESS, "Updated existing question with ID : " + original.getQuestionId());
+		} else {
+			Flash.add(Flash.Code.SUCCESS, "Question with ID " + questionId + " not found.");			
 		}
-		
-		Flash.add(Flash.Code.SUCCESS, "Updated existing question with ID : " + original.getQuestionId());
 		return new RedirectResponse(Pages.HOME_PAGE).build();
 	}
 	

@@ -25,6 +25,7 @@ public class Question {
 	private List<String> attributes;
 	private Long questionId;
 	private Boolean deployed = false;
+	private Boolean deleted = false;
 	private long supercededBy = -1;
 	private Date createdDate = new Date();
 
@@ -35,6 +36,7 @@ public class Question {
 		this.category = category;
 		this.attributes = attributes;
 		this.details = details;
+		this.questionId = Persistence.instance().generateAutoIncrement("question", 1000);
 	}
 	
 	public Question(Type type, Category category, List<String> attributes, String question, String references, List<Answer> answers, String discussion) {
@@ -117,6 +119,14 @@ public class Question {
 		this.deployed = deployed;
 	}
 	
+	public Boolean getDeleted() {
+		return deleted;
+	}
+
+	public void setDeleted(Boolean deleted) {
+		this.deleted = deleted;
+	}
+
 	public long getSupercededBy() {
 		return supercededBy;
 	}
@@ -176,12 +186,6 @@ public class Question {
 	public void setDiscussion(String discussion) {
 		details.setDiscussion(discussion);
 	}
-
-
-	public boolean update(QuestionDetails questionDetails) {
-		// TODO Auto-generated method stub
-		return true;
-	}
 	
 	private String toHtml(String s) {
 	    StringBuilder builder = new StringBuilder();
@@ -215,6 +219,7 @@ public class Question {
 	    }
 	    return builder.toString();
 	}
+	
 	/*
 	 * Database Management Functionality
 	 */

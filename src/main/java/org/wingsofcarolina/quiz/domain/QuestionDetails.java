@@ -12,7 +12,6 @@ public class QuestionDetails {
 	private String question;
 	private String discussion;
 	private String reference;
-	private String difficulty;
 	private List<Answer> answers;
 	
 	public QuestionDetails() {}
@@ -64,6 +63,45 @@ public class QuestionDetails {
 		}
 	}
 
+	/**
+	 * This method updates each detail field in the question and detects
+	 * whether any change has occurred. The change value is used to gate
+	 * updating the question in the database so we don't make gratuitous
+	 * changes.
+	 * 
+	 * @param original
+	 * @return
+	 */
+	public boolean update(Question original) {
+		boolean changed = false;
+		
+		if ( ! original.getQuestion().contentEquals(question)) {
+			original.setQuestion(question);
+			changed = true;
+		}
+		if ( ! original.getDiscussion().contentEquals(discussion)) {
+			original.setDiscussion(discussion);
+			changed = true;
+		}
+		if ( ! original.getReferences().contentEquals(reference)) {
+			original.setReferences(reference);
+			changed = true;
+		}
+		int i = 0;
+		for (Answer oldAnswer : original.getAnswers()) {
+			Answer newAnswer = answers.get(i);
+			if ( ! newAnswer.getAnswer().contentEquals(oldAnswer.getAnswer())) {
+				oldAnswer.setAnswer(newAnswer.getAnswer());
+				changed = true;
+			}
+			if (newAnswer.isCorrect() != oldAnswer.isCorrect() ) {
+				oldAnswer.setCorrect(newAnswer.isCorrect());
+				changed = true;
+			}
+		}
+		return changed;
+	}
+	
 	public String getQuestion() {
 		return question;
 	}
@@ -86,14 +124,6 @@ public class QuestionDetails {
 
 	public void setReference(String reference) {
 		this.reference = reference;
-	}
-
-	public String getDifficulty() {
-		return difficulty;
-	}
-
-	public void setDifficulty(String difficulty) {
-		this.difficulty = difficulty;
 	}
 
 	public List<Answer> getAnswers() {

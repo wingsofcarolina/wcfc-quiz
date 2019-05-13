@@ -22,6 +22,7 @@ import org.wingsofcarolina.quiz.authentication.AuthUtils;
 import org.wingsofcarolina.quiz.authentication.AuthenticationException;
 import org.wingsofcarolina.quiz.authentication.HashUtils;
 import org.wingsofcarolina.quiz.authentication.Privilege;
+import org.wingsofcarolina.quiz.common.Flash;
 import org.wingsofcarolina.quiz.common.Pages;
 import org.wingsofcarolina.quiz.common.Templates;
 import org.wingsofcarolina.quiz.domain.*;
@@ -285,12 +286,13 @@ public class QuizResource {
 			Jws<Claims> claims = authUtils.validateUser(cookie.getValue());
 			User user = User.getWithClaims(claims);
 			Question question = Question.getByQuestionId(questionId);
-			if (user != null || question == null) {
+			if (user != null && question != null) {
 				QuestionWrapper wrapper = new QuestionWrapper(user, question);
 				String output = renderer.render("editQuestion.ad", wrapper).toString();
 				return Response.ok().entity(output).build();
 			} else {
-				return Response.status(404).build();
+				Flash.add(Flash.Code.WARN, "Question with ID " + questionId + " not found.");			
+				return new RedirectResponse(Pages.HOME_PAGE).build();
 			}
 		} else {
 			return new RedirectResponse(Pages.LOGIN_PAGE).build();

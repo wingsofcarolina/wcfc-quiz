@@ -1,35 +1,51 @@
-p { font-size: 12pt; }
-body { font-family: Georgia, ‘Times New Roman’, serif; margin: 30px; } 
+p {
+	font-size: 12pt;
+}
+
+body {
+	font-family: Georgia, ‘Times New Roman’, serif;
+	margin: 30px;
+}
+
 .center {
-  text-align: center;
-  border: 3px;
+	text-align: center;
+	border: 3px;
 }
-.title { font-size: 25pt; }
-.subtitle { font-size: 16pt; }
+
+.title {
+	font-size: 25pt;
+}
+
+.subtitle {
+	font-size: 16pt;
+}
+
 .container {
-    display: inline-block;
-    margin: auto;
-    padding: 10px;
-    margin-bottom: 20px;
+	display: inline-block;
+	margin: auto;
+	padding: 10px;
+	margin-bottom: 20px;
 }
+
 .contents {
-  display: inline-block;
-  margin: 1em;
-  text-align: left;
+	display: inline-block;
+	margin: 1em;
+	text-align: left;
 }
 
 .instruction {
 	margin: 10px;
 	text-align: left;
-    font-size: 12pt;
+	font-size: 12pt;
 }
 
 .flash {
-  border-radius: 10px;
-  background-color: #87162d;
-  color: white;
-  padding: 10px;
-  overflow: hidden;
+	margin-top: 5px; border-radius : 10px;
+	background-color: #87162d;
+	color: white;
+	padding: 10px;
+	overflow: hidden;
+	border-radius: 10px;
 }
 
 .flash-success {
@@ -39,55 +55,60 @@ body { font-family: Georgia, ‘Times New Roman’, serif; margin: 30px; }
 .flash-warn {
 	background-color: #c4a000;
 }
+
 .flash-error {
 	background-color: #87162d;
 }
 
 #footer {
-  border-radius: 10px;
+	border-radius: 10px;
 }
 
 /* Add a black background color to the top navigation */
 .topnav {
-  border-radius: 10px;
-  background-color: #555;
-  overflow: hidden;
+	border-radius: 10px;
+	background-color: #555;
+	overflow: hidden;
 }
 
 /* Style the links inside the navigation bar */
 .topnav a {
-  float: left;
-  color: #f2f2f2;
-  text-align: center;
-  padding: 14px 16px;
-  text-decoration: none;
-  font-size: 17px;
+	float: left;
+	color: #f2f2f2;
+	text-align: center;
+	padding: 14px 16px;
+	text-decoration: none;
+	font-size: 17px;
 }
 
 /* Change the color of links on hover */
 .topnav a:hover {
-  background-color: #ddd;
-  color: black;
+	background-color: #ddd;
+	color: black;
 }
 
 /* Add a color to the active/current link */
 .topnav a.active {
-  background-color: #4CAF50;
-  color: white;
+	background-color: #4CAF50;
+	color: white;
 }
 
 /* Quiz Body Formatting */
 .quizBody {
 	margin: 20px;
 }
+
 .tableCell {
-  display: inline-block;
-  word-break: break-all; word-wrap: break-word;
-  vertical-align: top;
+	display: inline-block;
+	word-break: break-all;
+	word-wrap: break-word;
+	vertical-align: top;
 }
+
 .index {
 	width: 30px;
 }
+
 .question {
-  width: 800px;
+	width: 800px;
 }
