@@ -31,11 +31,13 @@ ${attribute}&nbsp;
 ${answer.index} : ${answer.answer}</br>
 <#else>
 <#if answer.isCorrect()>
-<b>Answer is :</b></br>
-${answer.index} : ${answer.answer}</p>
+<strong>${answer.index} : ${answer.answer}</strong></br>
+<#else>
+${answer.index} : ${answer.answer}</br>
 </#if>
 </#if>
 </#list>
+</p>
 <b>References :</b> ${question.references}</p>
 <b>CFI Discussion :</b> </br>
 ${question.discussion}</p>
