@@ -11,7 +11,7 @@ public class ViewNavButton extends NavButton {
 				" } }</script>");
 		sb.append("<a ");
 		if (active) sb.append("class=\"active\"");
-		sb.append(" onclick=viewQuestion()>View Question</a>\n");
+		sb.append(" onclick=viewQuestion()>Question</a>\n");
 		return sb.toString();
 	}
 }

@@ -1,0 +1,15 @@
+= Question Data
+
+<#setting number_format="#0">
+
+<#if user.isAdmin()>
+navbar:${user.userId}[buttons="HomeNavButton;RecipeNavButton;ViewNavButton;AddNavButton;EditNavButton;ProfileNavButton", active="ViewNavButton"]
+<#else>
+navbar:${user.userId}[buttons="HomeNavButton;ProfileNavButton", active="ProfileNavButton"]
+</#if>
+
+++++
+<div style='padding: 3px; width: 80%; word-break: break-all; word-wrap: break-word; margin-left: 10px'>
+${json}
+</div>
+++++

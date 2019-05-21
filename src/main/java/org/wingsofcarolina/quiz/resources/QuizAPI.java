@@ -29,7 +29,6 @@ import org.wingsofcarolina.quiz.authentication.Privilege;
 import org.wingsofcarolina.quiz.common.Flash;
 import org.wingsofcarolina.quiz.common.Pages;
 import org.wingsofcarolina.quiz.common.Templates;
-import org.wingsofcarolina.quiz.domain.Answer;
 import org.wingsofcarolina.quiz.domain.Attribute;
 import org.wingsofcarolina.quiz.domain.Category;
 import org.wingsofcarolina.quiz.domain.Question;
@@ -75,8 +74,6 @@ public class QuizAPI {
 	public Response login(@FormParam("email") String email, @FormParam("password") String password,
 			@FormParam("type") String type) throws Exception {
 		
-		String token = null;
-
 		if (email == null || password == null) {
 			Flash.add(Flash.Code.ERROR, "Either email or password missing, try again");
 			return new RedirectResponse(Pages.LOGIN_PAGE).build();
@@ -105,15 +102,7 @@ public class QuizAPI {
 	@GET
 	@Path("logout")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response logout(@CookieParam("quiz.token") Cookie cookie) throws Exception {
-		if (cookie != null) {
-			Jws<Claims> claims;
-			try {
-				claims = authUtils.validateUser(cookie.getValue());
-			} catch (AuthenticationException e) {
-				// Ignore, since we are logging out anyway
-			}
-		}
+	public Response logout() throws Exception {
 		NewCookie newCookie = new NewCookie("quiz.token", "", "/", "", "Quiz Login Token", 0, false);
 		return new RedirectResponse(Pages.LOGIN_PAGE).cookie(newCookie).build();
 	}
@@ -133,7 +122,6 @@ public class QuizAPI {
 
 		if (action.equals("Register")) {
 			User user = null;
-			String token = null;
 
 			if (email == null || password == null) {
 				Flash.add(Flash.Code.ERROR, "No email or password provided, try again");
@@ -149,7 +137,6 @@ public class QuizAPI {
 			}
 
 			// Generate user token
-			token = authUtils.generateToken(user);
 			LOG.info("Registered  : {}", user);
 			return new LoginResponse(authUtils.generateCookie(user)).build();
 		} else {

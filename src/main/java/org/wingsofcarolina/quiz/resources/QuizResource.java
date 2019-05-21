@@ -26,12 +26,14 @@ import org.wingsofcarolina.quiz.common.Flash;
 import org.wingsofcarolina.quiz.common.Pages;
 import org.wingsofcarolina.quiz.common.Templates;
 import org.wingsofcarolina.quiz.domain.*;
+import org.wingsofcarolina.quiz.domain.presentation.JsonWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.QuestionListWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.QuestionWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.Wrapper;
 import org.wingsofcarolina.quiz.resources.Quiz.QuizType;
 import org.wingsofcarolina.quiz.responses.RedirectResponse;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
@@ -157,63 +159,89 @@ public class QuizResource {
 	}
 	
 	@GET
-	@Path("recipe")
+	@Path("question/{id}")
 	@Produces("text/html")
-	public Response recipe(@QueryParam("quiz") String quiz) throws Exception {
-		Quiz.QuizType quizType = null;
+	public Response question(@CookieParam("quiz.token") Cookie cookie,
+			@PathParam("id") String id) throws AuthenticationException, IOException {
 
-		String output = "";
-		switch (quiz) {
-		case "far":
-			quizType = QuizType.FAR;
-			break;
-		case "sop-student":
-			quizType = QuizType.SOP_STUDENT;
-			break;
-		case "sop-pilot":
-			quizType = QuizType.SOP_PILOT;
-			break;
-		case "sop-instructor":
-			quizType = QuizType.SOP_INSTRUCTOR;
-			break;
-		case "c152":
-			quizType = QuizType.C152;
-			break;
-		case "c172":
-			quizType = QuizType.C172;
-			break;
-		case "pa28":
-			quizType = QuizType.PA28;
-			break;
-		case "m20j":
-			quizType = QuizType.M20J;
-			break;
+		if (cookie != null) {
+			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.USER);
+			User user = User.getWithClaims(claims);
+			Question question = Question.getByQuestionId(Long.valueOf(id));
+			if (question != null ) {
+				ObjectMapper mapper = new ObjectMapper();
+				mapper.enable(SerializationFeature.INDENT_OUTPUT);
+				String output = mapper.writeValueAsString(question);
+				output = output.replaceAll("(\r\n|\n)", "<br/>");
+				output = output.replaceAll("\\s", "&nbsp;&nbsp;");
+						
+				String rendered = renderer.render("question.ad", new JsonWrapper(user, output)).toString();
+				return Response.ok().entity(rendered).cookie(authUtils.generateCookie(user)).build();
+			} else {
+				Flash.add(Flash.Code.ERROR, "Requested question \"" + id + "\" not found.");
+				return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
+			}
+		} else {
+			return new RedirectResponse(Pages.LOGIN_PAGE).build();
 		}
-		Recipe recipe = Recipe.getRecipeByType(quizType);
-		
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.enable(SerializationFeature.INDENT_OUTPUT);
-		output = mapper.writeValueAsString(recipe);
-		output = output.replaceAll("(\r\n|\n)", "<br/>");
-		output = output.replaceAll("\\s", "&nbsp;&nbsp;");
-				
-		return Response.ok().entity(output).build();
 	}
 	
 	@GET
-	@Path("question/{id}")
+	@Path("recipe")
 	@Produces("text/html")
-	public Response question(@PathParam("id") String id) throws Exception {
+	public Response recipe(@CookieParam("quiz.token") Cookie cookie,
+			@QueryParam("quiz") String quiz) throws Exception, AuthenticationException {
+		Quiz.QuizType quizType = null;
 
-		Question question = Question.getByQuestionId(Long.valueOf(id));
-		
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.enable(SerializationFeature.INDENT_OUTPUT);
-		String output = mapper.writeValueAsString(question);
-		output = output.replaceAll("(\r\n|\n)", "<br/>");
-		output = output.replaceAll("\\s", "&nbsp;&nbsp;");
-				
-		return Response.ok().entity(output).build();
+		if (cookie != null) {
+			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.USER);
+			User user = User.getWithClaims(claims);
+			
+			String output = "";
+			switch (quiz) {
+			case "far":
+				quizType = QuizType.FAR;
+				break;
+			case "sop-student":
+				quizType = QuizType.SOP_STUDENT;
+				break;
+			case "sop-pilot":
+				quizType = QuizType.SOP_PILOT;
+				break;
+			case "sop-instructor":
+				quizType = QuizType.SOP_INSTRUCTOR;
+				break;
+			case "c152":
+				quizType = QuizType.C152;
+				break;
+			case "c172":
+				quizType = QuizType.C172;
+				break;
+			case "pa28":
+				quizType = QuizType.PA28;
+				break;
+			case "m20j":
+				quizType = QuizType.M20J;
+				break;
+			}
+			Recipe recipe = Recipe.getRecipeByType(quizType);
+			
+			if (recipe != null) {
+				ObjectMapper mapper = new ObjectMapper();
+				mapper.enable(SerializationFeature.INDENT_OUTPUT);
+				output = mapper.writeValueAsString(recipe);
+				output = output.replaceAll("(\r\n|\n)", "<br/>");
+				output = output.replaceAll("\\s", "&nbsp;&nbsp;");
+						
+				String rendered = renderer.render("recipe.ad", new JsonWrapper(user, output)).toString();
+				return Response.ok().entity(rendered).cookie(authUtils.generateCookie(user)).build();
+			} else {
+				Flash.add(Flash.Code.ERROR, "Requested recipe for \"" + quiz + "\" not found.");
+				return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
+			}
+		} else {
+			return new RedirectResponse(Pages.LOGIN_PAGE).build();
+		}
 	}
 	
 	@GET

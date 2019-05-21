@@ -81,7 +81,7 @@ public class AuthUtils {
 						Flash.add(Flash.Code.ERROR, "User idle too long.");
 						throw new AuthenticationException(403, "User idle too long.");
 					}
-					LOG.info("Last user interaction : {}", issuedAt);
+					LOG.debug("Last user interaction : {}", issuedAt);
 					
 					User user = User.getByEmail(name);
 					if (user != null && userId != null) {

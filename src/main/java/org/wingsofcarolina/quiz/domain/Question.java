@@ -147,6 +147,7 @@ public class Question {
 		return details.getQuestion();
 	}
 
+	@JsonIgnore
 	public String getQuestionAsHtml() {
 		return toHtml(details.getQuestion());
 	}
