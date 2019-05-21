@@ -7,7 +7,7 @@ flash:true[]
 ++++
 <link rel="stylesheet" href="/static/quiz-style.css">
 <center>
-Club member needing a quiz select from the following choices:</p>
+Club members needing a quiz select from the following choices:</p>
 <div style="text-align: center;">
   <div style="display: inline-block; text-align:left;">
    <a href="generate?quiz=far"> FAR 61/91, Pre-Solo</a><br>
