@@ -2,6 +2,7 @@ package org.wingsofcarolina.quiz.domain;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Id;
+import org.wingsofcarolina.quiz.domain.presentation.CmRenderer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -48,6 +49,11 @@ public class Answer {
 
 	public String getAnswer() {
 		return answer;
+	}
+
+	@JsonIgnore
+	public String getAnswerAsHtml() {
+		return CmRenderer.render(answer);
 	}
 
 	public void setAnswer(String answer) {

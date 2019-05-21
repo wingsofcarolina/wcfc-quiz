@@ -29,6 +29,7 @@ import org.wingsofcarolina.quiz.domain.*;
 import org.wingsofcarolina.quiz.domain.presentation.JsonWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.QuestionListWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.QuestionWrapper;
+import org.wingsofcarolina.quiz.domain.presentation.Renderer;
 import org.wingsofcarolina.quiz.domain.presentation.Wrapper;
 import org.wingsofcarolina.quiz.resources.Quiz.QuizType;
 import org.wingsofcarolina.quiz.responses.RedirectResponse;

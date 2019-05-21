@@ -1,4 +1,4 @@
-package org.wingsofcarolina.quiz.resources;
+package org.wingsofcarolina.quiz.domain.presentation;
 
 import static org.asciidoctor.Asciidoctor.Factory.create;
 import static org.asciidoctor.AttributesBuilder.attributes;
@@ -15,7 +15,6 @@ import org.asciidoctor.Asciidoctor;
 import org.asciidoctor.SafeMode;
 import org.asciidoctor.extension.JavaExtensionRegistry;
 import org.wingsofcarolina.quiz.QuizConfiguration;
-import org.wingsofcarolina.quiz.domain.presentation.Wrapper;
 import org.wingsofcarolina.quiz.extensions.Button;
 import org.wingsofcarolina.quiz.extensions.Color;
 import org.wingsofcarolina.quiz.extensions.CssHeaderProcessor;

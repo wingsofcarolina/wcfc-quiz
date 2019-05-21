@@ -5,10 +5,13 @@ import java.util.Date;
 import java.util.List;
 
 import org.bson.types.ObjectId;
+import org.commonmark.parser.Parser;
+import org.commonmark.renderer.html.HtmlRenderer;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Transient;
 import org.wingsofcarolina.quiz.domain.dao.QuestionDAO;
 import org.wingsofcarolina.quiz.domain.persistence.Persistence;
+import org.wingsofcarolina.quiz.domain.presentation.CmRenderer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -28,6 +31,12 @@ public class Question {
 	private Boolean deleted = false;
 	private long supercededBy = -1;
 	private Date createdDate = new Date();
+	@JsonIgnore
+	@Transient
+	private Parser parser;
+	@JsonIgnore
+	@Transient
+	private HtmlRenderer renderer;
 
 	public Question() {}
 	
@@ -149,7 +158,7 @@ public class Question {
 
 	@JsonIgnore
 	public String getQuestionAsHtml() {
-		return toHtml(details.getQuestion());
+		return CmRenderer.render(details.getQuestion());
 	}
 
 	public void setQuestion(String question) {
@@ -182,6 +191,11 @@ public class Question {
 
 	public String getDiscussion() {
 		return details.getDiscussion();
+	}
+
+	@JsonIgnore
+	public String getDiscussionAsHtml() {
+		return CmRenderer.render(details.getDiscussion());
 	}
 
 	public void setDiscussion(String discussion) {

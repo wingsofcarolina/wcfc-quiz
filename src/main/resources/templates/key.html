@@ -17,7 +17,7 @@
 
 <div>
 <#list questions as question>
-<b>${question.index}</b> : ${question.question} 
+<b>${question.index}</b> : ${question.getQuestionAsHtml()} 
 	<i>{ <a href="http:/question/${question.questionId}">${question.questionId}</a> }</i></br>
 &nbsp;&nbsp;&nbsp;
 <i>{ ${question.category}&nbsp;/&nbsp;
@@ -31,7 +31,7 @@ ${attribute}&nbsp;
 ${answer.index} : ${answer.answer}</br>
 <#else>
 <#if answer.isCorrect()>
-<strong>${answer.index} : ${answer.answer}</strong></br>
+<strong>${answer.index}</strong> : ${answer.getAnswerAsHtml()}</br>
 <#else>
 ${answer.index} : ${answer.answer}</br>
 </#if>
@@ -40,7 +40,7 @@ ${answer.index} : ${answer.answer}</br>
 </p>
 <b>References :</b> ${question.references}</p>
 <b>CFI Discussion :</b> </br>
-${question.discussion}</p>
+${question.getDiscussionAsHtml()}</p>
 <hr>
 </#list>
 </div>
