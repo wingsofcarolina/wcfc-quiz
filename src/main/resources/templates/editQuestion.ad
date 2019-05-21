@@ -86,6 +86,7 @@ function loadDifficultyAttributes()
 <input type="hidden" name="category" value="${question.category}" />
 
 <table>
+<tr><td>Question ID</td><td><strong>${question.questionId}</strong></td></tr>
 <tr><td>Type</td><td><strong>${question.type}</strong></td></tr>
 <tr><td>Category</td><td><strong>${question.category}</strong></td></tr>
 <tr><td valign="top">Question</td><td><textarea name="question" rows="4" cols="70">${question.question}</textarea></td></tr>

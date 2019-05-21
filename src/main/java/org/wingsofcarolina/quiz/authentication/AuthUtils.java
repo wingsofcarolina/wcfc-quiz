@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.crypto.spec.SecretKeySpec;
 import javax.ws.rs.core.Cookie;
+import javax.ws.rs.core.NewCookie;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,14 +76,16 @@ public class AuthUtils {
 					claims = parser.setSigningKey(key).parseClaimsJws(compactJws);
 					String name = claims.getBody().getSubject();
 					Date issuedAt = claims.getBody().getIssuedAt();
+					String userId = (String)claims.getBody().get("userId");
 					if (timedOut(issuedAt)) {
 						Flash.add(Flash.Code.ERROR, "User idle too long.");
 						throw new AuthenticationException(403, "User idle too long.");
 					}
+					LOG.info("Last user interaction : {}", issuedAt);
 					
 					User user = User.getByEmail(name);
-					if (user != null && user.getToken() != null) {
-						if ( ! user.getToken().equals(compactJws)) {
+					if (user != null && userId != null) {
+						if ( ! user.getUserId().contentEquals(userId)) {
 							throw new AuthenticationException();
 						}
 						List<Privilege> privs = user.getPrivs();
@@ -126,6 +129,10 @@ public class AuthUtils {
 		String compactJws = Jwts.builder().setClaims(claims).signWith(SignatureAlgorithm.HS512, key).compact();
 
 		return compactJws;
+	}
+
+	public NewCookie generateCookie(User user) {
+		return new NewCookie("quiz.token", generateToken(user), "/", "", "Quiz Login Token", -1, false);
 	}
 
 }

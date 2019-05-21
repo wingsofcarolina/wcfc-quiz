@@ -83,7 +83,7 @@ public class QuizResource {
 			User user = User.getWithClaims(claims);
 			if (user != null) {
 				String output = renderer.render("home.ad", new Wrapper(user));
-				return Response.ok().entity(output).build();
+				return Response.ok().entity(output).cookie(authUtils.generateCookie(user)).build();
 			} else {
 				return Response.status(404).build();
 			}
@@ -127,7 +127,7 @@ public class QuizResource {
 			User user = User.getWithClaims(claims);
 			if (user != null) {
 				String output = renderer.render("profile.ad", new Wrapper(user)).toString();
-				return Response.ok().entity(output).build();
+				return Response.ok().entity(output).cookie(authUtils.generateCookie(user)).build();
 			} else {
 				return Response.status(404).build();
 			}
@@ -226,7 +226,7 @@ public class QuizResource {
 			if (user != null) {
 				QuestionWrapper wrapper = new QuestionWrapper(user);
 				String output = renderer.render("addQuestion.ad", wrapper).toString();
-				return Response.ok().entity(output).build();
+				return Response.ok().entity(output).cookie(authUtils.generateCookie(user)).build();
 			} else {
 				return Response.status(404).build();
 			}
@@ -268,7 +268,7 @@ public class QuizResource {
 				List<Question> questions = Question.getQuestionsLimited(skip, pageCount);
 				QuestionListWrapper wrapper = new QuestionListWrapper(user, questions, skip, pageCount);
 				String output = renderer.render("browseQuestions.ad", wrapper).toString();
-				return Response.ok().entity(output).build();
+				return Response.ok().entity(output).cookie(authUtils.generateCookie(user)).build();
 			} else {
 				return Response.status(404).build();
 			}
@@ -289,7 +289,7 @@ public class QuizResource {
 			if (user != null && question != null) {
 				QuestionWrapper wrapper = new QuestionWrapper(user, question);
 				String output = renderer.render("editQuestion.ad", wrapper).toString();
-				return Response.ok().entity(output).build();
+				return Response.ok().entity(output).cookie(authUtils.generateCookie(user)).build();
 			} else {
 				Flash.add(Flash.Code.WARN, "Question with ID " + questionId + " not found.");			
 				return new RedirectResponse(Pages.HOME_PAGE).build();

@@ -95,16 +95,11 @@ public class QuizAPI {
 			Flash.add(Flash.Code.ERROR, "User not found, try again");
 			return new RedirectResponse(Pages.LOGIN_PAGE).build();
 		}
-
-		// Update the user
+		
 		User user = User.getByEmail(email);
-		token = authUtils.generateToken(user);
-		user.setToken(token);
-		user.save();
 		LOG.info("Logged in  : {}", user);
 
-		NewCookie cookie = new NewCookie("quiz.token", token, "/", "", "Quiz Login Token", -1, false);
-		return new LoginResponse(cookie).build();
+		return new LoginResponse(authUtils.generateCookie(user)).build();
 	}
 
 	@GET
@@ -115,9 +110,6 @@ public class QuizAPI {
 			Jws<Claims> claims;
 			try {
 				claims = authUtils.validateUser(cookie.getValue());
-				User user = User.getWithClaims(claims);
-				user.setToken(null);
-				user.save();
 			} catch (AuthenticationException e) {
 				// Ignore, since we are logging out anyway
 			}
@@ -156,16 +148,13 @@ public class QuizAPI {
 				user.save();
 			}
 
-			// Update the user
+			// Generate user token
 			token = authUtils.generateToken(user);
-			user.setToken(token);
-			user.save();
 			LOG.info("Registered  : {}", user);
-
-			NewCookie cookie = new NewCookie("quiz.token", token, "/", "", "Quiz Login Token", -1, false);
-			return new LoginResponse(cookie).build();
+			return new LoginResponse(authUtils.generateCookie(user)).build();
 		} else {
-			return new RedirectResponse(Pages.LOGIN_PAGE).build();
+			NewCookie newCookie = new NewCookie("quiz.token", "", "/", "", "Quiz Login Token", 0, false);
+			return new RedirectResponse(Pages.LOGIN_PAGE).cookie(newCookie).build();
 		}
 	}
 
@@ -192,7 +181,7 @@ public class QuizAPI {
 			return Response.ok().entity(output).build();
 		}
 		Flash.add(Flash.Code.ERROR, "Requested quiz not found.");
-		return new RedirectResponse(Pages.HOME_PAGE).build();
+		return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
 	}
 
 	@GET
@@ -215,7 +204,7 @@ public class QuizAPI {
 			}
 		}
 		
-		return new RedirectResponse(Pages.HOME_PAGE).build();
+		return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
 	}
 	
 	@POST
@@ -277,7 +266,7 @@ public class QuizAPI {
 		q.save();
 		
 		Flash.add(Flash.Code.SUCCESS, "Created new question with ID : " + q.getQuestionId());
-		return new RedirectResponse(Pages.HOME_PAGE).build();
+		return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
 	}
 	
 	@POST
@@ -347,7 +336,7 @@ public class QuizAPI {
 		} else {
 			Flash.add(Flash.Code.SUCCESS, "Question with ID " + questionId + " not found.");			
 		}
-		return new RedirectResponse(Pages.HOME_PAGE).build();
+		return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
 	}
 	
 	private String getUserCredentials(String email) {

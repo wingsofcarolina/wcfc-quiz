@@ -24,8 +24,6 @@ public class User {
 	private String fullname;
 	private String email;
 	@JsonIgnore
-	private String token;
-	@JsonIgnore
 	private String password;
 	@JsonIgnore
 	private List<Privilege> privileges = new ArrayList<Privilege>();
@@ -61,12 +59,6 @@ public class User {
 	public void setCreated(Date created) {
 		this.created = created;
 	}
-	public Object getToken() {
-		return token;
-	}
-	public void setToken(String token) {
-		this.token = token;
-	}
 	public List<Privilege> getPrivs() {
 		return privileges;
 	}
@@ -98,11 +90,6 @@ public class User {
 	/*
 	 * Database Management Functionality
 	 */
-	public void logout() {
-		this.setToken(null);
-		this.save();
-	}
-
 	public static User getWithClaims(Jws<Claims> claims) {
 		User user = null;
 		String userId = (String)claims.getBody().get("userId");
