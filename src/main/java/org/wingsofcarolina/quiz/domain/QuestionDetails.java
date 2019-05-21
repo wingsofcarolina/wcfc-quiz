@@ -49,7 +49,7 @@ public class QuestionDetails {
 		LOG.info("Answer4    --> {}, {}", answer4, correct4);
 		LOG.info("Answer5    --> {}, {}", answer5, correct5);
 		
-		List<Answer> answers = new ArrayList<Answer>();
+		answers = new ArrayList<Answer>();
 		if ( ! answer1.isEmpty()) answers.add(new Answer(answer1, correct1));
 		if ( ! answer2.isEmpty()) answers.add(new Answer(answer2, correct2));
 		if ( ! answer3.isEmpty()) answers.add(new Answer(answer3, correct3));
@@ -89,7 +89,7 @@ public class QuestionDetails {
 		}
 		int i = 0;
 		for (Answer oldAnswer : original.getAnswers()) {
-			Answer newAnswer = answers.get(i);
+			Answer newAnswer = answers.get(i++);
 			if ( ! newAnswer.getAnswer().contentEquals(oldAnswer.getAnswer())) {
 				oldAnswer.setAnswer(newAnswer.getAnswer());
 				changed = true;

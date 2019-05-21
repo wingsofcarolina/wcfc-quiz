@@ -48,7 +48,9 @@ public class Attribute {
 	
 	public static List<String> attributes(String category) {
 		switch (category.toLowerCase()) {
-		case "sop" : return sopAttributes();
+		case "far" :
+		case "sop" :
+			return sopAttributes();
 		case "c152" :
 		case "c172" :
 		case "pa28" :

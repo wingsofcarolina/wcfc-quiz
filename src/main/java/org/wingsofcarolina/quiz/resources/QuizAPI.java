@@ -317,9 +317,15 @@ public class QuizAPI {
 		// Get the existing question, and see if it has been deployed
 		Question original = Question.getByQuestionId(questionId);
 	
-		if (original == null) {
+		if (original != null) {
 			// Update Attributes, detecting changes
-			// TODO: Implement attribute changing
+			for (String att : attributes) {
+				if ( ! original.hasAttribute(att)) { changed = true; }
+			}
+			if (attributes.size() != original.getAttributes().size()) { changed = true; }
+			if (changed) {
+				original.setAttributes(attributes);
+			}
 			
 			// Update user-changeable details, detecting changes
 			QuestionDetails details = new QuestionDetails(question, discussion, references, answer1,
@@ -333,7 +339,11 @@ public class QuizAPI {
 				LOG.info("No changes detected for : {}", original.getQuestionId());
 			}
 			
-			Flash.add(Flash.Code.SUCCESS, "Updated existing question with ID : " + original.getQuestionId());
+			if (changed) {
+				Flash.add(Flash.Code.SUCCESS, "Updated existing question with ID : " + original.getQuestionId());
+			} else {
+				Flash.add(Flash.Code.SUCCESS, "No changes made to question with ID : " + original.getQuestionId());
+			}
 		} else {
 			Flash.add(Flash.Code.SUCCESS, "Question with ID " + questionId + " not found.");			
 		}

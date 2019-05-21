@@ -1,5 +1,6 @@
 package org.wingsofcarolina.quiz.authentication;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -73,6 +74,12 @@ public class AuthUtils {
 				if (compactJws != null && ! compactJws.isEmpty()) {
 					claims = parser.setSigningKey(key).parseClaimsJws(compactJws);
 					String name = claims.getBody().getSubject();
+					Date issuedAt = claims.getBody().getIssuedAt();
+					if (timedOut(issuedAt)) {
+						Flash.add(Flash.Code.ERROR, "User idle too long.");
+						throw new AuthenticationException(403, "User idle too long.");
+					}
+					
 					User user = User.getByEmail(name);
 					if (user != null && user.getToken() != null) {
 						if ( ! user.getToken().equals(compactJws)) {
@@ -97,6 +104,12 @@ public class AuthUtils {
 			throw new AuthenticationException(400, "Authentication string not provided");
 		}
 		return claims;
+	}
+	
+	private boolean timedOut(Date issuedAt) {
+		long secs = (new Date().getTime() - issuedAt.getTime()) / 1000;
+		long hours = secs / 3600;    
+		return hours > 2;
 	}
 	
 	public String generateToken(User user) {

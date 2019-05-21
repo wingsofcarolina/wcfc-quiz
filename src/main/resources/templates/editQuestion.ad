@@ -81,7 +81,9 @@ function loadDifficultyAttributes()
 <script src="/static/question-form-validation.js"></script>
 
 <form name="question" action="/api/updateQuestion" method="post">
-<input type="hidden" value="questionId" name="${question.questionId}" />
+<input type="hidden" name="questionId" value="${question.questionId}" />
+<input type="hidden" name="type" value="${question.type}" />
+<input type="hidden" name="category" value="${question.category}" />
 
 <table>
 <tr><td>Type</td><td><strong>${question.type}</strong></td></tr>
