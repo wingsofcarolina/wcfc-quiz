@@ -8,6 +8,10 @@ public class EmptyAnswer extends Answer {
 		return "";
 	}
 
+	public String getAnswerAsHtml() {
+		return getAnswer();
+	}
+	
 	public boolean isCorrect() {
 		return false;
 	}
