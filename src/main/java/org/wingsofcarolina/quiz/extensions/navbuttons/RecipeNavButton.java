@@ -11,7 +11,7 @@ public class RecipeNavButton extends NavButton {
 				" } }</script>");
 		sb.append("<a ");
 		if (active) sb.append("class=\"active\"");
-		sb.append(" onclick=viewRecipe()>Recipe</a>\n");
+		sb.append(" onclick=viewRecipe()>Show Recipe</a>\n");
 		return sb.toString();
 	}
 }

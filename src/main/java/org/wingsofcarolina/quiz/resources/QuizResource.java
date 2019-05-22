@@ -199,7 +199,7 @@ public class QuizResource {
 			User user = User.getWithClaims(claims);
 			
 			String output = "";
-			switch (quiz) {
+			switch (quiz.toLowerCase()) {
 			case "far":
 				quizType = QuizType.FAR;
 				break;
@@ -307,9 +307,9 @@ public class QuizResource {
 	}
 
 	@GET
-	@Path("editQuestion/{questionId}")
+	@Path("updateQuestion/{questionId}")
 	@Produces("text/html")
-	public Response editQuestion(@CookieParam("quiz.token") Cookie cookie,
+	public Response updateQuestion(@CookieParam("quiz.token") Cookie cookie,
 			@PathParam("questionId") Long questionId) throws Exception, AuthenticationException {
 		if (cookie != null) {
 			Jws<Claims> claims = authUtils.validateUser(cookie.getValue());
@@ -317,11 +317,30 @@ public class QuizResource {
 			Question question = Question.getByQuestionId(questionId);
 			if (user != null && question != null) {
 				QuestionWrapper wrapper = new QuestionWrapper(user, question);
-				String output = renderer.render("editQuestion.ad", wrapper).toString();
+				String output = renderer.render("updateQuestion.ad", wrapper).toString();
 				return Response.ok().entity(output).cookie(authUtils.generateCookie(user)).build();
 			} else {
 				Flash.add(Flash.Code.WARN, "Question with ID " + questionId + " not found.");			
 				return new RedirectResponse(Pages.HOME_PAGE).build();
+			}
+		} else {
+			return new RedirectResponse(Pages.LOGIN_PAGE).build();
+		}
+	}
+
+	@GET
+	@Path("updateRecipe")
+	@Produces("text/html")
+	public Response updateRecipe(@CookieParam("quiz.token") Cookie cookie) throws Exception, AuthenticationException {
+		if (cookie != null) {
+			Jws<Claims> claims = authUtils.validateUser(cookie.getValue());
+			User user = User.getWithClaims(claims);
+			if (user != null) {
+				Wrapper wrapper = new Wrapper(user);
+				String output = renderer.render("updateRecipe.ad", wrapper).toString();
+				return Response.ok().entity(output).cookie(authUtils.generateCookie(user)).build();
+			} else {
+				return new RedirectResponse(Pages.LOGIN_PAGE).build();
 			}
 		} else {
 			return new RedirectResponse(Pages.LOGIN_PAGE).build();

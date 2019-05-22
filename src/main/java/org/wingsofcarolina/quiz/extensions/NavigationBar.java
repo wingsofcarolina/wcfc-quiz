@@ -33,6 +33,7 @@ public class NavigationBar extends InlineMacroProcessor {
 		sb.append("<link rel=\"stylesheet\" href=\"/static/quiz-style.css\">");
 		sb.append("<div class=\"topnav\">\n");
 		if (items != null) {
+			boolean first = true;
 			for (String item : items) {
 				Class<?> clazz;
 				try {

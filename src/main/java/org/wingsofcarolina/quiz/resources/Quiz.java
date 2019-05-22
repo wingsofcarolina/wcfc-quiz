@@ -59,6 +59,29 @@ public class Quiz {
 			case "m20j": category = Category.M20J; quizType = QuizType.M20J; quizName = "Mooney M20J"; break;
 		}			
 	}
+	
+	public static QuizType getTypeFromName(String name) {
+		QuizType type = null; 
+		switch (name) {
+			case "far":
+				type = QuizType.FAR;
+				break;
+			case "sop-student":
+				type = QuizType.SOP_STUDENT;
+				break;
+			case "sop-pilot":
+				type = QuizType.SOP_PILOT;
+				break;
+			case "sop-instructor":
+				type = QuizType.SOP_INSTRUCTOR;
+				break;
+			case "c152": type = QuizType.C152; break;
+			case "c172": type = QuizType.C172; break;
+			case "pa28": type = QuizType.PA28; break;
+			case "m20j": type = QuizType.M20J; break;
+		}
+		return type;
+	}
 
 	public long getQuizId() {
 		return quizId;

@@ -33,6 +33,7 @@ import org.wingsofcarolina.quiz.domain.Attribute;
 import org.wingsofcarolina.quiz.domain.Category;
 import org.wingsofcarolina.quiz.domain.Question;
 import org.wingsofcarolina.quiz.domain.QuestionDetails;
+import org.wingsofcarolina.quiz.domain.Recipe;
 import org.wingsofcarolina.quiz.domain.Record;
 import org.wingsofcarolina.quiz.domain.Type;
 import org.wingsofcarolina.quiz.domain.User;
@@ -322,8 +323,33 @@ public class QuizAPI {
 				Flash.add(Flash.Code.SUCCESS, "No changes made to question with ID : " + original.getQuestionId());
 			}
 		} else {
-			Flash.add(Flash.Code.SUCCESS, "Question with ID " + questionId + " not found.");			
+			Flash.add(Flash.Code.ERROR, "Question with ID " + questionId + " not found.");			
 		}
+		return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
+	}
+	
+	@POST
+	@Path("updateRecipe")
+	@Produces("text/html")
+	public Response updateRecipe(@CookieParam("quiz.token") Cookie cookie,
+			@FormParam("recipe") String recipe
+			) throws Exception, AuthenticationException {
+		
+		Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
+		User user = User.getWithClaims(claims);
+
+		// Create the new recipe object
+		Recipe newRecipe = objectMapper.readValue(recipe, Recipe.class);
+
+		// Get rid of the old recipe
+		Recipe original = Recipe.getRecipeByType(newRecipe.getQuizType());
+		original.delete();
+		
+		// Replace it with the new recipe
+		newRecipe.save();
+		
+		Flash.add(Flash.Code.SUCCESS, "Recipe type " + newRecipe.getQuizType() + " updated.");			
+
 		return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
 	}
 	

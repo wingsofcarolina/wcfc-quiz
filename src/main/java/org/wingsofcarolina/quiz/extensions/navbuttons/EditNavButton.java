@@ -7,7 +7,7 @@ public class EditNavButton extends NavButton {
 		StringBuffer sb = new StringBuffer();
 		sb.append("<script>function modifyQuestion() {"
 				+ "var questionId = prompt(\"Question ID\");"
-				+ "if (questionId != null) { window.location.href = \"/editQuestion/\" + questionId + \"\";\n" + 
+				+ "if (questionId != null) { window.location.href = \"/updateQuestion/\" + questionId + \"\";\n" + 
 				" } }</script>");
 		sb.append("<a ");
 		if (active) sb.append("class=\"active\"");
