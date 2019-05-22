@@ -40,6 +40,7 @@ import org.wingsofcarolina.quiz.domain.User;
 import org.wingsofcarolina.quiz.domain.presentation.Renderer;
 import org.wingsofcarolina.quiz.responses.LoginResponse;
 import org.wingsofcarolina.quiz.responses.RedirectResponse;
+import org.wingsofcarolina.quiz.responses.ViewQuestionResponse;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -255,7 +256,7 @@ public class QuizAPI {
 		q.save();
 		
 		Flash.add(Flash.Code.SUCCESS, "Created new question with ID : " + q.getQuestionId());
-		return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
+		return new ViewQuestionResponse(q.getQuestionId()).cookie(authUtils.generateCookie(user)).build();
 	}
 	
 	@POST
@@ -325,7 +326,7 @@ public class QuizAPI {
 		} else {
 			Flash.add(Flash.Code.ERROR, "Question with ID " + questionId + " not found.");			
 		}
-		return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
+		return new ViewQuestionResponse(original.getQuestionId()).cookie(authUtils.generateCookie(user)).build();
 	}
 	
 	@POST

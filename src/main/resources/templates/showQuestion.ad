@@ -1,0 +1,49 @@
+= Edit Question
+
+<#setting number_format="#0">
+
+<#if user.isAdmin()>
+navbar:${user.userId}[buttons="HomeNavButton;RecipeNavButton;ViewNavButton;AddNavButton;EditNavButton;ProfileNavButton", active="ViewNavButton"]
+<#else>
+navbar:${user.userId}[buttons="HomeNavButton;ProfileNavButton", active="HomeNavButton"]
+</#if>
+
+++++
+<table width=100%>
+<tr><td width=10%>ID</td><td><strong>${question.questionId}</strong></td></tr>
+<tr><td>Type</td><td><strong>${question.type}</strong></td></tr>
+<tr><td>Category</td><td><strong>${question.category}</strong></td></tr>
+<tr><td valign="top">Question</td><td>${question.question}</td></tr>
+<tr><td valign="top">Discussion</td><td>${question.discussion}</td></tr>
+<tr><td valign="top">References</td><td>${question.references}</td></tr>
+
+<tr><td valign="top">Attributes</td><td>
+++++
+<#list question.attributes as attribute>
+${attribute}
+</#list>
+++++
+</td></tr>
+<tr><td colspan=2>The answer in <strong>bold</strong> below is the correct answer.</td></tr>
+<tr><td valign="top" id="answerLabel">Answers</td><td>
+	<table id="answerlist" width=100%>
+	<tr><td colspan=2 valign="top" width=5%>A</td><td>
+	<#if question.getAnswerAt(1).isCorrect()><strong></#if>
+	${question.getAnswerAt(1).getAnswer()}</td></tr>
+	<tr><td colspan=2 valign="top">B</td><td>
+	<#if question.getAnswerAt(2).isCorrect()><strong></#if>
+	${question.getAnswerAt(2).getAnswer()}</td></tr>
+	<tr><td colspan=2 valign="top">C</td><td>
+	<#if question.getAnswerAt(3).isCorrect()><strong></#if>
+	${question.getAnswerAt(3).getAnswer()}</td></tr>
+	<tr><td colspan=2 valign="top">D</td><td>
+	<#if question.getAnswerAt(4).isCorrect()><strong></#if>
+	${question.getAnswerAt(4).getAnswer()}</td></tr>
+	<tr><td colspan=2 valign="top">E</td><td>
+	<#if question.getAnswerAt(5).isCorrect()><strong></#if>
+	${question.getAnswerAt(5).getAnswer()}</td></tr>
+	</table>
+</td></tr>
+</table>
+</p>
+++++

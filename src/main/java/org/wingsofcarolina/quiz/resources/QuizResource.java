@@ -199,7 +199,7 @@ public class QuizResource {
 	@GET
 	@Path("question/{id}")
 	@Produces("text/html")
-	public Response question(@CookieParam("quiz.token") Cookie cookie,
+	public Response showQuestion(@CookieParam("quiz.token") Cookie cookie,
 			@PathParam("id") String id) throws AuthenticationException, IOException {
 
 		if (cookie != null) {
@@ -207,14 +207,15 @@ public class QuizResource {
 			User user = User.getWithClaims(claims);
 			Question question = Question.getByQuestionId(Long.valueOf(id));
 			if (question != null ) {
-				ObjectMapper mapper = new ObjectMapper();
-				mapper.enable(SerializationFeature.INDENT_OUTPUT);
-				String output = mapper.writeValueAsString(question);
-				output = output.replaceAll("(\r\n|\n)", "<br/>");
-				output = output.replaceAll("\\s", "&nbsp;&nbsp;");
-						
-				String rendered = renderer.render("question.ad", new JsonWrapper(user, output)).toString();
-				return Response.ok().entity(rendered).cookie(authUtils.generateCookie(user)).build();
+//				ObjectMapper mapper = new ObjectMapper();
+//				mapper.enable(SerializationFeature.INDENT_OUTPUT);
+//				String output = mapper.writeValueAsString(question);
+//				output = output.replaceAll("(\r\n|\n)", "<br/>");
+//				output = output.replaceAll("\\s", "&nbsp;&nbsp;");
+//						
+				QuestionWrapper wrapper = new QuestionWrapper(user, question);
+				String output = renderer.render("showQuestion.ad", wrapper).toString();
+				return Response.ok().entity(output).cookie(authUtils.generateCookie(user)).build();
 			} else {
 				Flash.add(Flash.Code.ERROR, "Requested question \"" + id + "\" not found.");
 				return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
