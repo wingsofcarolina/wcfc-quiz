@@ -6,7 +6,6 @@ import java.util.List;
 
 public class Attribute {
 	// General attributes
-	public static String REQUIRED = "REQUIRED";
 	public static String TEST = "TEST";		// Denotes a test question, not to be used in production
 
 	// Difficulty attributes
@@ -67,7 +66,6 @@ public class Attribute {
 
 	private static List<String> aircraftAttributes() {
 		List<String> attributeList = new ArrayList<String>();
-		attributeList.add(REQUIRED);
 		attributeList.addAll(aircraft_attributes);
 		attributeList.addAll(level_attributes);
 		return attributeList;
@@ -75,7 +73,6 @@ public class Attribute {
 
 	private static List<String> sopAttributes() {
 		List<String> attributeList = new ArrayList<String>();
-		attributeList.add(REQUIRED);
 		attributeList.addAll(sop_attributes);
 		attributeList.addAll(level_attributes);
 		return attributeList;
