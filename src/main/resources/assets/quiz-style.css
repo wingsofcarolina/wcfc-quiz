@@ -112,3 +112,13 @@ body {
 .question {
 	width: 800px;
 }
+
+.heading {
+    height: 200px;
+}
+#logo {
+    width: 310px;
+    height: 200px;
+    float: left;
+    background-image:url("/static/WCFC-logo-transparent.jpg");
+}

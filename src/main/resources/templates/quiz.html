@@ -8,27 +8,26 @@
 <body>
 <#setting number_format="#0"/>
 
-<div style="position:absolute; left:3px; right:3px; z-index:-1">
-	<img src="/static/WCFC-logo-transparent.jpg">
-</div>
-<div class="center">
-	<div class="title">${quizName} Written Test</div>
-	<div class="subtitle">Quiz ID - ${quizId}&nbsp;|&nbsp;Review before - ${sunsetDate?string('dd.MM.yyyy')}</div>
-	</p>
-	<div class="container">
-    	<div class="contents">
-    	Pilot _____________________________</br>
-    	&nbsp;</br>
-    	Instructor ________________________
-    	</div>
-    	<div class="contents">
-    	Score ____________________________</br>
-    	&nbsp;</br>
-    	Date _____________________________
+<div class="heading">
+    <div id="logo"></div>
+	<div class="center">
+		<div class="title">${quizName} Written Test</div>
+		<div class="subtitle">Quiz ID - ${quizId}&nbsp;|&nbsp;Review before - ${sunsetDate?string('dd.MM.yyyy')}</div>
+		</p>
+		<div class="container">
+	    	<div class="contents">
+	    	Pilot _____________________________</br>
+	    	&nbsp;</br>
+	    	Instructor ________________________
+	    	</div>
+	    	<div class="contents">
+	    	Score ____________________________</br>
+	    	&nbsp;</br>
+	    	Date _____________________________
+			</div>
 		</div>
 	</div>
 </div>
-
 <div>
 	<div class="instruction">
 	<b>Instructor</b>: Please note the final score (subtract ${pointsPerQuestion()?string(",##0.00")} points from 100 for each wrong answer) on the checkout
