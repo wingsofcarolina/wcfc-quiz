@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.List;
+import java.util.Map;
+
 import javax.ws.rs.CookieParam;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -59,9 +61,12 @@ public class QuizResource {
 	private AuthUtils authUtils;
 
 	private Renderer renderer;
-
+	
+	ObjectMapper objectMapper;
+	Map<String, Object> buildProperties;
 	private static final Integer pageCount = 10;
 
+	@SuppressWarnings("unchecked")
 	public QuizResource(QuizConfiguration config) throws IOException {
 		QuizResource.instance = this;
 
@@ -69,6 +74,17 @@ public class QuizResource {
 		authUtils = new AuthUtils();
 
 		renderer = new Renderer(config);
+		
+		// Load up all the system git/build properties
+		objectMapper = new ObjectMapper();
+		objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+	    ClassLoader classLoader = getClass().getClassLoader();
+	    InputStream inputStream = classLoader.getResourceAsStream("git.properties");
+	    try {
+			buildProperties = objectMapper.readValue(inputStream, Map.class);
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
 	}
 	
 	public static QuizResource instance() {
@@ -87,37 +103,16 @@ public class QuizResource {
 		if (cookie != null) {
 			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.USER);
 			User user = User.getWithClaims(claims);
-			String output = readGitProperties();
+			String output = objectMapper.writeValueAsString(buildProperties);
 			output = output.replaceAll("(\r\n|\n)", "<br/>");
 			output = output.replaceAll("\\s", "&nbsp;&nbsp;");
 					
 			String rendered = renderer.render("version.ad", new JsonWrapper(user, output)).toString();
 			return Response.ok().entity(rendered).cookie(authUtils.generateCookie(user)).build();
 		} else {
-			return Response.ok().entity("Something went wrong, me bucko.").build();
+			Flash.add(Flash.Code.ERROR, "Something went wrong generating version data.");
+			return new RedirectResponse(Pages.HOME_PAGE).build();
 		}
-	}
-	
-	private String readGitProperties() {
-	    ClassLoader classLoader = getClass().getClassLoader();
-	    InputStream inputStream = classLoader.getResourceAsStream("git.properties");
-	    try {
-	        return readFromInputStream(inputStream);
-	    } catch (IOException e) {
-	        e.printStackTrace();
-	        return "Version information could not be retrieved";
-	    }
-	}
-	private String readFromInputStream(InputStream inputStream)
-	throws IOException {
-	    StringBuilder resultStringBuilder = new StringBuilder();
-	    try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
-	        String line;
-	        while ((line = br.readLine()) != null) {
-	            resultStringBuilder.append(line).append("\n");
-	        }
-	    }
-	    return resultStringBuilder.toString();
 	}
 	
 	@GET
