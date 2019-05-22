@@ -1,6 +1,9 @@
 package org.wingsofcarolina.quiz.resources;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.List;
@@ -76,6 +79,45 @@ public class QuizResource {
 	@Path("favicon.ico")
 	public Response favIcon() {
 		return new RedirectResponse("/static/favicon.ico").build();
+	}
+	
+	@GET
+	@Path("version")
+	public Response versionInformation(@CookieParam("quiz.token") Cookie cookie) throws AuthenticationException, IOException {
+		if (cookie != null) {
+			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.USER);
+			User user = User.getWithClaims(claims);
+			String output = readGitProperties();
+			output = output.replaceAll("(\r\n|\n)", "<br/>");
+			output = output.replaceAll("\\s", "&nbsp;&nbsp;");
+					
+			String rendered = renderer.render("version.ad", new JsonWrapper(user, output)).toString();
+			return Response.ok().entity(rendered).cookie(authUtils.generateCookie(user)).build();
+		} else {
+			return Response.ok().entity("Something went wrong, me bucko.").build();
+		}
+	}
+	
+	private String readGitProperties() {
+	    ClassLoader classLoader = getClass().getClassLoader();
+	    InputStream inputStream = classLoader.getResourceAsStream("git.properties");
+	    try {
+	        return readFromInputStream(inputStream);
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	        return "Version information could not be retrieved";
+	    }
+	}
+	private String readFromInputStream(InputStream inputStream)
+	throws IOException {
+	    StringBuilder resultStringBuilder = new StringBuilder();
+	    try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
+	        String line;
+	        while ((line = br.readLine()) != null) {
+	            resultStringBuilder.append(line).append("\n");
+	        }
+	    }
+	    return resultStringBuilder.toString();
 	}
 	
 	@GET

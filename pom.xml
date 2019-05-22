@@ -196,11 +196,69 @@
 
 		<plugins>
 			<plugin>
+				<groupId>pl.project13.maven</groupId>
+				<artifactId>git-commit-id-plugin</artifactId>
+				<version>2.2.4</version>
+				<executions>
+					<execution>
+						<id>get-the-git-infos</id>
+						<goals>
+							<goal>revision</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
+					<prefix>git</prefix>
+					<verbose>false</verbose>
+					<generateGitPropertiesFile>true</generateGitPropertiesFile>
+					<generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties
+					</generateGitPropertiesFilename>
+					<format>json</format>
+					<gitDescribe>
+						<skip>false</skip>
+						<always>false</always>
+						<dirty>-dirty</dirty>
+					</gitDescribe>
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>3.1.1</version>
 				<configuration>
 					<forceCreation>true</forceCreation>
+					<archive>
+						<manifest>
+							<addDefaultImplementationEntries>true
+							</addDefaultImplementationEntries>
+							<addDefaultSpecificationEntries>true
+							</addDefaultSpecificationEntries>
+						</manifest>
+						<manifestEntries>
+							<Git-Commit-Id>${git.commit.id}</Git-Commit-Id>
+							<Git-Tags>${git.tags}</Git-Tags>
+							<Git-Branch>${git.branch}</Git-Branch>
+							<Git-Dirty>${git.dirty}</Git-Dirty>
+							<Git-Build-Time>${git.build.time}</Git-Build-Time>
+							<Git-Build-Host>${git.build.host}</Git-Build-Host>
+							<Git-Build-Version>${git.build.version}</Git-Build-Version>
+							<Git-Commit-Time>${git.commit.time}</Git-Commit-Time>
+							<Git-Remote-Origin-Url>${git.remote.origin.url}
+							</Git-Remote-Origin-Url>
+							<Git-Commit-Id-Abbrev>${git.commit.id.abbrev}
+							</Git-Commit-Id-Abbrev>
+							<Git-Commit-Id-Describe-short>${git.commit.id.describe-short}
+							</Git-Commit-Id-Describe-short>
+							<Git-Commit-User-Name>${git.commit.user.name}
+							</Git-Commit-User-Name>
+							<Git-Commit-User-Email>${git.commit.user.email}
+							</Git-Commit-User-Email>
+							<Git-Build-User-Name>${git.build.user.name}</Git-Build-User-Name>
+							<Git-Build-User-Email>${git.build.user.email}
+							</Git-Build-User-Email>
+						</manifestEntries>
+					</archive>
 				</configuration>
 			</plugin>
 			<plugin>

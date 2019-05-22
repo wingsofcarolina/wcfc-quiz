@@ -1,0 +1,17 @@
+= Update Recipe
+
+<#if user.isAdmin()>
+navbar:${user.userId}[buttons="HomeNavButton;RecipeNavButton;ViewNavButton;AddNavButton;EditNavButton;ProfileNavButton", active="RecipeNavButton"]
+</#if>
+
+++++
+<form name="question" action="/api/updateRecipe" method="post">
+
+<table>
+<tr><td colspan=2>Enter the raw JSON which defines the Recipe below.</td><td>
+<tr><td valign="top">Recipe</td><td><textarea name="recipe" rows="15" cols="70" placeholder=" Enter the recipe JSON here."></textarea></td></tr>
+</table>
+</p>
+<input type="submit" value="Update Recipe"></form>
+</p>
+++++

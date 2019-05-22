@@ -28,14 +28,18 @@ Retrieve a quiz key by entering the Quiz ID:
 <#if isAdmin()>
 ++++
 <hr>
+<h3>Admin Functions</h3>
 If you are seeing this section of the page then you have
 been identified as an administrator for the system with
-additional operations and privileges. Use your power
-wisely.</p>
+additional operations and privileges. Additionally, there
+are more commonly used admin functions added to your menu
+bar above. Use your power wisely.</p>
 
 <ul>
-<li><a href="api/backupQuestions">Generate Question Backup Files</a><br>
 <li><a href="browseQuestions">Browse questions</a><br>
+<li><a href="updateRecipe">Update a stored quiz recipe</a><br>
+<li><a href="api/backupQuestions">Generate Question Backup Files</a><br>
+<li><a href="version">Show system version information</a><br>
 </ul>
 </p>
 ++++

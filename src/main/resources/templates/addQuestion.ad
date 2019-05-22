@@ -7,7 +7,7 @@
 <#setting number_format="#0">
 
 <#if user.isAdmin()>
-navbar:${user.userId}[buttons="HomeNavButton;ViewNavButton;AddNavButton;EditNavButton;ProfileNavButton", active="AddNavButton"]
+navbar:${user.userId}[buttons="HomeNavButton;RecipeNavButton;ViewNavButton;AddNavButton;EditNavButton;ProfileNavButton", active="AddNavButton"]
 <#else>
 navbar:${user.userId}[buttons="HomeNavButton;ProfileNavButton", active="HomeNavButton"]
 </#if>
@@ -84,12 +84,15 @@ function loadDifficultyAttributes()
 </td></tr>
 <tr><td>Category</td><td>
 <select id="q-category" name="category" onchange=loadAttributes(this.value)>
+  <option value="far">FAR 61/91, Pre-Solo</option>
+  <option value="sop-student">SOP/FS Student Pilots</option>
+  <option value="sop-pilot">SOP/FS Licensed Pilots</option>
+  <option value="sop-instructor">SOP/FS Instructors</option>
   <option value="c152">C-152</option>
   <option value="c172">C-172 Skyhawk</option>
   <option value="pa28">PA-28 Warrior</option>
   <option value="m20j">M20J Mooney</option>
-  <option value="sop">FAR/SOP</option>
-</select>
+</select></td></tr>
 <tr><td valign="top">Question</td><td><textarea name="question" rows="4" cols="70" placeholder=" Enter the question here."></textarea></td></tr>
 <tr><td valign="top">Discussion</td><td><textarea name="discussion" rows="4" cols="70" placeholder=" Enter the CFI discussion here."></textarea></td></tr>
 <tr><td valign="top">References</td><td><input type="text" name="references" size="70" placeholder=" Enter any references here."></td></tr>
