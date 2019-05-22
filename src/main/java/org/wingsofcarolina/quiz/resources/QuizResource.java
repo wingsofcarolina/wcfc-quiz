@@ -213,8 +213,6 @@ public class QuizResource {
 //				output = output.replaceAll("(\r\n|\n)", "<br/>");
 //				output = output.replaceAll("\\s", "&nbsp;&nbsp;");
 //						
-				Slack slack = new Slack();
-				slack.sendMessage("Someone asked to see question " + question.getQuestionId());
 				QuestionWrapper wrapper = new QuestionWrapper(user, question);
 				String output = renderer.render("showQuestion.ad", wrapper).toString();
 				return Response.ok().entity(output).cookie(authUtils.generateCookie(user)).build();
