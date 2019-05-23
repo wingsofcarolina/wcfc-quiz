@@ -206,13 +206,7 @@ public class QuizResource {
 			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.USER);
 			User user = User.getWithClaims(claims);
 			Question question = Question.getByQuestionId(Long.valueOf(id));
-			if (question != null ) {
-//				ObjectMapper mapper = new ObjectMapper();
-//				mapper.enable(SerializationFeature.INDENT_OUTPUT);
-//				String output = mapper.writeValueAsString(question);
-//				output = output.replaceAll("(\r\n|\n)", "<br/>");
-//				output = output.replaceAll("\\s", "&nbsp;&nbsp;");
-//						
+			if (question != null ) {						
 				QuestionWrapper wrapper = new QuestionWrapper(user, question);
 				String output = renderer.render("showQuestion.ad", wrapper).toString();
 				return Response.ok().entity(output).cookie(authUtils.generateCookie(user)).build();

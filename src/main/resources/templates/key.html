@@ -40,6 +40,18 @@ ${answer.index} : ${answer.answer}</br>
 </#if>
 </#list>
 </p>
+
+<#list question.answers as answer>
+<#if question.isFillInTheBlank()>
+${answer.index} : ${answer.answer}</br>
+<#else>
+<#if answer.isCorrect()>
+Correct Answer is : <strong>${answer.index}</strong></br>
+</#if>
+</#if>
+</#list>
+</p>
+
 <b>References :</b> ${question.references}</p>
 <b>CFI Discussion :</b> </br>
 ${question.getDiscussionAsHtml()}</p>
