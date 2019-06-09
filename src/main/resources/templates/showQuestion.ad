@@ -47,4 +47,4 @@ ${attribute}
 </table>
 </p>
 ++++
-button:/updateQuestion/${question.questionId}[method="get",label="Update Question"]
+button:/updateQuestion/${question.questionId}[method="get",label="Edit Question"]

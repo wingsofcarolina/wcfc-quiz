@@ -91,7 +91,7 @@ function loadDifficultyAttributes()
 <tr><td>Category</td><td><strong>${question.category}</strong></td></tr>
 <tr><td valign="top">Question</td><td><textarea name="question" rows="4" cols="70">${question.question}</textarea></td></tr>
 <tr><td valign="top">Discussion</td><td><textarea name="discussion" rows="4" cols="70">${question.discussion}</textarea></td></tr>
-<tr><td valign="top">References</td><td><input type="text" name="references" size="70" value="${question.references}"></td></tr>
+<tr><td valign="top">References</td><td><textarea name="references" rows="2" cols="70">${question.references}</textarea></td></tr>
 
 <tr><td valign="top">Difficulty</td><td><select id="difficulty" name="difficulty" multiple="" class="form-control select-checkbox" size="3"></select></td></tr>
 
@@ -145,6 +145,7 @@ function loadDifficultyAttributes()
     }, "selection required");
 </script>
 </p>
-<input type="submit" value="Add/Update Question"></form>
+<input type="submit" value="Update Question"></form>
 </p>
 ++++
+button:/[method="get",label="Cancel"] 

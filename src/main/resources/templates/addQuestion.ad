@@ -101,7 +101,7 @@ function loadDifficultyAttributes()
 </select></td></tr>
 <tr><td valign="top">Question</td><td><textarea name="question" rows="4" cols="70" placeholder=" Enter the question here."></textarea></td></tr>
 <tr><td valign="top">Discussion</td><td><textarea name="discussion" rows="4" cols="70" placeholder=" Enter the CFI discussion here."></textarea></td></tr>
-<tr><td valign="top">References</td><td><input type="text" name="references" size="70" placeholder=" Enter any references here."></td></tr>
+<tr><td valign="top">References</td><td><textarea name="references" rows="2" cols="70" placeholder=" Enter any references here."></textarea></td></tr>
 <tr><td valign="top">Difficulty</td><td><select id="difficulty" name="difficulty" multiple="" class="form-control select-checkbox" size="3"></select></td></tr>
 <tr><td valign="top">Attributes</td><td><select id="attributes" name="attributes" multiple="" class="form-control select-checkbox" size="10"></select></td></tr>
 <tr><td></td><td><i>Control-click to select multiple attributes.</td></tr>
@@ -142,6 +142,7 @@ function loadDifficultyAttributes()
     }, "selection required");
 </script>
 </p>
-<input type="submit" value="Add/Update Question"></form>
+<input type="submit" value="Add Question"></form>
 </p>
 ++++
+button:/[method="get",label="Cancel"] 
