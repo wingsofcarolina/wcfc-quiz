@@ -7,6 +7,7 @@
 </head>
 <body>
 <#setting number_format="#0"/>
+<#assign seq = ["A", "B", "C", "D", "E"]>
 
 <div class="heading">
     <div id="logo"></div>
@@ -58,18 +59,20 @@
 	<div class="tableCell">&nbsp;</div>
 	<div class="tableCell">&nbsp;</div>
 </div>
+<#assign index = 0>
 <#list question.answers as answer>
 <#if question.isFillInTheBlank()>
 <div class="row">
-	<div class="tableCell index"><strong>${answer.index} :</strong></div>
+	<div class="tableCell index"><strong>${seq[index]} :</strong></div>
 	<div class="tableCell">__________________________________________________________________</div>
 </div>
 <#else>
 <div class="row">
-	<div class="tableCell index"><strong>${answer.index} :</strong></div>
+	<div class="tableCell index"><strong>${seq[index]} :</strong></div>
 	<div class="tableCell">${answer.getAnswerAsHtml()}</div>
 </div>
 </#if>
+<#assign index=index+1>
 </#list>
 </div>
 

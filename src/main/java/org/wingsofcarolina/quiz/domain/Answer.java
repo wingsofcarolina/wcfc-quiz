@@ -10,43 +10,24 @@ public class Answer {
     @Id
 	@JsonIgnore
     private ObjectId id;
-	private Integer index;
 	private String answer;
 	private boolean correct;
 
 	public Answer() {}
 	
-	public Answer(Integer index, String answer, boolean correct) {
-		this.index = index;
+	public Answer(String answer, boolean correct) {
 		this.answer = answer;
 		this.correct = correct;
 	}
 
-	public Answer(String answer, boolean correct) {
-		this(answer);
-		this.correct = correct;
-	}
-	
-	public Answer(Integer index, String answer) {
-		this(index, answer, false);
-	}
-
 	public Answer(String answer) {
-		this(-1, answer, false);
+		this(answer, false);
 	}
 
 	public ObjectId getId() {
 		return id;
 	}
 	
-	public Integer getIndex() {
-		return index;
-	}
-
-	public void setIndex(Integer index) {
-		this.index = index;
-	}
-
 	public String getAnswer() {
 		return answer;
 	}
@@ -70,6 +51,6 @@ public class Answer {
 
 	@Override
 	public String toString() {
-		return "Answer [index=" + index + ", answer=" + answer + "]";
+		return "Answer [answer=" + answer + ", correct=" + correct + "]";
 	}
 }

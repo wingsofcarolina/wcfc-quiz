@@ -55,12 +55,6 @@ public class QuestionDetails {
 		if ( ! answer3.isEmpty()) answers.add(new Answer(answer3, correct3));
 		if ( ! answer4.isEmpty()) answers.add(new Answer(answer4, correct4));
 		if ( ! answer5.isEmpty()) answers.add(new Answer(answer5, correct5));
-		
-		// Reset the indexes to the current order
-		int i = 1;
-		for (Answer a : answers) {
-			a.setIndex(i++);
-		}
 	}
 
 	/**

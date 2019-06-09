@@ -7,6 +7,7 @@
 </head>
 <body>
 <#setting number_format="#0"/>
+<#assign seq = ["A", "B", "C", "D", "E"]>
 
 <div class="heading">
     <div id="logo"></div>
@@ -28,27 +29,31 @@ ${attribute}&nbsp;
 </#list>
 }</i></p>
 
+<#assign index = 0>
 <#list question.answers as answer>
 <#if question.isFillInTheBlank()>
-${answer.index} : ${answer.answer}</br>
+${seq[index]} : ${answer.answer}</br>
 <#else>
 <#if answer.isCorrect()>
-<strong>${answer.index}</strong> : ${answer.getAnswerAsHtml()}</br>
+<strong>${seq[index]}</strong> : ${answer.getAnswerAsHtml()}</br>
 <#else>
-${answer.index} : ${answer.answer}</br>
+${seq[index]} : ${answer.answer}</br>
 </#if>
 </#if>
+<#assign index=index+1>
 </#list>
 </p>
 
+<#assign index = 0>
 <#list question.answers as answer>
 <#if question.isFillInTheBlank()>
-${answer.index} : ${answer.answer}</br>
+${seq[index]} : ${answer.answer}</br>
 <#else>
 <#if answer.isCorrect()>
-Correct Answer is : <strong>${answer.index}</strong></br>
+Correct Answer is : <strong>${seq[index]}</strong></br>
 </#if>
 </#if>
+<#assign index=index+1>
 </#list>
 </p>
 

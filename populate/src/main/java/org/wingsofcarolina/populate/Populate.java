@@ -205,10 +205,10 @@ public class Populate {
 		attributeList.add(Attribute.TEST);
 
 		answers = new ArrayList<Answer>();
-		answers.add(new Answer(1, getWords(5, 15)));
-		answers.add(new Answer(2, getWords(5, 15)));
-		answers.add(new Answer(3, getWords(5, 15)));
-		answers.add(new Answer(4, getWords(5, 15)));
+		answers.add(new Answer(getWords(5, 15)));
+		answers.add(new Answer(getWords(5, 15)));
+		answers.add(new Answer(getWords(5, 15)));
+		answers.add(new Answer(getWords(5, 15)));
 		answers.get(pick(4)).setCorrect(true);
 		// Select some references
 	    question = new Question(Type.CHOICE, category, attributeList, 
@@ -230,7 +230,7 @@ public class Populate {
 			answers = new ArrayList<Answer>();
 			int count = pick(4) + 1;
 			for (int j = 0; j < count; j++) {
-				answers.add(new Answer(j+1, getWords(5, 15)));
+				answers.add(new Answer(getWords(5, 15)));
 			}
 			int pick = pick(count);
 			answers.get(pick).setCorrect(true);
