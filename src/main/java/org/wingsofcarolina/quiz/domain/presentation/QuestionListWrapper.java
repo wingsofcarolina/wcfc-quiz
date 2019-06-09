@@ -19,6 +19,14 @@ public class QuestionListWrapper {
 		this.count = count;
 	}
 
+	public QuestionListWrapper(User user, List<Question> questions) {
+		super();
+		this.user = user;
+		this.questions = questions;
+		this.index = 0;
+		this.count = questions.size();
+	}
+
 	public User getUser() {
 		return user;
 	}

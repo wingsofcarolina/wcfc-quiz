@@ -53,7 +53,7 @@ public class Populate {
 	
 	private void run() throws FileNotFoundException, IOException {
 //		createUsers();
-//		createRecipes();
+		createRecipes();
 		createFARQuestions();
 		sopQuestions();
 		createAirplaneQuestions(Category.C152);

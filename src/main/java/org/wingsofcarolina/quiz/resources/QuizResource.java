@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -20,6 +21,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wingsofcarolina.quiz.QuizConfiguration;
@@ -338,6 +340,57 @@ public class QuizResource {
 		}
 	}
 
+	@GET
+	@Path("searchQuestions")
+	@Produces("text/html")
+	public Response searchFirstQuestions(@CookieParam("quiz.token") Cookie cookie) throws Exception, AuthenticationException {
+		return searchQuestions(cookie, null, false);
+	}
+
+	@POST
+	@Path("searchQuestions")
+	@Produces("text/html")
+	public Response searchQuestions(@CookieParam("quiz.token") Cookie cookie,
+			@FormParam("search") String search,
+			@FormParam("case") Boolean caseSensitive) throws Exception, AuthenticationException {
+		if (cookie != null) {
+			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
+			User user = User.getWithClaims(claims);
+			if (user != null) {
+				List<Question> questions = new ArrayList<Question>();
+				if (search != null && !search.isEmpty()) {
+					List<Question> candidates = Question.getAllQuestions();
+					LOG.info("Selected {} candidates", candidates.size());
+					for (Question question : candidates) {
+						if (compareCase(question.getQuestion(), search, caseSensitive)) {
+							questions.add(question);
+						} else if (compareCase(question.getDiscussion(), search, caseSensitive)) {
+							questions.add(question);
+						}
+					}
+				}
+				QuestionListWrapper wrapper = new QuestionListWrapper(user, questions);
+				String output = renderer.render("searchQuestions.ad", wrapper).toString();
+				return Response.ok().entity(output).cookie(authUtils.generateCookie(user)).build();
+			} else {
+				return Response.status(404).build();
+			}
+		} else {
+			return new RedirectResponse(Pages.LOGIN_PAGE).build();
+		}
+	}
+
+	private boolean compareCase(String target, String search, boolean caseSensitive) {
+		if (!caseSensitive) {
+			if (StringUtils.containsIgnoreCase(target, search)) {
+				return true;
+			}
+		} else if (target.contains(search)) {
+			return true;
+		}
+		return false;
+	}
+	
 	@GET
 	@Path("updateQuestion/{questionId}")
 	@Produces("text/html")

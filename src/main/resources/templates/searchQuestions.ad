@@ -1,0 +1,45 @@
+= Search Questions
+
+<#setting number_format="#0">
+
+<#if user.isAdmin()>
+navbar:${user.userId}[buttons="HomeNavButton;RecipeNavButton;ViewNavButton;AddNavButton;EditNavButton;ProfileNavButton"]
+<#else>
+navbar:${user.userId}[buttons="HomeNavButton;ProfileNavButton", active="HomeNavButton"]
+</#if>
+
+This searches the text of the questions as well as the text of the CFI discussion 
+for the matching string. The string can be a single word or a phrase, but there
+is no capability (yet) to search with wildcards. Except for selecting case sensitivity,
+this search is an exact match search function.
+
+++++
+<form action="/searchQuestions" method="post">
+  <input type="submit" name="action" value="Search Questions">
+  <input type="text" name="search" size=40 autofocus>
+  </p>
+  <input type="radio" id="exact" name="case" value="true" checked>
+  <label for="exact">Case Sensitive</label>
+  <input type="radio" id="notexact" name="case" value="false">
+  <label for="notexact">Case Insensitive</label>
+</form>
+</p>
+<ul>
+++++
+<#list questions as question>
+++++
+<li><a href="/question/${question.questionId}">${question.questionId}</a> : ${question.question}</br>
+${question.category} / 
+<#if question.attributes??>
+<#list question.attributes as attribute>
+${attribute}&nbsp;
+</#list>
+<#else>
+No Attributes Assigned!
+</#if>
+++++
+</#list>
+++++
+</ul>
+
+++++
