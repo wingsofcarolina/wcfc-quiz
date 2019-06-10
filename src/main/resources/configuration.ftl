@@ -11,6 +11,12 @@ templates: ${TEMPLATES!'./templates'}
 # Location of the data backup/restore directory
 dataDirectory: ${DATADIR!'/data'}
 
+# Operational mode, DEV or PROD
+mode: ${MODE!'PROD'}
+
+# Slack target channel (default is WCFC #quiz channel)
+slackTarget: ${SLACK!'REDACTED'}
+
 # Configure ports used by DropWizard
 server:
     type: simple

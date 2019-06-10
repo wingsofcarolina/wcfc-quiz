@@ -6,11 +6,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wingsofcarolina.quiz.authentication.AuthenticationExceptionMapper;
 import org.wingsofcarolina.quiz.authentication.Privilege;
+import org.wingsofcarolina.quiz.common.RuntimeExceptionMapper;
 import org.wingsofcarolina.quiz.domain.User;
 import org.wingsofcarolina.quiz.domain.persistence.Persistence;
 import org.wingsofcarolina.quiz.healthcheck.MinimalHealthCheck;
 import org.wingsofcarolina.quiz.resources.QuizAPI;
 import org.wingsofcarolina.quiz.resources.QuizResource;
+import org.wingsofcarolina.quiz.resources.Slack;
 
 import de.thomaskrille.dropwizard_template_config.TemplateConfigBundle;
 import de.thomaskrille.dropwizard_template_config.TemplateConfigBundleConfiguration;
@@ -52,7 +54,8 @@ public class QuizService extends Application<QuizConfiguration> {
 
 	@Override
 	public void run(QuizConfiguration config, Environment env) throws Exception {
-		User user;
+		// Set up Slack communications
+		new Slack(config);
 		
 		// Set up the Persistence singleton
 		new Persistence().initialize(config.getMongodb());
@@ -62,7 +65,9 @@ public class QuizService extends Application<QuizConfiguration> {
 
 		// Set exception mappers
 		env.jersey().register(new AuthenticationExceptionMapper());
-//        env.jersey().register(new RuntimeExceptionMapper());
+		if (config.getMode().contentEquals("PROD")) {
+			env.jersey().register(new RuntimeExceptionMapper());
+		}
 		
 		// Now finish setting up the API
 		env.jersey().register(quiz);

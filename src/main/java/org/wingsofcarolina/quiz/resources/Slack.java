@@ -11,11 +11,25 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wingsofcarolina.quiz.QuizConfiguration;
 
 public class Slack {
 	private static final Logger LOG = LoggerFactory.getLogger(Slack.class);
+	
+	private static Slack instance = null;
 
-	private String URL = "https://hooks.slack.com/services/REDACTED";
+	// WCFC #quiz channel : https://hooks.slack.com/services/REDACTED
+	// Planez.co #notification channel : https://hooks.slack.com/services/REDACTED
+	private String URL = null;
+	
+	public Slack(QuizConfiguration config) {
+		this.URL = "https://hooks.slack.com/services/" + config.getSlackTarget();
+		Slack.instance = this;
+	}
+	
+	public static Slack instance() {
+		return Slack.instance;
+	}
 	
 	public void sendMessage(String message) {
 		CloseableHttpClient httpclient = HttpClients.createDefault();
