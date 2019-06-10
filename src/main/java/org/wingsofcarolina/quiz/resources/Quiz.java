@@ -8,6 +8,7 @@ import java.util.List;
 import org.mongodb.morphia.annotations.Transient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wingsofcarolina.quiz.common.QuizBuildException;
 import org.wingsofcarolina.quiz.domain.Category;
 import org.wingsofcarolina.quiz.domain.Question;
 import org.wingsofcarolina.quiz.domain.Record;
@@ -124,8 +125,9 @@ public class Quiz {
 	/**
 	 * Based on a quiz recipe, build a quiz
 	 * @return
+	 * @throws QuizBuildException 
 	 */
-	public Quiz build() {
+	public Quiz build() throws QuizBuildException {
 		List<Question> pool = new ArrayList<Question>();
 
 		// Pick up the recipe for the desired quiz
@@ -166,7 +168,7 @@ public class Quiz {
 				}
 				int candidateCount = candidates.size();
 				if (candidateCount < selection.getCount()) {
-					throw new RuntimeException("Not enough candidates to satisfy the Recipe. Had " + candidateCount + " and wanted " + selection.getCount());
+					throw new QuizBuildException("Not enough candidates to satisfy the Recipe. Had " + candidateCount + " but wanted " + selection.getCount() + ".");
 				}
 				
 				// Select the desired number of questions from the candidates

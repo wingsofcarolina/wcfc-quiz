@@ -1,0 +1,23 @@
+= Quiz Generation Error
+
+<#setting number_format="#0">
+++++
+<link rel="stylesheet" href="/static/quiz-style.css">
+We apologize for the inconvenience, but there was a problem
+generating your quiz. Please contact <a href="mailto:dfrye@planez.co">Dwight Frye</a> and
+report the failure, including the message below. The message returned from the system
+during quiz construction was :
+</p>
+
+<div style="font-size:1.2em">
+<strong>${message}</strong>
+</div>
+
+<hr>
+The Recipe which could not be fulfilled was :
+<blockquote>
+<div style='padding: 3px; width: 80%; word-break: break-all; word-wrap: break-word; margin-left: 10px'>
+${output}
+</div>
+</blockquote>
+++++

@@ -31,11 +31,13 @@ import org.wingsofcarolina.quiz.authentication.HashUtils;
 import org.wingsofcarolina.quiz.authentication.Privilege;
 import org.wingsofcarolina.quiz.common.Flash;
 import org.wingsofcarolina.quiz.common.Pages;
+import org.wingsofcarolina.quiz.common.QuizBuildException;
 import org.wingsofcarolina.quiz.common.Templates;
 import org.wingsofcarolina.quiz.domain.*;
 import org.wingsofcarolina.quiz.domain.presentation.JsonWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.QuestionListWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.QuestionWrapper;
+import org.wingsofcarolina.quiz.domain.presentation.QuizBuildErrorWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.Renderer;
 import org.wingsofcarolina.quiz.domain.presentation.Wrapper;
 import org.wingsofcarolina.quiz.resources.Quiz.QuizType;
@@ -182,9 +184,11 @@ public class QuizResource {
 	@Path("generate")
 	@Produces("text/html")
 	public Response generate(@QueryParam("quiz") String quizType) throws Exception {
+		Quiz quiz = null;
 		String output = "";
 		try {
-			Quiz quiz = new Quiz(quizType).build();
+			quiz = new Quiz(quizType);
+			quiz.build();
 			
 			// Store the quiz question set for later retrieval
 			Record record = quiz.getRecord();
@@ -192,6 +196,17 @@ public class QuizResource {
 			
 			// Render the output for the club member
 			output = renderer.render(Templates.QUIZ, quiz).toString();
+		} catch (QuizBuildException e) {
+			Recipe recipe = Recipe.getRecipeByType(quiz.getQuizType());
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.enable(SerializationFeature.INDENT_OUTPUT);
+			output = mapper.writeValueAsString(recipe);
+			output = output.replaceAll("(\r\n|\n)", "<br/>");
+			output = output.replaceAll("\\s", "&nbsp;&nbsp;");
+
+			QuizBuildErrorWrapper wrapper = new QuizBuildErrorWrapper(e.getMessage(), output);
+			output = renderer.render("quizBuildError.ad", wrapper);
+			return Response.ok().entity(output).build();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -224,7 +239,7 @@ public class QuizResource {
 	@GET
 	@Path("recipe")
 	@Produces("text/html")
-	public Response recipe(@CookieParam("quiz.token") Cookie cookie,
+	public Response showRecipe(@CookieParam("quiz.token") Cookie cookie,
 			@QueryParam("quiz") String quiz) throws Exception, AuthenticationException {
 		Quiz.QuizType quizType = null;
 
