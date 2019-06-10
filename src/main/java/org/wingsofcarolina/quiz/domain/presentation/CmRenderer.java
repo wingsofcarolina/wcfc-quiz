@@ -11,6 +11,8 @@ public class CmRenderer {
 	public static String render(String input) {
 		Node document = parser.parse(input);
 		String output = renderer.render(document);
-		return output.substring(3,output.length()-5);
+		int first = output.indexOf('>');
+		int last = output.lastIndexOf('<');
+		return output.substring(first+1,last-1);
 	}
 }

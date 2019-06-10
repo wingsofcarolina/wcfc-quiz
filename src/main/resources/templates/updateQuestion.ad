@@ -153,5 +153,7 @@ Fill in the Blank
 </p>
 <input type="submit" value="Update Question"></form>
 </p>
+<div class="paragraph">
+<p><form action="/question/${question.questionId}" method="get"><input type="submit" value="Cancel" /></form></p>
+</div>
 ++++
-button:/[method="get",label="Cancel"] 

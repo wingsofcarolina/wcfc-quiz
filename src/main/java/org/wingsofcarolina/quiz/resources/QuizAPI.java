@@ -219,7 +219,22 @@ public class QuizAPI {
 			@FormParam("correct4") Boolean correct4,
 			@FormParam("correct5") Boolean correct5
 			) throws Exception, AuthenticationException {
+
+		Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
+		User user = User.getWithClaims(claims);
 		
+		Question q = createQuestion(cookie, typeName, categoryName, question, discussion, references, difficulty,
+				attributes, answer1, answer2, answer3, answer4, answer5, correct1, correct2, correct3, correct4,
+				correct5);
+		
+		return new ViewQuestionResponse(q.getQuestionId()).cookie(authUtils.generateCookie(user)).build();
+	}
+	
+	private Question createQuestion(Cookie cookie, String typeName, String categoryName, String question,
+			String discussion, String references, String difficulty, List<String> attributes, String answer1,
+			String answer2, String answer3, String answer4, String answer5, Boolean correct1, Boolean correct2,
+			Boolean correct3, Boolean correct4, Boolean correct5) throws Exception {
+
 		LOG.info("Type       --> {}", typeName);
 		LOG.info("Category   --> {}", categoryName);
 		LOG.info("Question   --> {}", question);
@@ -231,9 +246,6 @@ public class QuizAPI {
 		// Add the difficulty to the attributes
 		attributes.add(difficulty);
 		LOG.info("Attributes --> {}", attributes);
-		
-		Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
-		User user = User.getWithClaims(claims);
 		
 		Type type = null;
 		Category category = null;
@@ -256,7 +268,7 @@ public class QuizAPI {
 		q.save();
 		
 		Flash.add(Flash.Code.SUCCESS, "Created new question with ID : " + q.getQuestionId());
-		return new ViewQuestionResponse(q.getQuestionId()).cookie(authUtils.generateCookie(user)).build();
+		return q;
 	}
 	
 	@POST
@@ -264,8 +276,8 @@ public class QuizAPI {
 	@Produces("text/html")
 	public Response updateQuestion(@CookieParam("quiz.token") Cookie cookie,
 			@FormParam("questionId") Long questionId,
-			@FormParam("type") String type,
-			@FormParam("category") String category,
+			@FormParam("type") String typeName,
+			@FormParam("category") String categoryName,
 			@FormParam("question") String question,
 			@FormParam("discussion") String discussion,
 			@FormParam("references") String references,
@@ -297,31 +309,42 @@ public class QuizAPI {
 		Question original = Question.getByQuestionId(questionId);
 	
 		if (original != null) {
-			// Update Attributes, detecting changes
-			for (String att : attributes) {
-				if ( ! original.hasAttribute(att)) { changed = true; }
-			}
-			if (attributes.size() != original.getAttributes().size()) { changed = true; }
-			if (changed) {
-				original.setAttributes(attributes);
-			}
-			
-			// Update user-changeable details, detecting changes
-			QuestionDetails details = new QuestionDetails(question, discussion, references, answer1,
-					answer2, answer3, answer4, answer5, correct1, correct2, correct3, correct4, correct5);
-			if (details.update(original)) { changed = true; }
-			
-			if (changed) {
-				LOG.info("Updated Question : {}", original.getQuestionId());
+			if ( ! original.getDeployed()) {
+				// Update Attributes, detecting changes
+				for (String att : attributes) {
+					if ( ! original.hasAttribute(att)) { changed = true; }
+				}
+				if (attributes.size() != original.getAttributes().size()) { changed = true; }
+				if (changed) {
+					original.setAttributes(attributes);
+				}
+				
+				// Update user-changeable details, detecting changes
+				QuestionDetails details = new QuestionDetails(question, discussion, references, answer1,
+						answer2, answer3, answer4, answer5, correct1, correct2, correct3, correct4, correct5);
+				if (details.update(original)) { changed = true; }
+				
+				if (changed) {
+					LOG.info("Updated Question : {}", original.getQuestionId());
+					original.save();
+				} else {
+					LOG.info("No changes detected for : {}", original.getQuestionId());
+				}
+				
+				if (changed) {
+					Flash.add(Flash.Code.SUCCESS, "Updated existing question with ID : " + original.getQuestionId());
+				} else {
+					Flash.add(Flash.Code.SUCCESS, "No changes made to question with ID : " + original.getQuestionId());
+				}
+			} else {
+				Question q = createQuestion(cookie, typeName, categoryName, question, discussion, references, difficulty,
+						attributes, answer1, answer2, answer3, answer4, answer5, correct1, correct2, correct3, correct4,
+						correct5);
+				original.setSupercededBy(q.getQuestionId());
 				original.save();
-			} else {
-				LOG.info("No changes detected for : {}", original.getQuestionId());
-			}
-			
-			if (changed) {
-				Flash.add(Flash.Code.SUCCESS, "Updated existing question with ID : " + original.getQuestionId());
-			} else {
-				Flash.add(Flash.Code.SUCCESS, "No changes made to question with ID : " + original.getQuestionId());
+				Flash.add(Flash.Code.SUCCESS, "Superceded existing question with ID : " + original.getQuestionId());
+				
+				return new ViewQuestionResponse(q.getQuestionId()).cookie(authUtils.generateCookie(user)).build();
 			}
 		} else {
 			Flash.add(Flash.Code.ERROR, "Question with ID " + questionId + " not found.");			

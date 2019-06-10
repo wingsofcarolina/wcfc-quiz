@@ -1,6 +1,7 @@
-= Edit Question
+= Show Question
 
 <#setting number_format="#0">
+<#assign seq = ["A", "B", "C", "D", "E"]>
 
 <#if user.isAdmin()>
 navbar:${user.userId}[buttons="HomeNavButton;RecipeNavButton;ViewNavButton;AddNavButton;EditNavButton;ProfileNavButton", active="ViewNavButton"]
@@ -11,6 +12,11 @@ navbar:${user.userId}[buttons="HomeNavButton;ProfileNavButton", active="HomeNavB
 ++++
 <table width=100%>
 <tr><td width=10%>ID</td><td><strong>${question.questionId}</strong></td></tr>
+
+<#if question.isSuperceded()>
+<tr><td valign="top">Superceded</td><td><strong>${question.getSupercededBy()}</strong> -- Question ${question.questionId} locked</td></tr>
+</#if>
+
 <tr><td>Type</td><td><strong>
 <#if question.type == "CHOICE">
 Multiple Choice
@@ -30,27 +36,38 @@ ${attribute}
 </#list>
 ++++
 </td></tr>
-<tr><td colspan=2>The answer in <strong>bold</strong> below is the correct answer.</td></tr>
+
 <tr><td valign="top" id="answerLabel">Answers</td><td>
 	<table id="answerlist" width=100%>
-	<tr><td colspan=2 valign="top" width=5%>A</td><td>
-	<#if question.getAnswerAt(1).isCorrect()><strong></#if>
-	${question.getAnswerAt(1).getAnswerAsHtml()}</td></tr>
-	<tr><td colspan=2 valign="top">B</td><td>
-	<#if question.getAnswerAt(2).isCorrect()><strong></#if>
-	${question.getAnswerAt(2).getAnswerAsHtml()}</td></tr>
-	<tr><td colspan=2 valign="top">C</td><td>
-	<#if question.getAnswerAt(3).isCorrect()><strong></#if>
-	${question.getAnswerAt(3).getAnswerAsHtml()}</td></tr>
-	<tr><td colspan=2 valign="top">D</td><td>
-	<#if question.getAnswerAt(4).isCorrect()><strong></#if>
-	${question.getAnswerAt(4).getAnswerAsHtml()}</td></tr>
-	<tr><td colspan=2 valign="top">E</td><td>
-	<#if question.getAnswerAt(5).isCorrect()><strong></#if>
-	${question.getAnswerAt(5).getAnswerAsHtml()}</td></tr>
+	<tr><td colspan=2 valign="top" width=5%>A</td>
+	<td>${question.getAnswerAt(1).getAnswerAsHtml()}</td></tr>
+	<tr><td colspan=2 valign="top">B</td>
+	<td>${question.getAnswerAt(2).getAnswerAsHtml()}</td></tr>
+	<tr><td colspan=2 valign="top">C</td>
+	<td>${question.getAnswerAt(3).getAnswerAsHtml()}</td></tr>
+	<tr><td colspan=2 valign="top">D</td>
+	<td>${question.getAnswerAt(4).getAnswerAsHtml()}</td></tr>
+	<tr><td colspan=2 valign="top">E</td>
+	<td>${question.getAnswerAt(5).getAnswerAsHtml()}</td></tr>
 	</table>
 </td></tr>
+
+<#if question.isMultipleChoice()>
+<tr><td colspan=2>
+<#assign index = 0>
+<#list question.answers as answer>
+<#if answer.isCorrect()>
+Correct Answer is : <strong>${seq[index]}</strong></br>
+</#if>
+<#assign index=index+1>
+</#list>
+</td></tr>
+</#if>
 </table>
 </p>
+
+<#if ! question.isSuperceded()>
 ++++
 button:/updateQuestion/${question.questionId}[method="get",label="Edit Question"]
+++++
+</#if>

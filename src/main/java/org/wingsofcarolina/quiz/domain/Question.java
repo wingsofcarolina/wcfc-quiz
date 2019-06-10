@@ -139,6 +139,10 @@ public class Question {
 	public long getSupercededBy() {
 		return supercededBy;
 	}
+	
+	public boolean isSuperceded() {
+		return supercededBy != -1;
+	}
 
 	public void setSupercededBy(long supercededBy) {
 		this.supercededBy = supercededBy;
@@ -202,39 +206,6 @@ public class Question {
 		details.setDiscussion(discussion);
 	}
 	
-	private String toHtml(String s) {
-	    StringBuilder builder = new StringBuilder();
-	    boolean previousWasASpace = false;
-	    for( char c : s.toCharArray() ) {
-	        if( c == ' ' ) {
-	            if( previousWasASpace ) {
-	                builder.append("&nbsp;");
-	                previousWasASpace = false;
-	                continue;
-	            }
-	            previousWasASpace = true;
-	        } else {
-	            previousWasASpace = false;
-	        }
-	        switch(c) {
-	            case '<': builder.append("&lt;"); break;
-	            case '>': builder.append("&gt;"); break;
-	            case '&': builder.append("&amp;"); break;
-	            case '"': builder.append("&quot;"); break;
-	            case '\n': builder.append("<br>"); break;
-	            // We need Tab support here, because we print StackTraces as HTML
-	            case '\t': builder.append("&nbsp; &nbsp; &nbsp;"); break;  
-	            default:
-	                if( c < 128 ) {
-	                    builder.append(c);
-	                } else {
-	                    builder.append("&#").append((int)c).append(";");
-	                }    
-	        }
-	    }
-	    return builder.toString();
-	}
-	
 	/*
 	 * Database Management Functionality
 	 */
@@ -249,7 +220,7 @@ public class Question {
 		return questionDao.getQuestionsLimited(skip, count);
 	}
 	
-	public static Collection<? extends Question> getSelected(Category category) {
+	public static List<Question> getSelected(Category category) {
 		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
 		return questionDao.getSelected(category);
 	}

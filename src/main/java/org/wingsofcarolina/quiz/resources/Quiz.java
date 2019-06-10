@@ -6,6 +6,8 @@ import java.util.Date;
 import java.util.List;
 
 import org.mongodb.morphia.annotations.Transient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wingsofcarolina.quiz.domain.Category;
 import org.wingsofcarolina.quiz.domain.Question;
 import org.wingsofcarolina.quiz.domain.Record;
@@ -14,8 +16,9 @@ import org.wingsofcarolina.quiz.domain.Section;
 import org.wingsofcarolina.quiz.domain.Selection;
 import org.wingsofcarolina.quiz.domain.persistence.Persistence;
 
-
 public class Quiz {
+	private static final Logger LOG = LoggerFactory.getLogger(Quiz.class);
+
 	public enum QuizType { FAR, SOP_STUDENT, SOP_PILOT, SOP_INSTRUCTOR, C152, C172, PA28, M20J };
 
 	public final static Integer MONTHS_TO_LIVE = 3;
@@ -137,17 +140,30 @@ public class Quiz {
 			if (section.getRequired() != null) {
 				for (Long id : section.getRequired()) {
 					Question candidate = Question.getByQuestionId(id);
-					pool.add(candidate);
-					if ( ! candidate.getDeployed()) {
-						candidate.setDeployed(true);
-						candidate.save();
+					while (candidate != null && candidate.isSuperceded()) {
+						candidate = Question.getByQuestionId(candidate.getSupercededBy());
+					}
+
+					if (candidate != null) {
+						pool.add(candidate);
+						if ( ! candidate.getDeployed()) {
+							candidate.setDeployed(true);
+							candidate.save();
+						}
+					} else {
+						LOG.error("Required question {} not found. WTF?", id);
 					}
 				}
 			}
 			
 			// Next iterate over all selections within the section
 			for (Selection selection : section.getSelections()) {
-				candidates = Question.getSelected(category, selection.getAttributes());
+				List<String> atts = selection.getAttributes();
+				if (atts.contains("ALL")) {
+					candidates = Question.getSelected(category);
+				} else {
+					candidates = Question.getSelected(category, atts);
+				}
 				int candidateCount = candidates.size();
 				if (candidateCount < selection.getCount()) {
 					throw new RuntimeException("Not enough candidates to satisfy the Recipe. Had " + candidateCount + " and wanted " + selection.getCount());
@@ -159,15 +175,18 @@ public class Quiz {
 					int pick = 	(int)(Math.random() * candidates.size());
 					Question candidate = candidates.get(pick);
 					candidates.remove(pick);
+					
+					// If the question has been supersededed, then find the most
+					// current version and use that instead.
+					while (candidate != null && candidate.isSuperceded()) {
+						candidate = Question.getByQuestionId(candidate.getSupercededBy());
+					}
+					
 					// If the candidate is _not_ already in the pool (which can
 					// happen due to conflicts with the REQUIRED list) then we
 					// can add it, otherwise we skip it and press on.
 					if (notInPool(candidate, pool)) {
 						pool.add(candidate);
-						if ( ! candidate.getDeployed()) {
-							candidate.setDeployed(true);
-							candidate.save();
-						}
 						i++;
 					}
 				}
@@ -182,6 +201,12 @@ public class Quiz {
 			Question entity = pool.remove(pick);
 			entity.setIndex(i + 1);
 			questions.add(entity);
+			
+			// Make note that the question has now been 'deployed'
+			if ( ! entity.getDeployed()) {
+				entity.setDeployed(true);
+				entity.save();
+			}
 		}
 		return this;
 	}

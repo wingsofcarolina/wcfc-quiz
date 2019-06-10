@@ -43,7 +43,7 @@ public class Attribute {
 	public static String PILOT = "PILOT";
 	public static String ANY = "ANY";
 	public static List<String> sop_attributes = Arrays.asList(SOP_I, SOP_II, SOP_III, SOP_IV, SOP_V, SOP_VI, SOP_VII, FS);
-	public static List<String> level_attributes = Arrays.asList(STUDENT, INSTRUCTOR, PILOT, ANY);
+	public static List<String> level_attributes = Arrays.asList(STUDENT, INSTRUCTOR, PILOT);
 	
 	public static List<String> attributes(String category) {
 		switch (category.toLowerCase()) {
