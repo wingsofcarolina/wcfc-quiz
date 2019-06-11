@@ -6,9 +6,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import javax.ws.rs.CookieParam;
 import javax.ws.rs.FormParam;
@@ -68,6 +71,8 @@ public class QuizResource {
 	
 	ObjectMapper objectMapper;
 	Map<String, Object> buildProperties;
+
+	private SimpleDateFormat dateFormatGmt;
 	private static final Integer pageCount = 10;
 
 	@SuppressWarnings("unchecked")
@@ -89,6 +94,10 @@ public class QuizResource {
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
+	    
+		// Get the startup date/time format in GMT
+	    dateFormatGmt = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss");
+		dateFormatGmt.setTimeZone(TimeZone.getTimeZone("GMT"));
 	}
 	
 	public static QuizResource instance() {
@@ -107,6 +116,7 @@ public class QuizResource {
 		if (cookie != null) {
 			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.USER);
 			User user = User.getWithClaims(claims);
+			Slack.instance().sendMessage("Version information requested by : " + user.getFullname() + "(" + user.getEmail() + ")");
 			String output = objectMapper.writeValueAsString(buildProperties);
 			output = output.replaceAll("(\r\n|\n)", "<br/>");
 			output = output.replaceAll("\\s", "&nbsp;&nbsp;");
@@ -196,6 +206,7 @@ public class QuizResource {
 			
 			// Render the output for the club member
 			output = renderer.render(Templates.QUIZ, quiz).toString();
+			Slack.instance().sendMessage("Quiz " + quiz.getQuizName() + " requested at " + dateFormatGmt.format(new Date()));
 		} catch (QuizBuildException e) {
 			Recipe recipe = Recipe.getRecipeByType(quiz.getQuizType());
 			ObjectMapper mapper = new ObjectMapper();
@@ -204,6 +215,9 @@ public class QuizResource {
 			output = output.replaceAll("(\r\n|\n)", "<br/>");
 			output = output.replaceAll("\\s", "&nbsp;&nbsp;");
 
+			// Notify someone of the failure to generate a quiz. This is critical!
+			Slack.instance().sendMessage("ERROR generating quiz for " + quiz.getQuizName() + " : " + e.getMessage());
+			
 			QuizBuildErrorWrapper wrapper = new QuizBuildErrorWrapper(e.getMessage(), output);
 			output = renderer.render("quizBuildError.ad", wrapper);
 			return Response.ok().entity(output).build();

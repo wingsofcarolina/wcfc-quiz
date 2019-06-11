@@ -13,6 +13,9 @@ import org.wingsofcarolina.quiz.domain.Question;
 import org.wingsofcarolina.quiz.domain.Type;
 
 import com.mongodb.BasicDBObjectBuilder;
+import com.mongodb.DBCollection;
+import com.mongodb.WriteResult;
+import com.mongodb.client.model.DeleteOptions;
 
 
 public class QuestionDAO extends BasicDAO<Question, ObjectId> {
@@ -76,5 +79,9 @@ public class QuestionDAO extends BasicDAO<Question, ObjectId> {
 		Query<Question> query = getDatastore().createQuery(Question.class).disableValidation();
 		query.filter("category = ", category);
 		return query.order("questionid").asList();
+	}
+
+	public void drop() {
+		getDatastore().getCollection(Question.class).drop();
 	}
 }

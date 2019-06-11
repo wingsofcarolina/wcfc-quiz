@@ -1,5 +1,9 @@
 package org.wingsofcarolina.quiz;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
+
 import org.knowm.dropwizard.sundial.SundialBundle;
 import org.knowm.dropwizard.sundial.SundialConfiguration;
 import org.slf4j.Logger;
@@ -54,9 +58,13 @@ public class QuizService extends Application<QuizConfiguration> {
 
 	@Override
 	public void run(QuizConfiguration config, Environment env) throws Exception {
+		// Get the startup date/time in GMT
+		SimpleDateFormat dateFormatGmt = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss");
+		dateFormatGmt.setTimeZone(TimeZone.getTimeZone("GMT"));
+
 		// Set up Slack communications
-		new Slack(config);
-		
+		new Slack(config).sendMessage("WCFC Quiz System restarted at " + dateFormatGmt.format(new Date()));
+
 		// Set up the Persistence singleton
 		new Persistence().initialize(config.getMongodb());
 

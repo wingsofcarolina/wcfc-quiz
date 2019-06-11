@@ -35,11 +35,19 @@ additional operations and privileges. Additionally, there
 are more commonly used admin functions added to your menu
 bar above. Use your power wisely.</p>
 
+<script>
+function restoreQuestions() {
+	if (confirm('Really? Restore ALL the Questions?')) {
+		window.location.href = "/api/restoreQuestions";
+	}
+}
+</script>
 <ul>
 <li><a href="browseQuestions">Browse questions</a><br>
 <li><a href="searchQuestions">Search questions</a><br>
 <li><a href="updateRecipe">Update a stored quiz recipe</a><br>
 <li><a href="api/backupQuestions">Generate Question Backup Files</a><br>
+<li><a id="restoreQuestions" href="#" onclick="restoreQuestions();return false;">Restore Question Backup Files</a>
 <li><a href="version">Show system version information</a><br>
 </ul>
 </p>

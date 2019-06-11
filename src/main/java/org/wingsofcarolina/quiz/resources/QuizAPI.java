@@ -4,8 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import javax.ws.rs.CookieParam;
 import javax.ws.rs.FormParam;
@@ -42,6 +45,8 @@ import org.wingsofcarolina.quiz.responses.LoginResponse;
 import org.wingsofcarolina.quiz.responses.RedirectResponse;
 import org.wingsofcarolina.quiz.responses.ViewQuestionResponse;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jsonwebtoken.Claims;
@@ -61,6 +66,7 @@ public class QuizAPI {
 	private String dataDir;
 	private String questionDir;
 	private Renderer renderer;
+	private SimpleDateFormat dateFormatGmt;
 
 	public QuizAPI(QuizConfiguration config) throws IOException {
 		this.config = config;
@@ -69,6 +75,10 @@ public class QuizAPI {
 		dataDir = config.getDataDirectory();
 		questionDir = dataDir + "/questions";
 		renderer = new Renderer(config);
+		
+		// Get the startup date/time format in GMT
+	    dateFormatGmt = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss");
+		dateFormatGmt.setTimeZone(TimeZone.getTimeZone("GMT"));
 	}
 
 	@POST
@@ -158,15 +168,18 @@ public class QuizAPI {
 		String output = "";
 		Jws<Claims> claims = authUtils.validateUser(cookie.getValue());
 		User user = User.getWithClaims(claims);
-		LOG.info("Quiz {} retrieved by {}", quizId, user.getFullname());
 		
 		Record record = Record.getByQuizId(quizId);
 		if (record != null) {
 			Quiz quiz = Quiz.quizFromRecord(record);
 			if (type.equals("Key")) {
 				output = renderer.render(Templates.KEY, quiz).toString();
+				LOG.info("Quiz Key for quiz ID {} retrieved by {}", quizId, user.getFullname());
+				Slack.instance().sendMessage("Quiz Key for quiz ID " + quizId + " retrieved by " + user.getFullname() + " at " + dateFormatGmt.format(new Date()));
 			} else {
 				output = renderer.render(Templates.QUIZ, quiz).toString();
+				LOG.info("Quiz Copy for quiz ID {} retrieved by {}", quizId, user.getFullname());
+				Slack.instance().sendMessage("Quiz Copy for quiz ID " + quizId + " retrieved by " + user.getFullname() + " at " + dateFormatGmt.format(new Date()));
 			}
 			return Response.ok().entity(output).build();
 		}
@@ -177,9 +190,15 @@ public class QuizAPI {
 	@GET
 	@Path("backupQuestions")
 	public Response backupQuestions(@CookieParam("quiz.token") Cookie cookie) throws AuthenticationException {
+		int count = 0;
+		
 		Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
 		User user = User.getWithClaims(claims);
 		
+		// Notify someone that a backup has been requested
+		Slack.instance().sendMessage("Backup of all questions requested at " + dateFormatGmt.format(new Date()));
+		LOG.info("Backup of all questions requested at {}", dateFormatGmt.format(new Date()));
+
 		// Make the directory if it doesn't exist
 		new File(dataDir).mkdir();
 		new File(questionDir).mkdir();
@@ -189,14 +208,55 @@ public class QuizAPI {
 			String name = questionDir + "/" + question.getQuestionId() + ".json";
 			try {
 				objectMapper.writeValue(new File(name), question);
+				count++;
 			} catch (IOException e) {
 				LOG.info("IOException writing question {}", name, e);
 			}
 		}
 		
+		LOG.info("The number of questions saved : {}", count);
+		Flash.add(Flash.Code.SUCCESS, "Saved " + count + " questions from the database.");
 		return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
 	}
-	
+
+	@GET
+	@Path("restoreQuestions")
+	public Response restoreQuestions(@CookieParam("quiz.token") Cookie cookie) throws AuthenticationException {
+		Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
+		User user = User.getWithClaims(claims);
+
+		// Notify someone that a backup has been requested
+		Slack.instance().sendMessage("Restore of all questions requested at " + dateFormatGmt.format(new Date()));
+		LOG.info("Restore of all questions requested at {}", dateFormatGmt.format(new Date()));
+
+		// First delete all questions (shudder)
+		Question.drop();
+
+		// Then pull in each file, one at a time, and create/save the question
+		int count = 0;
+		File folder = new File(questionDir);
+		if (folder.isDirectory()) {
+			File[] listOfFiles = folder.listFiles();
+			for (File file : listOfFiles) {
+				try {
+					Question question = objectMapper.readValue(file, Question.class);
+					question.save();
+				} catch (IOException e) {
+					LOG.error("Failed reastoring question from file : {}", e.getMessage());
+				}
+				count++;
+			}
+		} else {
+			LOG.error("Directory {} not found during question database recovery.", questionDir);
+		}
+
+		LOG.info("The number of questions restored : {}", count);
+
+		Flash.add(Flash.Code.SUCCESS, "Restored " + count + " questions into the database.");
+		Slack.instance().sendMessage("Restored " + count + " questions into the database.");
+		return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
+	}
+
 	@POST
 	@Path("addQuestion")
 	@Produces("text/html")
@@ -264,6 +324,7 @@ public class QuizAPI {
 		
 		Question q = new Question(type, category, attributes, new QuestionDetails(question, discussion, references, answer1,
 				answer2, answer3, answer4, answer5, correct1, correct2, correct3, correct4, correct5));
+		Slack.instance().sendMessage("Created Question : " + q.toString());
 		LOG.info("Created Question : {}", q);
 		q.save();
 		
@@ -327,6 +388,7 @@ public class QuizAPI {
 				if (changed) {
 					LOG.info("Updated Question : {}", original.getQuestionId());
 					original.save();
+					Slack.instance().sendMessage("Updated Question : " + original.toString());
 				} else {
 					LOG.info("No changes detected for : {}", original.getQuestionId());
 				}
@@ -342,7 +404,9 @@ public class QuizAPI {
 						correct5);
 				original.setSupercededBy(q.getQuestionId());
 				original.save();
-				Flash.add(Flash.Code.SUCCESS, "Superceded existing question with ID : " + original.getQuestionId());
+				LOG.info("Superceded question {} with " + original.getQuestionId(), q.getQuestionId());
+				Flash.add(Flash.Code.SUCCESS, "Superceded question " + original.getQuestionId() + " with " + q.getQuestionId());
+				Slack.instance().sendMessage("Superceded question " + original.getQuestionId() + " with " + q.getQuestionId() + " at " + dateFormatGmt.format(new Date()));
 				
 				return new ViewQuestionResponse(q.getQuestionId()).cookie(authUtils.generateCookie(user)).build();
 			}

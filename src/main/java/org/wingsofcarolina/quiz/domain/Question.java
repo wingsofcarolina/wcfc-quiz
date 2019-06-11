@@ -38,7 +38,9 @@ public class Question {
 	@Transient
 	private HtmlRenderer renderer;
 
-	public Question() {}
+	public Question() {
+		details = new QuestionDetails();
+	}
 	
 	public Question(Type type, Category category,  List<String> attributes, QuestionDetails details) {
 		this.type = type;
@@ -209,6 +211,11 @@ public class Question {
 	/*
 	 * Database Management Functionality
 	 */
+	public static void drop() {
+		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
+		questionDao.drop();
+	}
+	
 	public static List<Question> getAllQuestions() {
 		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
 		return questionDao.getAllQuestions();

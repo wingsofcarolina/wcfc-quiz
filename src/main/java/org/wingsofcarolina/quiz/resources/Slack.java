@@ -23,7 +23,8 @@ public class Slack {
 	private String URL = null;
 	
 	public Slack(QuizConfiguration config) {
-		this.URL = "https://hooks.slack.com/services/" + config.getSlackTarget();
+		// TODO Eventually make this configurable, but for now always go to Planez.co
+		this.URL = "https://hooks.slack.com/services/REDACTED"; // "https://hooks.slack.com/services/" + config.getSlackTarget();
 		Slack.instance = this;
 	}
 	
