@@ -108,6 +108,7 @@ public class QuizAPI {
 		
 		User user = User.getByEmail(email);
 		LOG.info("Logged in  : {}", user);
+		Slack.instance().sendMessage("Logged in  : " + user.getFullname() + " (" + user.getEmail() + ")");
 
 		return new LoginResponse(authUtils.generateCookie(user)).build();
 	}

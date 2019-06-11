@@ -69,6 +69,11 @@ public class Question {
 		return type != Type.BLANK;
 	}
 	
+	@JsonIgnore
+	public boolean isSuperceded() {
+		return supercededBy != -1;
+	}
+
 	public long getQuestionId() {
 		return questionId;
 	}
@@ -142,10 +147,6 @@ public class Question {
 		return supercededBy;
 	}
 	
-	public boolean isSuperceded() {
-		return supercededBy != -1;
-	}
-
 	public void setSupercededBy(long supercededBy) {
 		this.supercededBy = supercededBy;
 	}
