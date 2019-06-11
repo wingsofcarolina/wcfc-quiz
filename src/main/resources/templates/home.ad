@@ -36,9 +36,10 @@ are more commonly used admin functions added to your menu
 bar above. Use your power wisely.</p>
 
 <script>
-function restoreQuestions() {
-	if (confirm('Really? Restore ALL the Questions?')) {
-		window.location.href = "/api/restoreQuestions";
+function query(msg, redirect) {
+	if (confirm(msg)) {
+		console.log('Redirecting to --> ' + redirect);
+		window.location.href = redirect;
 	}
 }
 </script>
@@ -46,8 +47,8 @@ function restoreQuestions() {
 <li><a href="browseQuestions">Browse questions</a><br>
 <li><a href="searchQuestions">Search questions</a><br>
 <li><a href="updateRecipe">Update a stored quiz recipe</a><br>
-<li><a href="api/backupQuestions">Generate Question Backup Files</a><br>
-<li><a id="restoreQuestions" href="#" onclick="restoreQuestions();return false;">Restore Question Backup Files</a>
+<li><a id="restoreQuestions" href="#" onclick="query('Really? Overwrite ALL currently saved Questions?', '/api/backupQuestions');return false;">Create Question Backup Files</a>
+<li><a id="restoreQuestions" href="#" onclick="query('Really? Restore ALL the Questions?', '/api/restoreQuestions');return false;">Restore Question Backup Files</a>
 <li><a href="version">Show system version information</a><br>
 </ul>
 </p>
