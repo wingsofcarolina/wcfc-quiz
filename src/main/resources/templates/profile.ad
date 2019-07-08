@@ -1,4 +1,4 @@
-= User Profile : ${user.fullname}
+= User Profile : ${user.name}
 
 <#setting number_format="#0">
 
@@ -10,10 +10,10 @@ navbar:${user.userId}[buttons="HomeNavButton;ProfileNavButton", active="ProfileN
 
 flash:message[]
 
-
+== User Details
 ++++
 <table>
-<tr><td>Name</td><td>${user.fullname}</td></tr>
+<tr><td>Name</td><td>${user.name}</td></tr>
 <tr><td>Email Address</td><td>${user.email}</td></tr>
 <tr><td>User ID</td><td>${user.userId}</td></tr>
 <tr><td>Privileges</td>
@@ -25,19 +25,17 @@ ${privilege}&nbsp;&nbsp;
 </table>
 
 </hr>
-++++
+
 <form action="/api/changePassword" method="post">
 ++++
-
+== Change Password
 |===
-| Old Password : | pass:[<input type="password" name="oldPw">]
-| &nbsp; | 
 | Password : | pass:[<input type="password" name="password">]
 | Password (again) : | pass:[<input type="password" name="passwordVerify">]
 |===
 
 ++++
   <input type="submit" name="action" value="Change Password">
-  <input type="submit" name="action" value="Cancel">
 </form>
 ++++
+button:/[method="get",label="Cancel"] 

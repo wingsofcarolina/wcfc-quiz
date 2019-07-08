@@ -140,10 +140,10 @@ public class QuizAPI {
 		User user = null;
 
 		if (email == null || password == null) {
-			Flash.add(Flash.Code.ERROR, "No email or password provided, try again");
+			Flash.add(Flash.Code.ERROR, "No email or password provided, try again.");
 			return new RedirectResponse(Pages.REGISTER_PAGE).build();
 		} else if (! password.equals(passwordVerify)) {
-			Flash.add(Flash.Code.ERROR, "Passwords do not match");
+			Flash.add(Flash.Code.ERROR, "Passwords do not match.");
 			return new RedirectResponse(Pages.REGISTER_PAGE).build();
 		}
 
@@ -151,7 +151,7 @@ public class QuizAPI {
 			user = QuizResource.instance().addUser(name, email, password, Privilege.USER);
 			user.save();
 		} else {
-			Flash.add(Flash.Code.ERROR, "User already exists");
+			Flash.add(Flash.Code.ERROR, "User already exists.");
 			return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(requester)).build();		
 		}
 
@@ -159,6 +159,32 @@ public class QuizAPI {
 		LOG.info("Registered  : {}", user);
 		Flash.add(Flash.Code.SUCCESS, "User with registered successfully.");
 		return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(requester)).build();		
+	}
+
+	@POST
+	@Path("changePassword")
+	@Produces("text/html")
+	public Response changePassword(@CookieParam("quiz.token") Cookie cookie,
+			@FormParam("password") String password,
+			@FormParam("passwordVerify") String passwordVerify
+			) throws AuthenticationException, IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+		
+		Jws<Claims> claims = authUtils.validateUser(cookie.getValue());
+		User user = User.getWithClaims(claims);
+
+		if (password == null || passwordVerify == null) {
+			Flash.add(Flash.Code.ERROR, "No password or verification password provided, try again.");
+		} else if (! password.equals(passwordVerify)) {
+			Flash.add(Flash.Code.ERROR, "Passwords do not match.");
+		}
+
+		// Actually change the password for the user
+		LOG.info("Changing the password for '" + user.getEmail() +"'.");
+		String hashedPw = HashUtils.generateStrongPasswordHash(password);
+		user.setPassword(hashedPw);
+		user.save();
+		
+		return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
 	}
 
 	@POST
