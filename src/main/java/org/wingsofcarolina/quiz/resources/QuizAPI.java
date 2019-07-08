@@ -108,7 +108,7 @@ public class QuizAPI {
 		
 		User user = User.getByEmail(email);
 		LOG.info("Logged in  : {}", user);
-		Slack.instance().sendMessage("Logged in  : " + user.getFullname() + " (" + user.getEmail() + ")");
+		Slack.instance().sendMessage("Logged in  : " + user.getName() + " (" + user.getEmail() + ")");
 
 		return new LoginResponse(authUtils.generateCookie(user)).build();
 	}
@@ -124,39 +124,41 @@ public class QuizAPI {
 	@POST
 	@Path("register")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response register(@FormParam("action") String action,
-			@FormParam("fullname") String fullname,
+	public Response register(@CookieParam("quiz.token") Cookie cookie,
+			@FormParam("action") String action,
+			@FormParam("name") String name,
 			@FormParam("email") String email,
 			@FormParam("password") String password,
 			@FormParam("passwordVerify") String passwordVerify,
-			@FormParam("name") String name,
 			@FormParam("phone") String phone,
 			@FormParam("member") String member)
-			throws Exception {
+			throws Exception, AuthenticationException {
+		
+		Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
+		User requester = User.getWithClaims(claims);
 
-		if (action.equals("Register")) {
-			User user = null;
+		User user = null;
 
-			if (email == null || password == null) {
-				Flash.add(Flash.Code.ERROR, "No email or password provided, try again");
-				return new RedirectResponse(Pages.REGISTER_PAGE).build();
-			} else if (! password.equals(passwordVerify)) {
-				Flash.add(Flash.Code.ERROR, "Passwords do not match");
-				return new RedirectResponse(Pages.REGISTER_PAGE).build();
-			}
-
-			if (User.getByEmail(email) == null) {
-				user = QuizResource.instance().addUser(name, email, password, Privilege.USER);
-				user.save();
-			}
-
-			// Generate user token
-			LOG.info("Registered  : {}", user);
-			return new LoginResponse(authUtils.generateCookie(user)).build();
-		} else {
-			NewCookie newCookie = new NewCookie("quiz.token", "", "/", "", "Quiz Login Token", 0, false);
-			return new RedirectResponse(Pages.LOGIN_PAGE).cookie(newCookie).build();
+		if (email == null || password == null) {
+			Flash.add(Flash.Code.ERROR, "No email or password provided, try again");
+			return new RedirectResponse(Pages.REGISTER_PAGE).build();
+		} else if (! password.equals(passwordVerify)) {
+			Flash.add(Flash.Code.ERROR, "Passwords do not match");
+			return new RedirectResponse(Pages.REGISTER_PAGE).build();
 		}
+
+		if (User.getByEmail(email) == null) {
+			user = QuizResource.instance().addUser(name, email, password, Privilege.USER);
+			user.save();
+		} else {
+			Flash.add(Flash.Code.ERROR, "User already exists");
+			return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(requester)).build();		
+		}
+
+		// Generate user token
+		LOG.info("Registered  : {}", user);
+		Flash.add(Flash.Code.SUCCESS, "User with registered successfully.");
+		return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(requester)).build();		
 	}
 
 	@POST
@@ -175,12 +177,12 @@ public class QuizAPI {
 			Quiz quiz = Quiz.quizFromRecord(record);
 			if (type.equals("Key")) {
 				output = renderer.render(Templates.KEY, quiz).toString();
-				LOG.info("Quiz Key for quiz ID {} retrieved by {}", quizId, user.getFullname());
-				Slack.instance().sendMessage("Quiz Key for quiz ID " + quizId + " retrieved by " + user.getFullname() + " at " + dateFormatGmt.format(new Date()));
+				LOG.info("Quiz Key for quiz ID {} retrieved by {}", quizId, user.getName());
+				Slack.instance().sendMessage("Quiz Key for quiz ID " + quizId + " retrieved by " + user.getName() + " at " + dateFormatGmt.format(new Date()));
 			} else {
 				output = renderer.render(Templates.QUIZ, quiz).toString();
-				LOG.info("Quiz Copy for quiz ID {} retrieved by {}", quizId, user.getFullname());
-				Slack.instance().sendMessage("Quiz Copy for quiz ID " + quizId + " retrieved by " + user.getFullname() + " at " + dateFormatGmt.format(new Date()));
+				LOG.info("Quiz Copy for quiz ID {} retrieved by {}", quizId, user.getName());
+				Slack.instance().sendMessage("Quiz Copy for quiz ID " + quizId + " retrieved by " + user.getName() + " at " + dateFormatGmt.format(new Date()));
 			}
 			return Response.ok().entity(output).build();
 		}

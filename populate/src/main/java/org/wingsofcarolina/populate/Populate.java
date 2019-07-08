@@ -52,7 +52,7 @@ public class Populate {
 	}
 	
 	private void run() throws FileNotFoundException, IOException {
-//		createUsers();
+		createUsers();
 		createRecipes();
 		createFARQuestions();
 		sopQuestions();
@@ -112,7 +112,7 @@ public class Populate {
 				if (name == null) {
 					name = "none";
 				}
-				user.setFullname(name);
+				user.setName(name);
 				user.addPriv(priv);
 				user.save();
 				System.out.println("New user  : " + user);

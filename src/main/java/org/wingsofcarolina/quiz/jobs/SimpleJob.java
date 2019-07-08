@@ -1,4 +1,4 @@
-package org.wingsofcarolina.jobs;
+package org.wingsofcarolina.quiz.jobs;
 
 import org.knowm.sundial.Job;
 import org.knowm.sundial.annotations.CronTrigger;

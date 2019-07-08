@@ -1,4 +1,4 @@
-= Register New User
+= Register New Instructor
 
 ++++
 <center>
@@ -8,14 +8,12 @@
 flash:message[]
 
 |===
-| Full Name : | pass:[<input type="text" name="fullname">]
+| Full Name : | pass:[<input type="text" name="name">]
 | Email : | pass:[<input type="text" name="email">]
 | Password : | pass:[<input type="password" name="password">]
 | Password (again) : | pass:[<input type="password" name="passwordVerify">]
 | &nbsp; | 
-| Name | pass:[<input type="text" name="name">]
-| Phone | pass:[<input type="text" name="phone">]
-| Member Number | pass:[<input type="text" name="member">]
+| WCFC Member Number | pass:[<input type="text" name="member">]
 |===
 
 ++++

@@ -43,7 +43,7 @@ sundial:
   start-delay-seconds: 0
   start-scheduler-on-load: true
   global-lock-on-load: false
-  annotated-jobs-package-name: org.wingsofcarolina.jobs
+  annotated-jobs-package-name: org.wingsofcarolina.quiz.jobs
   tasks: [startjob, stopjob]
   
 # SLF4j Logging settings.

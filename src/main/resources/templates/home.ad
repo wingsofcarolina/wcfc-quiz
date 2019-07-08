@@ -44,12 +44,13 @@ function query(msg, redirect) {
 }
 </script>
 <ul>
-<li><a href="browseQuestions">Browse questions</a><br>
-<li><a href="searchQuestions">Search questions</a><br>
-<li><a href="updateRecipe">Update a stored quiz recipe</a><br>
+<li><a href="/browseQuestions">Browse questions</a><br>
+<li><a href="/searchQuestions">Search questions</a><br>
+<li><a href="/updateRecipe">Update a stored quiz recipe</a><br>
 <li><a id="restoreQuestions" href="#" onclick="query('Really? Overwrite ALL currently saved Questions?', '/api/backupQuestions');return false;">Create Question Backup Files</a>
 <li><a id="restoreQuestions" href="#" onclick="query('Really? Restore ALL the Questions?', '/api/restoreQuestions');return false;">Restore Question Backup Files</a>
-<li><a href="version">Show system version information</a><br>
+<li><a href="/register">Register a new instructor within the system</a>
+<li><a href="/version">Show system version information</a><br>
 </ul>
 </p>
 ++++

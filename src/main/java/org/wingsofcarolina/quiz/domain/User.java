@@ -21,7 +21,7 @@ public class User {
 	@JsonIgnore
     private ObjectId id;
 	private String userId;
-	private String fullname;
+	private String name;
 	private String email;
 	@JsonIgnore
 	private String password;
@@ -47,11 +47,11 @@ public class User {
 	public String getEmail() {
 		return email;
 	}
-	public String getFullname() {
-		return fullname;
+	public String getName() {
+		return name;
 	}
-	public void setFullname(String fullname) {
-		this.fullname = fullname;
+	public void setName(String fullname) {
+		this.name = fullname;
 	}
 	public Date getCreated() {
 		return created;
@@ -83,7 +83,7 @@ public class User {
 
 	@Override
 	public String toString() {
-		return "User [userId=" + userId + ", fullname=" + fullname + ", email=" + email + ", privileges=" + privileges
+		return "User [userId=" + userId + ", name=" + name + ", email=" + email + ", privileges=" + privileges
 				+ ", created=" + created + "]";
 	}
 

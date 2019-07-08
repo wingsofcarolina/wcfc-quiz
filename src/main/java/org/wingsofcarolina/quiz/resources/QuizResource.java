@@ -116,7 +116,7 @@ public class QuizResource {
 		if (cookie != null) {
 			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.USER);
 			User user = User.getWithClaims(claims);
-			Slack.instance().sendMessage("Version information requested by : " + user.getFullname() + "(" + user.getEmail() + ")");
+			Slack.instance().sendMessage("Version information requested by : " + user.getName() + "(" + user.getEmail() + ")");
 			String output = objectMapper.writeValueAsString(buildProperties);
 			output = output.replaceAll("(\r\n|\n)", "<br/>");
 			output = output.replaceAll("\\s", "&nbsp;&nbsp;");
@@ -159,7 +159,7 @@ public class QuizResource {
 		return Response.ok().entity(output).build();
 	}
 
-	@POST
+	@GET
 	@Path("register")
 	@Produces("text/html")
 	public Response register() throws Exception {
@@ -490,7 +490,7 @@ public class QuizResource {
 				if (name == null) {
 					name = "none";
 				}
-				user.setFullname(name);
+				user.setName(name);
 				user.addPriv(priv);
 				user.save();
 				LOG.info("New user  : {}", user);
