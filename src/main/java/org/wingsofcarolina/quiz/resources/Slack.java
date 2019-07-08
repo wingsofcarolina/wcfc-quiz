@@ -21,11 +21,14 @@ public class Slack {
 	// WCFC #quiz channel : https://hooks.slack.com/services/REDACTED
 	// Planez.co #notification channel : https://hooks.slack.com/services/REDACTED
 	private String URL = null;
+
+	private QuizConfiguration config;
 	
 	public Slack(QuizConfiguration config) {
 		// TODO Eventually make this configurable, but for now always go to Planez.co
 		this.URL = "https://hooks.slack.com/services/REDACTED"; // "https://hooks.slack.com/services/" + config.getSlackTarget();
 		Slack.instance = this;
+		this.config = config;
 	}
 	
 	public static Slack instance() {
@@ -33,19 +36,21 @@ public class Slack {
 	}
 	
 	public void sendMessage(String message) {
-		CloseableHttpClient httpclient = HttpClients.createDefault();
-	    HttpPost httpPost = new HttpPost(URL);
-	    String json="{\"text\":\"" + message + "\"}";
-	    HttpEntity stringEntity = new StringEntity(json,ContentType.APPLICATION_JSON);
-	    httpPost.setEntity(stringEntity);
-	    try {
-			CloseableHttpResponse response = httpclient.execute(httpPost);
-			if (response.getStatusLine().getStatusCode() != 200) {
-				LOG.error("Failed to successfully send message to Slack");
+		if (config.getMode().contentEquals("PROD")) {
+			CloseableHttpClient httpclient = HttpClients.createDefault();
+		    HttpPost httpPost = new HttpPost(URL);
+		    String json="{\"text\":\"" + message + "\"}";
+		    HttpEntity stringEntity = new StringEntity(json,ContentType.APPLICATION_JSON);
+		    httpPost.setEntity(stringEntity);
+		    try {
+				CloseableHttpResponse response = httpclient.execute(httpPost);
+				if (response.getStatusLine().getStatusCode() != 200) {
+					LOG.error("Failed to successfully send message to Slack");
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 	}
 }
