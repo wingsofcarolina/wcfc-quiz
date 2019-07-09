@@ -35,7 +35,7 @@ public class Quiz {
 	public Quiz() {}
 	
 	public Quiz(String request) {
-		this.quizId = Persistence.instance().generateAutoIncrement("quiz", 1000);
+		this.quizId = Persistence.instance().getID("quiz", 1000);
 		switch (request) {
 			case "far":
 				category = Category.FAR;

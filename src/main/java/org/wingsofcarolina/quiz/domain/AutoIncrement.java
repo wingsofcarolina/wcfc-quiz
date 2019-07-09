@@ -7,7 +7,7 @@ import org.mongodb.morphia.annotations.Id;
  * Used to store counters for other entities.
  */
 
-@Entity(value = "ids", noClassnameStored = true)
+@Entity(value = "IDs", noClassnameStored = true)
 public class AutoIncrement {
 
   @Id
@@ -34,6 +34,10 @@ public class AutoIncrement {
     value = startValue;
   }
 
+  public void setValue(Long value) {
+	  this.value = value;
+  }
+  
   public Long getValue() {
     return value;
   }

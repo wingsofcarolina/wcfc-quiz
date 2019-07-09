@@ -76,14 +76,6 @@ public class Populate {
 			user.addPriv(Privilege.ADMIN);
 			user.save();
 		}
-		user = createUser("Sam Evett", "sam_evett@yahoo.com", "REDACTED");
-		if (user != null) {
-			user.save();
-		}
-		user = createUser("Heinz McArthur", "Heinz@mcarthur.net", "REDACTED");
-		if (user != null) {
-			user.save();
-		}
 	}
 	
 	private User createUser(String name, String email, String password) {

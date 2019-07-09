@@ -1,6 +1,7 @@
 package org.wingsofcarolina.quiz.domain.persistence;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.mongodb.morphia.Datastore;
@@ -59,7 +60,17 @@ public class Persistence {
 		return (BasicDAO) daoStore.get(clazz);
 	}
 
-	public long generateAutoIncrement(final String key, final long minimumValue) {
+	public AutoIncrement setID(final String key, final long setvalue) {
+		List<AutoIncrement> autoIncrement = datastore.find(AutoIncrement.class).filter("_id = ", key).asList();
+		AutoIncrement inc = autoIncrement.get(0);
+		if (inc != null) {
+			inc.setValue(setvalue);
+			datastore.save(inc);
+		}
+		return inc;
+	}
+	
+	public long getID(final String key, final long minimumValue) {
 
 		// Get the given key from the auto increment entity and try to increment it.
 		final Query<AutoIncrement> query = datastore.find(AutoIncrement.class).field("_id").equal(key);

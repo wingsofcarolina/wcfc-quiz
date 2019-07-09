@@ -1,6 +1,5 @@
 package org.wingsofcarolina.quiz.domain;
 
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -37,6 +36,8 @@ public class Question {
 	@JsonIgnore
 	@Transient
 	private HtmlRenderer renderer;
+	
+	public static String ID_KEY = "question";
 
 	public Question() {
 		details = new QuestionDetails();
@@ -47,7 +48,7 @@ public class Question {
 		this.category = category;
 		this.attributes = attributes;
 		this.details = details;
-		this.questionId = Persistence.instance().generateAutoIncrement("question", 1000);
+		this.questionId = Persistence.instance().getID(ID_KEY, 1000);
 	}
 	
 	public Question(Type type, Category category, List<String> attributes, String question, String references, List<Answer> answers, String discussion) {
@@ -56,7 +57,7 @@ public class Question {
 		this.category = category;
 		this.attributes = attributes;
 		this.details = new QuestionDetails(question, references, answers, discussion);
-		this.questionId = Persistence.instance().generateAutoIncrement("question", 1000);
+		this.questionId = Persistence.instance().getID(ID_KEY, 1000);
 	}
 
 	@JsonIgnore

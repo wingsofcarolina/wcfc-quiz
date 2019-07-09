@@ -33,6 +33,7 @@ import org.wingsofcarolina.quiz.common.Flash;
 import org.wingsofcarolina.quiz.common.Pages;
 import org.wingsofcarolina.quiz.common.Templates;
 import org.wingsofcarolina.quiz.domain.Attribute;
+import org.wingsofcarolina.quiz.domain.AutoIncrement;
 import org.wingsofcarolina.quiz.domain.Category;
 import org.wingsofcarolina.quiz.domain.Question;
 import org.wingsofcarolina.quiz.domain.QuestionDetails;
@@ -40,6 +41,7 @@ import org.wingsofcarolina.quiz.domain.Recipe;
 import org.wingsofcarolina.quiz.domain.Record;
 import org.wingsofcarolina.quiz.domain.Type;
 import org.wingsofcarolina.quiz.domain.User;
+import org.wingsofcarolina.quiz.domain.persistence.Persistence;
 import org.wingsofcarolina.quiz.domain.presentation.Renderer;
 import org.wingsofcarolina.quiz.responses.LoginResponse;
 import org.wingsofcarolina.quiz.responses.RedirectResponse;
@@ -251,6 +253,8 @@ public class QuizAPI {
 	@GET
 	@Path("restoreQuestions")
 	public Response restoreQuestions(@CookieParam("quiz.token") Cookie cookie) throws AuthenticationException {
+		Long maxID = 0L;
+		
 		Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
 		User user = User.getWithClaims(claims);
 
@@ -269,12 +273,17 @@ public class QuizAPI {
 			for (File file : listOfFiles) {
 				try {
 					Question question = objectMapper.readValue(file, Question.class);
+					if (question.getQuestionId() > maxID) {
+						maxID = question.getQuestionId();
+					}
 					question.save();
 				} catch (IOException e) {
 					LOG.error("Failed reastoring question from file : {}", e.getMessage());
 				}
 				count++;
 			}
+			LOG.info("Resetting maximum question ID in database to : {}", maxID);
+			AutoIncrement inc = Persistence.instance().setID(Question.ID_KEY, maxID);
 		} else {
 			LOG.error("Directory {} not found during question database recovery.", questionDir);
 		}
