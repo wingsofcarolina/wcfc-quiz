@@ -161,7 +161,7 @@ public class Quiz {
 			// Next iterate over all selections within the section
 			for (Selection selection : section.getSelections()) {
 				List<String> atts = selection.getAttributes();
-				if (atts.contains("ALL")) {
+				if (atts.contains("ANY")) {
 					candidates = Question.getSelected(category);
 				} else {
 					candidates = Question.getSelected(category, atts);

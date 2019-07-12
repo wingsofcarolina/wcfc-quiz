@@ -362,8 +362,8 @@ public class QuizAPI {
 		
 		Question q = new Question(type, category, attributes, new QuestionDetails(question, discussion, references, answer1,
 				answer2, answer3, answer4, answer5, correct1, correct2, correct3, correct4, correct5));
-		Slack.instance().sendMessage("Created Question : " + q.toString());
-		LOG.info("Created Question : {}", q);
+		Slack.instance().sendMessage("Created Question : " + q.getQuestionId());
+		LOG.info("Created Question : {}", q.getQuestionId());
 		q.save();
 		
 		Flash.add(Flash.Code.SUCCESS, "Created new question with ID : " + q.getQuestionId());
