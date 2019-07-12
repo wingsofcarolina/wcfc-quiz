@@ -10,14 +10,14 @@ flash:true[]
 Club members needing a quiz select from the following choices:</p>
 <div style="text-align: center;">
   <div style="display: inline-block; text-align:left;">
-   <a href="generate?quiz=far"> FAR 61/91, Pre-Solo</a><br>
-   <a href="generate?quiz=sop-student"> SOP/FS, Student Pilots</a><br>
-   <a href="generate?quiz=sop-pilot"> SOP/FS, Licensed Pilot</a><br>
-   <a href="generate?quiz=sop-instructor"> SOP/FS, Instructor</a><br>
-   <a href="generate?quiz=c152"> C-152</a><br>
-   <a href="generate?quiz=c172"> C-172 Skyhawk</a><br>
-   <a href="generate?quiz=pa28"> PA-28 Warrior</a><br>
-   <a href="generate?quiz=m20j"> M20J Mooney</a><br>
+   <a href="generate?quiz=far" target="_blank"> FAR 61/91, Pre-Solo</a><br>
+   <a href="generate?quiz=sop-student" target="_blank"> SOP/FS, Student Pilots</a><br>
+   <a href="generate?quiz=sop-pilot" target="_blank"> SOP/FS, Licensed Pilot</a><br>
+   <a href="generate?quiz=sop-instructor" target="_blank"> SOP/FS, Instructor</a><br>
+   <a href="generate?quiz=c152" target="_blank"> C-152</a><br>
+   <a href="generate?quiz=c172" target="_blank"> C-172 Skyhawk</a><br>
+   <a href="generate?quiz=pa28" target="_blank"> PA-28 Warrior</a><br>
+   <a href="generate?quiz=m20j" target="_blank"> M20J Mooney</a><br>
   </div>
 </div>
 </p>
