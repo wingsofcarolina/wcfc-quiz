@@ -15,26 +15,21 @@ public class CmRenderer {
 	public static String render(String input) {
 		Node document = parser.parse(input);
 		String output = renderer.render(document);
-//		LOG.info(">>>>>>>> {}", output.trim());
-//		int last = output.lastIndexOf('<');
-//		String result = output.substring(3);
-//		LOG.info("<<<<<<<< {}", result);
 		String result = remove(output, "<p>");
 		result = remove(result, "</p>");
 		return result;
 	}
 	
 	public static String remove(String input, String cut) {
-	    StringBuilder sb = new StringBuilder(input);
-	    if(input.length() < cut.length()){
-	       return input;
-	    }
-	    else if(input.substring(1, 4).equals("del")){
-	        StringBuilder afterRemove = sb.delete(1, 4);
-	        return afterRemove.toString();
-	    }
-	    else{
-	       return input;
-	    }
+		StringBuilder sb = new StringBuilder(input);
+		if (input.length() < cut.length()) {
+			return input;
+		} else if (input.indexOf(cut) != -1) {
+			int start = input.indexOf(cut);
+			StringBuilder afterRemove = sb.delete(start, start + cut.length());
+			return afterRemove.toString();
+		} else {
+			return input;
+		}
 	}
 }
