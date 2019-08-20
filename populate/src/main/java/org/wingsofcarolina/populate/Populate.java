@@ -52,16 +52,32 @@ public class Populate {
 	}
 	
 	private void run() throws FileNotFoundException, IOException {
-		createUsers();
-		createRecipes();
-		createFARQuestions();
-		sopQuestions();
-		createAirplaneQuestions(Category.C152);
-		createAirplaneQuestions(Category.C172);
-		createAirplaneQuestions(Category.PA28);
-		createAirplaneQuestions(Category.M20J);
+		resetQuestionValue();
+//		createUsers();
+//		createRecipes();
+//		createFARQuestions();
+//		sopQuestions();
+//		createAirplaneQuestions(Category.C152);
+//		createAirplaneQuestions(Category.C172);
+//		createAirplaneQuestions(Category.PA28);
+//		createAirplaneQuestions(Category.M20J);
 		
 		System.out.println("Done.");
+	}
+	
+	private void resetQuestionValue() {
+		int count = 0;
+		
+		List<Question> questions = Question.getAllQuestions();
+		
+		for (Question question : questions) {
+			question.setDeployed(false);
+			question.setSupercededBy(-1);
+			question.save();
+			count++;
+		}
+		
+		System.out.println("Number of questions modified : " + count);
 	}
 	
 	private void createUsers() {
