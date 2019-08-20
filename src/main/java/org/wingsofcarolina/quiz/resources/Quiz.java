@@ -9,6 +9,7 @@ import org.mongodb.morphia.annotations.Transient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wingsofcarolina.quiz.common.QuizBuildException;
+import org.wingsofcarolina.quiz.domain.Attribute;
 import org.wingsofcarolina.quiz.domain.Category;
 import org.wingsofcarolina.quiz.domain.Question;
 import org.wingsofcarolina.quiz.domain.Record;
@@ -161,7 +162,7 @@ public class Quiz {
 			// Next iterate over all selections within the section
 			for (Selection selection : section.getSelections()) {
 				List<String> atts = selection.getAttributes();
-				if (atts.contains("ANY")) {
+				if (atts.contains(Attribute.ANY)) {
 					candidates = Question.getSelected(category);
 				} else {
 					candidates = Question.getSelected(category, atts);
