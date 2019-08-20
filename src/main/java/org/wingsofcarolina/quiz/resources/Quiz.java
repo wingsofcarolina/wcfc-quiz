@@ -8,6 +8,7 @@ import java.util.List;
 import org.mongodb.morphia.annotations.Transient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wingsofcarolina.quiz.QuizConfiguration;
 import org.wingsofcarolina.quiz.common.QuizBuildException;
 import org.wingsofcarolina.quiz.domain.Attribute;
 import org.wingsofcarolina.quiz.domain.Category;
@@ -33,9 +34,12 @@ public class Quiz {
 	@Transient
 	private Date createdDate = new Date();
 
+	private QuizConfiguration config = null;
+
 	public Quiz() {}
 	
-	public Quiz(String request) {
+	public Quiz(QuizConfiguration config, String request) {
+		this.config  = config;
 		this.quizId = Persistence.instance().getID("quiz", 1000);
 		switch (request) {
 			case "far":
@@ -206,9 +210,11 @@ public class Quiz {
 			questions.add(entity);
 			
 			// Make note that the question has now been 'deployed'
-			if ( ! entity.getDeployed()) {
-				entity.setDeployed(true);
-				entity.save();
+			if (config.getMode().contentEquals("PROD")) {
+				if ( ! entity.getDeployed()) {
+					entity.setDeployed(true);
+					entity.save();
+				}
 			}
 		}
 		return this;

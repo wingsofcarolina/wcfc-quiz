@@ -28,6 +28,7 @@ import de.thomaskrille.dropwizard_template_config.redist.freemarker.template.Tem
 
 public class Renderer {
 
+	@SuppressWarnings("unused")
 	private QuizConfiguration config;
 	private Asciidoctor asciidoctor;
 	private Map<String, Object> options;

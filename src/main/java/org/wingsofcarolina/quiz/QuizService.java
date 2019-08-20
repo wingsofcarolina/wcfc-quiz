@@ -63,7 +63,9 @@ public class QuizService extends Application<QuizConfiguration> {
 		dateFormatGmt.setTimeZone(TimeZone.getTimeZone("GMT"));
 
 		// Set up Slack communications
-		new Slack(config).sendMessage("WCFC Quiz System restarted at " + dateFormatGmt.format(new Date()));
+		Slack slack = new Slack(config);
+		slack.sendMessage("WCFC Quiz System restarted at " + dateFormatGmt.format(new Date()));
+		slack.sendMessage("WCFC Quiz System running in '" + config.getMode() + "' mode.");
 
 		// Set up the Persistence singleton
 		new Persistence().initialize(config.getMongodb());

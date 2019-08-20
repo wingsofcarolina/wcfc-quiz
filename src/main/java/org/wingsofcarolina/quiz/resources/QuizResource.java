@@ -197,7 +197,7 @@ public class QuizResource {
 		Quiz quiz = null;
 		String output = "";
 		try {
-			quiz = new Quiz(quizType);
+			quiz = new Quiz(config, quizType);
 			quiz.build();
 			
 			// Store the quiz question set for later retrieval

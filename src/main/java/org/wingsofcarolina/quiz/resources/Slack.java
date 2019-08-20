@@ -36,6 +36,7 @@ public class Slack {
 	}
 	
 	public void sendMessage(String message) {
+		LOG.info("Sending : {}", message);
 		if (config.getMode().contentEquals("PROD")) {
 			CloseableHttpClient httpclient = HttpClients.createDefault();
 		    HttpPost httpPost = new HttpPost(URL);
