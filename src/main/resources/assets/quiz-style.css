@@ -125,3 +125,8 @@ body {
     margin-top: 30px;
     background-image:url("/static/WCFC-logo-small-transparent.jpg");
 }
+
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
