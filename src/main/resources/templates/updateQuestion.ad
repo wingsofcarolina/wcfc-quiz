@@ -151,7 +151,15 @@ Fill in the Blank
     }, "selection required");
 </script>
 </p>
-<input type="submit" value="Update Question"></form>
+<input type="submit" value="Update Question"><p>
+++++
+<#if question.deployed == true>
+++++
+<input type="checkbox" value=true name="overwrite">Overwrite previously deployed question?
+++++
+</#if>
+++++
+</form>
 </p>
 <div class="paragraph">
 <p><form action="/question/${question.questionId}" method="get"><input type="submit" value="Cancel" /></form></p>

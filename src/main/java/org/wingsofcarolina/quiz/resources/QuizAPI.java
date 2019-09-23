@@ -391,7 +391,8 @@ public class QuizAPI {
 			@FormParam("correct2") Boolean correct2,
 			@FormParam("correct3") Boolean correct3,
 			@FormParam("correct4") Boolean correct4,
-			@FormParam("correct5") Boolean correct5
+			@FormParam("correct5") Boolean correct5,
+			@FormParam("overwrite") Boolean overwrite
 			) throws Exception, AuthenticationException {
 		
 		boolean changed = false;
@@ -408,7 +409,7 @@ public class QuizAPI {
 		Question original = Question.getByQuestionId(questionId);
 	
 		if (original != null) {
-			if ( (! original.getDeployed()) || config.getMode().equals("DEV")) {
+			if ( (! original.getDeployed()) || overwrite == true) {
 				// Update Attributes, detecting changes
 				for (String att : attributes) {
 					if ( ! original.hasAttribute(att)) { changed = true; }
