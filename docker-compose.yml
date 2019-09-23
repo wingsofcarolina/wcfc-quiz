@@ -2,7 +2,7 @@ version: '3'
 services:
 
   mongodb:
-    container_name: mongo.gagl
+    container_name: quiz.mongo
     image: percona/percona-server-mongodb:3.4
     ports:
      - "27017:27017"

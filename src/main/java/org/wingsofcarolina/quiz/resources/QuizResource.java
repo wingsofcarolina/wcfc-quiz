@@ -1,6 +1,9 @@
 package org.wingsofcarolina.quiz.resources;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -46,7 +49,6 @@ import org.wingsofcarolina.quiz.domain.presentation.Wrapper;
 import org.wingsofcarolina.quiz.resources.Quiz.QuizType;
 import org.wingsofcarolina.quiz.responses.RedirectResponse;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
@@ -198,15 +200,16 @@ public class QuizResource {
 		String output = "";
 		try {
 			quiz = new Quiz(config, quizType);
-			quiz.build();
-			
+			// Render the output for the club member
+			PDFGenerator generator = new PDFGenerator(config, quiz);
+
 			// Store the quiz question set for later retrieval
 			Record record = quiz.getRecord();
 			record.save();
-			
-			// Render the output for the club member
-			output = renderer.render(Templates.QUIZ, quiz).toString();
+
 			Slack.instance().sendMessage("Quiz " + quiz.getQuizName() + " requested at " + dateFormatGmt.format(new Date()));
+			ByteArrayInputStream inputStream = generator.generate();
+			return Response.ok().type("application/pdf").entity(inputStream).build();
 		} catch (QuizBuildException e) {
 			Recipe recipe = Recipe.getRecipeByType(quiz.getQuizType());
 			ObjectMapper mapper = new ObjectMapper();
@@ -221,10 +224,7 @@ public class QuizResource {
 			QuizBuildErrorWrapper wrapper = new QuizBuildErrorWrapper(e.getMessage(), output);
 			output = renderer.render("quizBuildError.ad", wrapper);
 			return Response.ok().entity(output).build();
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
-		return Response.ok().entity(output).build();
 	}
 	
 	@GET

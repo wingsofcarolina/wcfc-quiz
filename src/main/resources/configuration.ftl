@@ -11,6 +11,9 @@ templates: ${TEMPLATES!'./templates'}
 # Location of the data backup/restore directory
 dataDirectory: ${DATADIR!'/data'}
 
+# Location of the asset directory
+assetDirectory: ${ASSETDIR!'./assets/'}
+
 # Operational mode, DEV or PROD
 mode: ${MODE!'PROD'}
 

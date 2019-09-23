@@ -408,7 +408,7 @@ public class QuizAPI {
 		Question original = Question.getByQuestionId(questionId);
 	
 		if (original != null) {
-			if ( ! original.getDeployed()) {
+			if ( (! original.getDeployed()) || config.getMode().equals("DEV")) {
 				// Update Attributes, detecting changes
 				for (String att : attributes) {
 					if ( ! original.hasAttribute(att)) { changed = true; }
