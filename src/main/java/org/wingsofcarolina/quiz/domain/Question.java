@@ -13,6 +13,8 @@ import org.wingsofcarolina.quiz.domain.persistence.Persistence;
 import org.wingsofcarolina.quiz.domain.presentation.CmRenderer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.itextpdf.layout.element.IBlockElement;
+import com.itextpdf.layout.element.Paragraph;
 
 public class Question {
     @Id
@@ -166,7 +168,12 @@ public class Question {
 
 	@JsonIgnore
 	public String getQuestionAsHtml() {
-		return CmRenderer.render(details.getQuestion());
+		return CmRenderer.renderAsHtml(details.getQuestion());
+	}
+
+	@JsonIgnore
+	public Paragraph getQuestionAsIText() {
+		return CmRenderer.renderToParagraph(details.getQuestion());
 	}
 
 	public void setQuestion(String question) {
@@ -203,7 +210,7 @@ public class Question {
 
 	@JsonIgnore
 	public String getDiscussionAsHtml() {
-		return CmRenderer.render(details.getDiscussion());
+		return CmRenderer.renderAsHtml(details.getDiscussion());
 	}
 
 	public void setDiscussion(String discussion) {

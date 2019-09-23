@@ -13,6 +13,7 @@ public class QuizConfiguration extends Configuration {
 	@JsonProperty String mongodb;
 	@JsonProperty String templates;
 	@JsonProperty String dataDirectory;
+	@JsonProperty String assetDirectory;
 	@JsonProperty String mode;
 	@JsonProperty String slackTarget;
 	
@@ -56,5 +57,9 @@ public class QuizConfiguration extends Configuration {
 
 	public String getSlackTarget() {
 		return slackTarget;
+	}
+
+	public String getAssetDirectory() {
+		return assetDirectory;
 	}
 }
