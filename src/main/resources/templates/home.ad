@@ -1,6 +1,24 @@
 = Quiz Management
 
 <#setting number_format="#0">
+++++
+<script src="static/jquery.cookieMessage.min.js"></script>
+<script>
+$.cookieMessage({
+    mainMessage: "This website uses cookies. By using this website you consent to our use of these cookies.",
+    acceptButton: "Got It!",
+    expirationDays: 20,
+    backgroundColor: '#666',
+    fontSize: '18px',
+    fontColor: 'white',
+    btnBackgroundColor: 'blue',
+    btnFontSize: '11px',
+    btnFontColor: 'white',
+    linkFontColor: '#ffff00',
+    cookieName: 'WCFCQuizCookieMessage'
+});
+</script>
+++++
 
 <#if user.isAdmin()>
 navbar:${user.userId}[buttons="HomeNavButton;RecipeNavButton;ViewNavButton;AddNavButton;EditNavButton;ProfileNavButton", active="HomeNavButton"]
