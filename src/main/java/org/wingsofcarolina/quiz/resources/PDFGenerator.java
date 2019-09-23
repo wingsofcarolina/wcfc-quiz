@@ -7,10 +7,10 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wingsofcarolina.quiz.QuizConfiguration;
 import org.wingsofcarolina.quiz.common.QuizBuildException;
 import org.wingsofcarolina.quiz.domain.Answer;
@@ -18,7 +18,6 @@ import org.wingsofcarolina.quiz.domain.Question;
 
 import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.io.image.ImageDataFactory;
-import com.itextpdf.kernel.colors.Color;
 import com.itextpdf.kernel.events.Event;
 import com.itextpdf.kernel.events.IEventHandler;
 import com.itextpdf.kernel.events.PdfDocumentEvent;
@@ -30,7 +29,6 @@ import com.itextpdf.kernel.pdf.PdfPage;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
 import com.itextpdf.kernel.pdf.canvas.draw.SolidLine;
-import com.itextpdf.kernel.pdf.colorspace.PdfColorSpace;
 import com.itextpdf.kernel.pdf.xobject.PdfFormXObject;
 import com.itextpdf.layout.Canvas;
 import com.itextpdf.layout.Document;
@@ -48,15 +46,18 @@ import com.itextpdf.layout.property.VerticalAlignment;
 
 
 public class PDFGenerator {
-	
+	private static final Logger LOG = LoggerFactory.getLogger(PDFGenerator.class);
+
 	private Quiz quiz;
 	private PdfFont normal;
+	private PdfFont italic;
 	private QuizConfiguration config;
 	
 	public PDFGenerator(QuizConfiguration config, Quiz quiz) throws IOException {
 		this.config = config;
 		this.quiz = quiz;
 		normal = PdfFontFactory.createFont(StandardFonts.HELVETICA, true);
+		italic = PdfFontFactory.createFont(StandardFonts.HELVETICA_OBLIQUE, true);
 	}
 	
 	public ByteArrayInputStream generate() throws QuizBuildException, URISyntaxException, MalformedURLException, IOException {		
@@ -68,10 +69,12 @@ public class PDFGenerator {
 		PdfWriter writer = new PdfWriter(inMemoryStream);
 		PdfDocument pdf = new PdfDocument(writer);
 		Document document = new Document(pdf);
+		document.setBottomMargin(110.0f);
+		LOG.info("Bottom Margin : {}", document.getBottomMargin());
 		document.setFont(normal).setFontSize(10);
 		PageXofY event = new PageXofY(pdf);
         pdf.addEventHandler(PdfDocumentEvent.END_PAGE, event);
-
+        
 		// First lets flesh out the document header
 		addDocumentHeader(quiz, document);
 
@@ -216,7 +219,7 @@ public class PDFGenerator {
         protected PdfFormXObject placeholder;
         protected float side = 20;
         protected float x = 300;
-        protected float y = 25;
+        protected float y = 85;
         protected float space = 4.5f;
         protected float descent = 3;
         
@@ -234,11 +237,13 @@ public class PDFGenerator {
             PdfCanvas pdfCanvas = new PdfCanvas(
                 page.getLastContentStream(), page.getResources(), pdf);
             Canvas canvas = new Canvas(pdfCanvas, pdf, pageSize);
+            canvas.setFont(normal);
+            canvas.setFontSize(10);
             Paragraph p = new Paragraph()
                 .add("Page ").add(String.valueOf(pageNumber)).add(" of");
             canvas.showTextAligned(p, x, y, TextAlignment.RIGHT);
-            canvas.showTextAligned(new Paragraph("WCFC " + quiz.getQuizName() + " Quiz"), 50, y, TextAlignment.LEFT);
-            canvas.showTextAligned(new Paragraph("Quiz ID : " + quiz.getQuizId()), 550, y, TextAlignment.RIGHT);
+            canvas.showTextAligned(new Paragraph("WCFC " + quiz.getQuizName() + " Quiz").setFontSize(8), 50, y, TextAlignment.LEFT);
+            canvas.showTextAligned(new Paragraph("Quiz ID : " + quiz.getQuizId()).setFontSize(8), 550, y, TextAlignment.RIGHT);
             pdfCanvas.addXObject(placeholder, x + space, y - descent);
             pdfCanvas.release();
             canvas.close();
@@ -246,6 +251,8 @@ public class PDFGenerator {
         
         public void writeTotal(PdfDocument pdf) {
             Canvas canvas = new Canvas(placeholder, pdf);
+            canvas.setFont(normal);
+            canvas.setFontSize(10);
             canvas.showTextAligned(String.valueOf(pdf.getNumberOfPages()),
                 0, descent, TextAlignment.LEFT);
             canvas.close();
