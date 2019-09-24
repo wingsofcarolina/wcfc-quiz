@@ -5,6 +5,23 @@
 flash:true[]
 
 ++++
+<!-- https://www.jqueryscript.net/other/cookie-consent-bar-message.html -->
+<script src="static/jquery.cookieMessage.min.js"></script>
+<script>
+$.cookieMessage({
+    mainMessage: "Logging into this website will trigger the use of cookies. By using this website you consent to our use of these cookies.<br>Cookies are not used when generating quizzes for members.<br><br>",
+    acceptButton: "Got It!",
+    expirationDays: 20,
+    backgroundColor: '#555',
+    fontSize: '18px',
+    fontColor: 'white',
+    btnBackgroundColor: 'blue',
+    btnFontSize: '20px',
+    btnFontColor: 'white',
+    linkFontColor: '#ffff00',
+    cookieName: 'wcfc_quiz_cookie_message'
+});
+</script>
 <link rel="stylesheet" href="/static/quiz-style.css">
 <center>
 Club members needing a quiz select from the following choices:</p>
