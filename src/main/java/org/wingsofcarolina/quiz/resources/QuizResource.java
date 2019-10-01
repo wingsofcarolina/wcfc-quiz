@@ -236,13 +236,20 @@ public class QuizResource {
 		if (cookie != null) {
 			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.USER);
 			User user = User.getWithClaims(claims);
-			Question question = Question.getByQuestionId(Long.valueOf(id));
-			if (question != null ) {						
-				QuestionWrapper wrapper = new QuestionWrapper(user, question);
-				String output = renderer.render("showQuestion.ad", wrapper).toString();
-				return Response.ok().entity(output).cookie(authUtils.generateCookie(user)).build();
-			} else {
-				Flash.add(Flash.Code.ERROR, "Requested question \"" + id + "\" not found.");
+			try
+			{
+				Long questionId = Long.valueOf(id);
+				Question question = Question.getByQuestionId(questionId);
+				if (question != null ) {						
+					QuestionWrapper wrapper = new QuestionWrapper(user, question);
+					String output = renderer.render("showQuestion.ad", wrapper).toString();
+					return Response.ok().entity(output).cookie(authUtils.generateCookie(user)).build();
+				} else {
+					Flash.add(Flash.Code.ERROR, "Requested question \"" + id + "\" not found.");
+					return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
+				}
+			} catch (NumberFormatException ex) {
+				Flash.add(Flash.Code.ERROR, "Invalid question ID \"" + id + "\" entered.");
 				return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
 			}
 		} else {
