@@ -43,12 +43,20 @@ public class CmRenderer {
 	public static String renderAsHtml(String input) {
 		Node document = parser.parse(input);
 		String output = htmlRenderer.render(document);
-		String result = remove(output, "<p>");
-		result = remove(result, "</p>");
+		String result = removeAll(output, "<p>");
+		result = removeLast(result, "</p>");
 		return result;
 	}
 	
-	public static String remove(String input, String cut) {
+	public static String removeAll(String input, String cut) {
+		String result = input;
+		while (result.indexOf(cut) != -1) {
+			result = removeFirst(result, cut);
+		}
+		return result;
+	}
+
+	public static String removeFirst(String input, String cut) {
 		StringBuilder sb = new StringBuilder(input);
 		if (input.length() < cut.length()) {
 			return input;
@@ -60,7 +68,20 @@ public class CmRenderer {
 			return input;
 		}
 	}
-	
+
+	public static String removeLast(String input, String cut) {
+		StringBuilder sb = new StringBuilder(input);
+		if (input.length() < cut.length()) {
+			return input;
+		} else if (input.lastIndexOf(cut) != -1) {
+			int start = input.lastIndexOf(cut);
+			StringBuilder afterRemove = sb.delete(start, start + cut.length());
+			return afterRemove.toString();
+		} else {
+			return input;
+		}
+	}
+
 	public static com.itextpdf.layout.element.Paragraph renderToParagraph(String input) {
 		graph = new com.itextpdf.layout.element.Paragraph();
 

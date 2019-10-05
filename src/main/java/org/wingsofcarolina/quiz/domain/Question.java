@@ -184,6 +184,11 @@ public class Question {
 		return details.getReference();
 	}
 
+	@JsonIgnore
+	public String getReferencesAsHtml() {
+		return CmRenderer.renderAsHtml(details.getReference());
+	}
+	
 	public void setReferences(String references) {
 		details.setReference(references);
 	}
