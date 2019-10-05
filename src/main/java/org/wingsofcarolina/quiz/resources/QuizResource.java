@@ -41,6 +41,7 @@ import org.wingsofcarolina.quiz.common.QuizBuildException;
 import org.wingsofcarolina.quiz.common.Templates;
 import org.wingsofcarolina.quiz.domain.*;
 import org.wingsofcarolina.quiz.domain.presentation.JsonWrapper;
+import org.wingsofcarolina.quiz.domain.presentation.PDFGenerator;
 import org.wingsofcarolina.quiz.domain.presentation.QuestionListWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.QuestionWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.QuizBuildErrorWrapper;
@@ -225,6 +226,18 @@ public class QuizResource {
 			output = renderer.render("quizBuildError.ad", wrapper);
 			return Response.ok().entity(output).build();
 		}
+	}
+	
+	@GET
+	@Path("preview/{id}")
+	@Produces("text/html")
+	public Response preview(@PathParam("id") Long questionId) throws Exception {
+		// Render the preview of the question
+		Question question = Question.getByQuestionId(questionId);
+		PDFGenerator generator = new PDFGenerator(config, question);
+
+		ByteArrayInputStream inputStream = generator.generate();
+		return Response.ok().type("application/pdf").entity(inputStream).build();
 	}
 	
 	@GET

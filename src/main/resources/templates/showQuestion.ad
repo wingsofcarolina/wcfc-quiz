@@ -66,6 +66,10 @@ Correct Answer is : <strong>${seq[index]}</strong></br>
 </table>
 </p>
 
+++++
+button:/preview/${question.questionId}[method="get",label="Preview Question",target="preview"]
+++++
+
 <#if ! question.isSuperceded()>
 ++++
 button:/updateQuestion/${question.questionId}[method="get",label="Edit Question"]

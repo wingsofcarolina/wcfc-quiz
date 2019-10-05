@@ -1,4 +1,4 @@
-package org.wingsofcarolina.quiz.resources;
+package org.wingsofcarolina.quiz.domain.presentation;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -15,6 +15,7 @@ import org.wingsofcarolina.quiz.QuizConfiguration;
 import org.wingsofcarolina.quiz.common.QuizBuildException;
 import org.wingsofcarolina.quiz.domain.Answer;
 import org.wingsofcarolina.quiz.domain.Question;
+import org.wingsofcarolina.quiz.resources.Quiz;
 
 import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.io.image.ImageDataFactory;
@@ -48,7 +49,8 @@ import com.itextpdf.layout.property.VerticalAlignment;
 public class PDFGenerator {
 	private static final Logger LOG = LoggerFactory.getLogger(PDFGenerator.class);
 
-	private Quiz quiz;
+	private Quiz quiz = null;
+	private Question question = null;
 	private PdfFont normal;
 	private PdfFont italic;
 	private QuizConfiguration config;
@@ -60,7 +62,47 @@ public class PDFGenerator {
 		italic = PdfFontFactory.createFont(StandardFonts.HELVETICA_OBLIQUE, true);
 	}
 	
+	public PDFGenerator(QuizConfiguration config, Question question) throws IOException {
+		this.config = config;
+		this.question = question;
+		normal = PdfFontFactory.createFont(StandardFonts.HELVETICA, true);
+		italic = PdfFontFactory.createFont(StandardFonts.HELVETICA_OBLIQUE, true);
+	}
+
 	public ByteArrayInputStream generate() throws QuizBuildException, URISyntaxException, MalformedURLException, IOException {		
+		if (quiz != null) {
+			return generateQuiz();
+		} else if (question != null) {
+			return generateQuestion();
+		} else {
+			return null;
+		}
+	}
+	public ByteArrayInputStream generateQuestion() throws QuizBuildException, URISyntaxException, MalformedURLException, IOException {
+		// Create the document
+		ByteArrayOutputStream inMemoryStream = new ByteArrayOutputStream();
+		PdfWriter writer = new PdfWriter(inMemoryStream);
+		PdfDocument pdf = new PdfDocument(writer);
+		Document document = new Document(pdf);
+		document.setBottomMargin(110.0f);
+		document.setFont(normal).setFontSize(10);
+		
+		SolidLine line = new SolidLine(1f);
+		LineSeparator ls = new LineSeparator(line);
+		ls.setMargin(5);
+		document.add(ls);
+
+		document.add(addQuestion(0, question));
+
+		document.add(ls);
+		
+		// Finalize the document
+		document.close();
+
+		return new ByteArrayInputStream(inMemoryStream.toByteArray());
+
+	}
+	public ByteArrayInputStream generateQuiz() throws QuizBuildException, URISyntaxException, MalformedURLException, IOException {		
 		// Build the quiz itself
 		quiz.build();
 

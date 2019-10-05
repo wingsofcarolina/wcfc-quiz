@@ -12,13 +12,18 @@ public class Button extends InlineMacroProcessor {
 	}
 
 	@Override
-	public String process(ContentNode parent, String target, Map<String, Object> attributes) {
+	public String process(ContentNode parent, String url, Map<String, Object> attributes) {
 		String method = (String) attributes.get("method");
+		String target = (String) attributes.get("target");
 		if (method == null) {
 			method = "post";
 		}
 		StringBuffer sb = new StringBuffer();
-		sb.append("<form action=\"" + target + "\" method=\"" + method + "\">");
+		if (target == null) {
+			sb.append("<form action=\"" + url + "\" method=\"" + method + "\">");
+		} else {
+			sb.append("<form action=\"" + url + "\" method=\"" + method + "\" target=\"" + target + "\">");			
+		}
 		sb.append("<input type=\"submit\" value=\"" + attributes.get("label") + "\" />");
 		sb.append("</form>");
 		return sb.toString();
