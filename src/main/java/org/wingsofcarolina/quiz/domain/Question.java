@@ -122,9 +122,11 @@ public class Question {
 	}
 
 	public boolean hasAttribute(String attribute) {
-		for (String att : attributes) {
-			if (att.equals(attribute) ) {
-				return true;
+		if (attribute != null) {
+			for (String att : attributes) {
+				if (att != null && att.equals(attribute) ) {
+					return true;
+				}
 			}
 		}
 		return false;

@@ -13,6 +13,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -253,7 +254,16 @@ public class QuizResource {
 			{
 				Long questionId = Long.valueOf(id);
 				Question question = Question.getByQuestionId(questionId);
-				if (question != null ) {						
+				if (question != null ) {			
+					// We have found nulls in the attributes, so lets sanitize the list
+					// until we find the root cause.
+					List<String> attributes = question.getAttributes();
+				    for (ListIterator<String> iterator = attributes.listIterator(); iterator.hasNext();) {
+				    	if (iterator.next() == null) {
+				    		iterator.remove();
+				    	}
+				    }
+
 					QuestionWrapper wrapper = new QuestionWrapper(user, question);
 					String output = renderer.render("showQuestion.ad", wrapper).toString();
 					return Response.ok().entity(output).cookie(authUtils.generateCookie(user)).build();

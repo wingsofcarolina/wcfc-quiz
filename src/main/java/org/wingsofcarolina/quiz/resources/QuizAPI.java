@@ -399,6 +399,9 @@ public class QuizAPI {
 		LOG.info("QuestionId --> {}", questionId);
 
 		// Add the difficulty to the attributes
+		if (difficulty == null) {
+			difficulty = "EASY";
+		}
 		attributes.add(difficulty);
 		LOG.info("Attributes --> {}", attributes);
 		
