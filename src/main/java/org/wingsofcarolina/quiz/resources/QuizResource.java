@@ -425,6 +425,8 @@ public class QuizResource {
 							questions.add(question);
 						} else if (compareCase(question.getDiscussion(), search, caseSensitive)) {
 							questions.add(question);
+						} else if (compareCase(question.getCategory().name(), search, caseSensitive)) {
+							questions.add(question);
 						}
 					}
 				}
