@@ -1,0 +1,32 @@
+= Category Report
+
+<#setting number_format="#0">
+
+<#if user.isAdmin()>
+navbar:${user.userId}[buttons="HomeNavButton;RecipeNavButton;ViewNavButton;AddNavButton;EditNavButton;ProfileNavButton"]
+<#else>
+navbar:${user.userId}[buttons="HomeNavButton;ProfileNavButton", active="HomeNavButton"]
+</#if>
+
+== Category : ${category}
+
+++++
+<ul>
+++++
+<#list questions as question>
+++++
+<li><a href="/question/${question.questionId}">${question.questionId}</a> : ${question.question}</br>
+${question.category} / 
+<#if question.attributes??>
+<#list question.attributes as attribute>
+${attribute}&nbsp;
+</#list>
+<#else>
+No Attributes Assigned!
+</#if>
+++++
+</#list>
+++++
+</ul>
+
+++++

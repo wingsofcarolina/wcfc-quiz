@@ -45,6 +45,15 @@ function query(msg, redirect) {
 </script>
 <ul>
 <li><a href="/browseQuestions">Browse questions</a><br>
+<li><em>Quiz category reports:</em>
+<ul>
+<li><a href="report/FAR">FAR Questions</a>
+<li><a href="report/SOP">SOP Questions</a>
+<li><a href="report/C152">Cessna 152 Questions</a>
+<li><a href="report/C172">Cessna 172 Questions</a>
+<li><a href="report/PA28">Warrior Questions</a>
+<li><a href="report/M20J">Mooney Questions</a>
+</ul>
 <li><a href="/searchQuestions">Search questions</a><br>
 <li><a href="/updateRecipe">Update a stored quiz recipe</a><br>
 <li><a id="restoreQuestions" href="#" onclick="query('Really? Overwrite ALL currently saved Questions?', '/api/backupQuestions');return false;">Create Question Backup Files</a>
