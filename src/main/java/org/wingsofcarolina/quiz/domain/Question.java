@@ -224,6 +224,16 @@ public class Question {
 		details.setDiscussion(discussion);
 	}
 	
+	@JsonIgnore
+	public QuestionDetails getDetails() {
+		return details;
+	}
+	
+	@JsonIgnore
+	public void setDetails(QuestionDetails details) {
+		this.details = details;
+	}
+	
 	/*
 	 * Database Management Functionality
 	 */

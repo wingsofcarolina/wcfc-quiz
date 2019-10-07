@@ -425,7 +425,10 @@ public class QuizAPI {
 				// Update user-changeable details, detecting changes
 				QuestionDetails details = new QuestionDetails(question, discussion, references, answer1,
 						answer2, answer3, answer4, answer5, correct1, correct2, correct3, correct4, correct5);
-				if (details.update(original)) { changed = true; }
+				if (details.compareTo(original.getDetails()) != 0) {
+					original.setDetails(details);
+					changed = true;
+				}
 				
 				if (changed) {
 					LOG.info("Updated Question : {}", original.getQuestionId());

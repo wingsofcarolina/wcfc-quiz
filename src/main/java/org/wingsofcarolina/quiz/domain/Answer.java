@@ -60,4 +60,10 @@ public class Answer {
 	public String toString() {
 		return "Answer [answer=" + answer + ", correct=" + correct + "]";
 	}
+
+	public int compareTo(Answer other) {
+		if (! answer.equals(other.getAnswer())) return -1;
+		if (correct != other.isCorrect()) return -1;
+		return 0;
+	}
 }
