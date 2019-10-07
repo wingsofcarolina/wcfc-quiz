@@ -15,4 +15,5 @@ public class Templates {
 
 	public static final String QUIZ = BASE + "/quiz.html";
 	public static final String KEY = BASE + "/key.html";
+	public static final String PREVIEW_KEY = BASE + "/previewKey.html";
 }

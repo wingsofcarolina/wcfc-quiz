@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <link rel="stylesheet" href="/static/quiz-style.css">
+  <link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
+</head>
+<body>
+<#setting number_format="#0"/>
+<#assign seq = ["A", "B", "C", "D", "E"]>
+
+<hr>
+
+<div>
+<b>0</b> : ${question.getQuestionAsHtml()} 
+	<i>(${question.questionId})</i></br>
+&nbsp;&nbsp;&nbsp;
+<i>{ ${question.category}&nbsp;/&nbsp;
+<#list question.attributes as attribute>
+${attribute}&nbsp;
+</#list>
+}</i></p>
+
+<#assign index = 0>
+<#list question.answers as answer>
+<#if question.isFillInTheBlank()>
+${seq[index]} : ${answer.answer}</br>
+<#else>
+<#if answer.isCorrect()>
+<strong>${seq[index]}</strong> : ${answer.getAnswerAsHtml()}</br>
+<#else>
+${seq[index]} : ${answer.answer}</br>
+</#if>
+</#if>
+<#assign index=index+1>
+</#list>
+</p>
+
+<#assign index = 0>
+<#list question.answers as answer>
+<#if question.isFillInTheBlank()>
+${seq[index]} : ${answer.answer}</br>
+<#else>
+<#if answer.isCorrect()>
+Correct Answer is : <strong>${seq[index]}</strong></br>
+</#if>
+</#if>
+<#assign index=index+1>
+</#list>
+</p>
+
+<b>References :</b> ${question.references}</p>
+<b>CFI Discussion :</b> </br>
+${question.getDiscussionAsHtml()}</p>
+<hr>
+</div>
+</body>
+</html>

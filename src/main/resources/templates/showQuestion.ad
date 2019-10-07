@@ -71,9 +71,10 @@ Correct Answer is : <strong>${seq[index]}</strong></br>
 </p>
 
 ++++
-button:/preview/${question.questionId}[method="get",label="Preview Question",target="preview"]
-++++
+button:/previewQuestion/${question.questionId}[method="get",label="Preview Question",target="preview"]
 
+button:/previewKey/${question.questionId}[method="get",label="Preview Key",target="preview"]
+++++
 <#if ! question.isSuperceded()>
 ++++
 button:/updateQuestion/${question.questionId}[method="get",label="Edit Question"]

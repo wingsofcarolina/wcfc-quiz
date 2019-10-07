@@ -234,15 +234,67 @@ public class QuizResource {
 	}
 	
 	@GET
-	@Path("preview/{id}")
+	@Path("previewQuestion/{id}")
 	@Produces("text/html")
-	public Response preview(@PathParam("id") Long questionId) throws Exception {
+	public Response previewQuestion(@CookieParam("quiz.token") Cookie cookie,
+			@PathParam("id") Long questionId) throws Exception, AuthenticationException {
 		// Render the preview of the question
-		Question question = Question.getByQuestionId(questionId);
-		PDFGenerator generator = new PDFGenerator(config);
+		if (cookie != null) {
+			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.USER);
+			User user = User.getWithClaims(claims);
+			Question question = Question.getByQuestionId(questionId);
+			if (question != null) {
+				PDFGenerator generator = new PDFGenerator(config);
+		
+				ByteArrayInputStream inputStream = generator.generate(question);
+				return Response.ok().type("application/pdf").entity(inputStream).build();
+			} else {
+				Flash.add(Flash.Code.ERROR, "Requested question \"" + questionId + "\" not found.");
+				return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
+			}
+		} else {
+			return new RedirectResponse(Pages.LOGIN_PAGE).build();
 
-		ByteArrayInputStream inputStream = generator.generate(question);
-		return Response.ok().type("application/pdf").entity(inputStream).build();
+		}
+	}
+	
+	@GET
+	@Path("previewKey/{id}")
+	@Produces("text/html")
+	public Response previewKey(@CookieParam("quiz.token") Cookie cookie,
+			@PathParam("id") Long questionId) throws Exception, AuthenticationException {
+		// Render the preview of the question key
+		if (cookie != null) {
+			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.USER);
+			User user = User.getWithClaims(claims);
+			try
+			{
+				Question question = Question.getByQuestionId(questionId);
+				if (question != null ) {			
+					// We have found nulls in the attributes, so lets sanitize the list
+					// until we find the root cause.
+					List<String> attributes = question.getAttributes();
+				    for (ListIterator<String> iterator = attributes.listIterator(); iterator.hasNext();) {
+				    	if (iterator.next() == null) {
+				    		iterator.remove();
+				    	}
+				    }
+
+					QuestionWrapper wrapper = new QuestionWrapper(user, question);
+					String output = renderer.render(Templates.PREVIEW_KEY, wrapper).toString();
+					return Response.ok().entity(output).cookie(authUtils.generateCookie(user)).build();
+				} else {
+					Flash.add(Flash.Code.ERROR, "Requested question \"" + questionId + "\" not found.");
+					return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
+				}
+			} catch (NumberFormatException ex) {
+				Flash.add(Flash.Code.ERROR, "Invalid question ID \"" + questionId + "\" entered.");
+				return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
+			}
+		} else {
+			return new RedirectResponse(Pages.LOGIN_PAGE).build();
+		}
+
 	}
 	
 	@GET
