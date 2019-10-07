@@ -221,7 +221,7 @@ public class Quiz {
 	}
 	
 	/**
-	 * Insure that we don't allow duplicates in the pool
+	 * Ensure that we don't allow duplicates in the pool
 	 * 
 	 * @param candidate
 	 * @param pool

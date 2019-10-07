@@ -201,16 +201,19 @@ public class QuizResource {
 		Quiz quiz = null;
 		String output = "";
 		try {
+			// Build the quiz itself
 			quiz = new Quiz(config, quizType);
+			quiz.build();
+
 			// Render the output for the club member
-			PDFGenerator generator = new PDFGenerator(config, quiz);
+			PDFGenerator generator = new PDFGenerator(config);
 
 			// Store the quiz question set for later retrieval
 			Record record = quiz.getRecord();
 			record.save();
 
 			Slack.instance().sendMessage("Quiz " + quiz.getQuizName() + " requested at " + dateFormatGmt.format(new Date()));
-			ByteArrayInputStream inputStream = generator.generate();
+			ByteArrayInputStream inputStream = generator.generate(quiz);
 			return Response.ok().type("application/pdf").entity(inputStream).build();
 		} catch (QuizBuildException e) {
 			Recipe recipe = Recipe.getRecipeByType(quiz.getQuizType());
@@ -235,9 +238,9 @@ public class QuizResource {
 	public Response preview(@PathParam("id") Long questionId) throws Exception {
 		// Render the preview of the question
 		Question question = Question.getByQuestionId(questionId);
-		PDFGenerator generator = new PDFGenerator(config, question);
+		PDFGenerator generator = new PDFGenerator(config);
 
-		ByteArrayInputStream inputStream = generator.generate();
+		ByteArrayInputStream inputStream = generator.generate(question);
 		return Response.ok().type("application/pdf").entity(inputStream).build();
 	}
 	
@@ -464,7 +467,7 @@ public class QuizResource {
 			if (user != null && question != null) {
 				QuestionWrapper wrapper = new QuestionWrapper(user, question);
 				String output = renderer.render("updateQuestion.ad", wrapper).toString();
-				return Response.ok().entity(output).cookie(authUtils.generateCookie(user)).build();
+				return Response.ok().entity(output).cookie(authUtils.generateCookie(user, question.getQuestionId())).build();
 			} else {
 				Flash.add(Flash.Code.WARN, "Question with ID " + questionId + " not found.");			
 				return new RedirectResponse(Pages.HOME_PAGE).build();

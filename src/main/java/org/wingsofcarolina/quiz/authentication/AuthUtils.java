@@ -115,7 +115,7 @@ public class AuthUtils {
 		return hours > 2;
 	}
 	
-	public String generateToken(User user) {
+	public String generateToken(User user, Long questionId) {
 		// Now generate the Java Web Token
 		// https://github.com/jwtk/jjwt
 		// https://stormpath.com/blog/jwt-java-create-verify
@@ -126,13 +126,21 @@ public class AuthUtils {
 		claims.put("email", user.getEmail());
 		claims.put("admin", user.getPrivileges().contains(Privilege.ADMIN));
 		claims.put("userId", user.getUserId());
+		if (questionId != null) {
+			questionId = new Long(-1);
+		}
+		claims.put("questionId", questionId);
 		String compactJws = Jwts.builder().setClaims(claims).signWith(SignatureAlgorithm.HS512, key).compact();
 
 		return compactJws;
 	}
 
 	public NewCookie generateCookie(User user) {
-		return new NewCookie("quiz.token", generateToken(user), "/", "", "Quiz Login Token", -1, false);
+		return new NewCookie("quiz.token", generateToken(user, null), "/", "", "Quiz Login Token", -1, false);
+	}
+
+	public NewCookie generateCookie(User user, Long questionId) {
+		return new NewCookie("quiz.token", generateToken(user, questionId), "/", "", "Quiz Login Token", -1, false);
 	}
 
 }

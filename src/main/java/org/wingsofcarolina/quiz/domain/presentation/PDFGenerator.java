@@ -49,36 +49,33 @@ import com.itextpdf.layout.property.VerticalAlignment;
 public class PDFGenerator {
 	private static final Logger LOG = LoggerFactory.getLogger(PDFGenerator.class);
 
-	private Quiz quiz = null;
-	private Question question = null;
 	private PdfFont normal;
 	private PdfFont italic;
 	private QuizConfiguration config;
 	
-	public PDFGenerator(QuizConfiguration config, Quiz quiz) throws IOException {
+	public PDFGenerator(QuizConfiguration config) throws IOException {
 		this.config = config;
-		this.quiz = quiz;
-		normal = PdfFontFactory.createFont(StandardFonts.HELVETICA, true);
-		italic = PdfFontFactory.createFont(StandardFonts.HELVETICA_OBLIQUE, true);
-	}
-	
-	public PDFGenerator(QuizConfiguration config, Question question) throws IOException {
-		this.config = config;
-		this.question = question;
 		normal = PdfFontFactory.createFont(StandardFonts.HELVETICA, true);
 		italic = PdfFontFactory.createFont(StandardFonts.HELVETICA_OBLIQUE, true);
 	}
 
-	public ByteArrayInputStream generate() throws QuizBuildException, URISyntaxException, MalformedURLException, IOException {		
+	public ByteArrayInputStream generate(Quiz quiz) throws QuizBuildException, URISyntaxException, MalformedURLException, IOException {		
 		if (quiz != null) {
-			return generateQuiz();
-		} else if (question != null) {
-			return generateQuestion();
+			return generateQuiz(quiz);
 		} else {
-			return null;
+			throw new QuizBuildException("Null pointer for quiz entity");
 		}
 	}
-	public ByteArrayInputStream generateQuestion() throws QuizBuildException, URISyntaxException, MalformedURLException, IOException {
+
+	public ByteArrayInputStream generate(Question question) throws QuizBuildException, URISyntaxException, MalformedURLException, IOException {		
+		if (question != null) {
+			return generateQuestion(question);
+		} else {
+			throw new QuizBuildException("Null pointer for question entity");
+		}
+	}
+
+	public ByteArrayInputStream generateQuestion(Question question) throws QuizBuildException, URISyntaxException, MalformedURLException, IOException {
 		// Create the document
 		ByteArrayOutputStream inMemoryStream = new ByteArrayOutputStream();
 		PdfWriter writer = new PdfWriter(inMemoryStream);
@@ -102,10 +99,8 @@ public class PDFGenerator {
 		return new ByteArrayInputStream(inMemoryStream.toByteArray());
 
 	}
-	public ByteArrayInputStream generateQuiz() throws QuizBuildException, URISyntaxException, MalformedURLException, IOException {		
-		// Build the quiz itself
-		quiz.build();
-
+	
+	public ByteArrayInputStream generateQuiz(Quiz quiz) throws QuizBuildException, URISyntaxException, MalformedURLException, IOException {		
 		// Create the document
 		ByteArrayOutputStream inMemoryStream = new ByteArrayOutputStream();
 		PdfWriter writer = new PdfWriter(inMemoryStream);
@@ -114,7 +109,7 @@ public class PDFGenerator {
 		document.setBottomMargin(110.0f);
 		LOG.info("Bottom Margin : {}", document.getBottomMargin());
 		document.setFont(normal).setFontSize(10);
-		PageXofY event = new PageXofY(pdf);
+		PageXofY event = new PageXofY(pdf, quiz);
         pdf.addEventHandler(PdfDocumentEvent.END_PAGE, event);
         
 		// First lets flesh out the document header
@@ -178,7 +173,7 @@ public class PDFGenerator {
 		return table;
 	}
 	
-	private void addDocumentHeader(Quiz quiz2, Document document) throws URISyntaxException, MalformedURLException, IOException {
+	private void addDocumentHeader(Quiz quiz, Document document) throws URISyntaxException, MalformedURLException, IOException {
 		// Generate header
 		byte[] bytes = Files.readAllBytes(new File(config.getAssetDirectory() + "/WCFC-logo-transparent.jpg").toPath());
 		Image img = new Image(ImageDataFactory.create(bytes));
@@ -264,8 +259,10 @@ public class PDFGenerator {
         protected float y = 85;
         protected float space = 4.5f;
         protected float descent = 3;
+        protected Quiz quiz;
         
-        public PageXofY(PdfDocument pdf) {
+        public PageXofY(PdfDocument pdf, Quiz quiz) {
+        	this.quiz = quiz;
             placeholder = new PdfFormXObject(new Rectangle(0, 0, side, side));
         }
         
