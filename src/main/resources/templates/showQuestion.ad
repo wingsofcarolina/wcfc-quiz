@@ -30,11 +30,15 @@ Fill in the Blank
 <tr><td valign="top">References</td><td>${question.getReferencesAsHtml()}</td></tr>
 
 <tr><td valign="top">Attributes</td><td>
+
 ++++
-<#list question.attributes as attribute>
-${attribute}
+
+<#list question.attributes as att>
+${att}
 </#list>
+
 ++++
+
 </td></tr>
 
 <tr><td valign="top" id="answerLabel">Answers</td><td>
@@ -75,3 +79,4 @@ button:/preview/${question.questionId}[method="get",label="Preview Question",tar
 button:/updateQuestion/${question.questionId}[method="get",label="Edit Question"]
 ++++
 </#if>
+++++
