@@ -162,11 +162,13 @@ public class PDFGenerator {
 			cell.setTextAlignment(TextAlignment.RIGHT);
 			cell.add(new Paragraph(characters[aIndex] + " : "));
 			cell.setWidth(CELL_WIDTH);
+			cell.setPaddingTop(0);
 			table.addCell(cell);
 			
 			cell = new Cell();
 			cell.setBorder(Border.NO_BORDER);
 			cell.add(answer.getAnswerAsIText());
+			cell.setPaddingTop(0);
 			table.addCell(cell);
 			aIndex++;
 		}
