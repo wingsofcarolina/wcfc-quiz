@@ -575,37 +575,51 @@ public class QuizAPI {
 	}
 
 	@GET
-	@Path("/download")
+	@Path("download")
 	@Produces(MediaType.TEXT_PLAIN)
-	public Response downloadQuestions() {
-	    StreamingOutput streamingOutput = outputStream -> {
-	        ZipOutputStream zipOut = new ZipOutputStream(new BufferedOutputStream(outputStream));
-
-	        // Iterate over all questions creating the zip output file
-			List<Question> questions = Question.getAllQuestions();
-			for (Question question : questions) {
-				String name = question.getQuestionId() + ".json";
-		        ZipEntry zipEntry = new ZipEntry(name);
-		        zipOut.putNextEntry(zipEntry);
-				try {
-					ByteArrayOutputStream bos = new ByteArrayOutputStream();
-					objectMapper.writeValue(bos, question);
-					byte[] ba = bos.toByteArray();
-                    zipOut.write(ba, 0, ba.length);
-	                zipOut.flush();
-				} catch (IOException e) {
-					LOG.info("IOException writing question {}", name, e);
+	public Response downloadQuestions(@CookieParam("quiz.token") Cookie cookie) throws AuthenticationException {
+		
+		if (cookie != null) {
+			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
+			User user = User.getWithClaims(claims);
+	
+			String now = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date());
+	
+			// Notify someone that a backup has been requested
+			Slack.instance().sendMessage("Download of all questions requested at " + dateFormatGmt.format(new Date()));
+			LOG.info("Download of all questions requested at {}", dateFormatGmt.format(new Date()));
+			
+		    StreamingOutput streamingOutput = outputStream -> {
+		        ZipOutputStream zipOut = new ZipOutputStream(new BufferedOutputStream(outputStream));
+	
+		        // Iterate over all questions creating the zip output file
+				List<Question> questions = Question.getAllQuestions();
+				for (Question question : questions) {
+					String name = "quiz-" + now + "/" + question.getQuestionId() + ".json";
+			        ZipEntry zipEntry = new ZipEntry(name);
+			        zipOut.putNextEntry(zipEntry);
+					try {
+						ByteArrayOutputStream bos = new ByteArrayOutputStream();
+						objectMapper.writeValue(bos, question);
+						byte[] ba = bos.toByteArray();
+	                    zipOut.write(ba, 0, ba.length);
+		                zipOut.flush();
+					} catch (IOException e) {
+						LOG.info("IOException writing question {}", name, e);
+					}
 				}
-			}
-			zipOut.close();
-	        outputStream.flush();
-	        outputStream.close();
-	    };
-
-	    return Response.ok(streamingOutput)
-	            .type(MediaType.TEXT_PLAIN)
-	            .header("Content-Disposition","attachment; filename=\"quiz-backup.zip\"")
-	            .build();
+				zipOut.close();
+		        outputStream.flush();
+		        outputStream.close();
+		    };
+	
+		    return Response.ok(streamingOutput)
+		            .type(MediaType.TEXT_PLAIN)
+		            .header("Content-Disposition","attachment; filename=\"quiz-" + now + ".zip\"")
+		            .build();
+		} else {
+			return new RedirectResponse(Pages.LOGIN_PAGE).build();
+		}
 	}
 	
 	class AttributeResponse {
