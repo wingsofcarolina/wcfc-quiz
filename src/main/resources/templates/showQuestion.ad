@@ -10,6 +10,13 @@ navbar:${user.userId}[buttons="HomeNavButton;ProfileNavButton", active="HomeNavB
 </#if>
 
 ++++
+<script>
+function query(msg, redirect) {
+	if (confirm(msg)) {
+		window.location.href = redirect;
+	}
+}
+</script>
 <table width=100%>
 <tr><td width=10%>ID</td><td><strong>${question.questionId}</strong></td></tr>
 
@@ -77,7 +84,13 @@ button:/previewKey/${question.questionId}[method="get",label="Preview Key",targe
 ++++
 <#if ! question.isSuperceded()>
 ++++
-button:/updateQuestion/${question.questionId}[method="get",label="Edit Question"]
+button:/updateQuestion/${question.questionId}[method="get",label="Edit/Update Question"]
+++++
+<script>function deleteQuestion() {
+	var questionId = prompt("Question ID");
+	if (questionId != null) { window.location.href = "/deleteQuestion/" + questionId; }
+}
+</script>
+<a onclick="query('Really? Delete Question ${question.questionId}?', '/api/deleteQuestion/${question.questionId}');return false;">Delete Question</a>
 ++++
 </#if>
-++++

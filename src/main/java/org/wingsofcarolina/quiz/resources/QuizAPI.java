@@ -11,13 +11,17 @@ import java.util.List;
 import java.util.TimeZone;
 
 import javax.ws.rs.CookieParam;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Cookie;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
@@ -449,9 +453,9 @@ public class QuizAPI {
 						correct5);
 				original.setSupercededBy(q.getQuestionId());
 				original.save();
-				LOG.info("Superceded question {} with " + original.getQuestionId(), q.getQuestionId());
-				Flash.add(Flash.Code.SUCCESS, "Superceded question " + original.getQuestionId() + " with " + q.getQuestionId());
-				Slack.instance().sendMessage("Superceded question " + original.getQuestionId() + " with " + q.getQuestionId() + " at " + dateFormatGmt.format(new Date()));
+				LOG.info("Superseded question " + original.getQuestionId() + " with " +  q.getQuestionId());
+				Flash.add(Flash.Code.SUCCESS, "Superseded question " + original.getQuestionId() + " with " + q.getQuestionId());
+				Slack.instance().sendMessage("Superseded question " + original.getQuestionId() + " with " + q.getQuestionId() + " at " + dateFormatGmt.format(new Date()));
 				
 				return new ViewQuestionResponse(q.getQuestionId()).cookie(authUtils.generateCookie(user)).build();
 			}
@@ -461,6 +465,45 @@ public class QuizAPI {
 		return new ViewQuestionResponse(original.getQuestionId()).cookie(authUtils.generateCookie(user)).build();
 	}
 	
+	/**
+	 * Delete question
+	 * 
+	 * Questions can only be deleted if they have not been either deployed or superseded. In
+	 * either of those cases removing a question would break references either internally or
+	 * (in a sense) externally.
+	 * 
+	 * @param cookie
+	 * @param headers
+	 * @param questionId
+	 * @return
+	 * @throws AuthenticationException
+	 */
+	@GET
+	@Path("deleteQuestion/{id}")
+	public Response deleteQuestion(@CookieParam("quiz.token") Cookie cookie,
+			@Context HttpHeaders headers,
+			@PathParam("id") Long questionId) throws AuthenticationException {
+		Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
+		User user = User.getWithClaims(claims);
+		
+		String referer = headers.getRequestHeader("referer").get(0);
+
+		Question question = Question.getByQuestionId(questionId);
+		if (question.isSuperceded() || question.getDeployed() == true) {
+			Flash.add(Flash.Code.ERROR, "Question " + question.getQuestionId() + " is either superseded or deployed and can't be deleted.");
+			return new RedirectResponse(referer).cookie(authUtils.generateCookie(user)).build();
+		} else {
+			// Actually perform the deletion
+			question.delete();
+			
+			// Log the action
+			LOG.info("Deleted question " + question.getQuestionId());
+			Flash.add(Flash.Code.SUCCESS, "Deleted question " + question.getQuestionId());
+			Slack.instance().sendMessage("Deleted question " + question.getQuestionId() + " at " + dateFormatGmt.format(new Date()));
+		}
+		return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
+	}
+
 	@POST
 	@Path("updateRecipe")
 	@Produces("text/html")
