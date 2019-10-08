@@ -1,5 +1,7 @@
 package org.wingsofcarolina.quiz.resources;
 
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -9,6 +11,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.CookieParam;
@@ -26,6 +30,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -569,6 +574,39 @@ public class QuizAPI {
 		return Response.ok().entity(attributes).build();
 	}
 
+	@GET
+	@Path("/download")
+	@Produces(MediaType.TEXT_PLAIN)
+	public Response downloadQuestions() {
+	    StreamingOutput streamingOutput = outputStream -> {
+	        ZipOutputStream zipOut = new ZipOutputStream(new BufferedOutputStream(outputStream));
+
+	        // Iterate over all questions creating the zip output file
+			List<Question> questions = Question.getAllQuestions();
+			for (Question question : questions) {
+				String name = question.getQuestionId() + ".json";
+		        ZipEntry zipEntry = new ZipEntry(name);
+		        zipOut.putNextEntry(zipEntry);
+				try {
+					ByteArrayOutputStream bos = new ByteArrayOutputStream();
+					objectMapper.writeValue(bos, question);
+					byte[] ba = bos.toByteArray();
+                    zipOut.write(ba, 0, ba.length);
+	                zipOut.flush();
+				} catch (IOException e) {
+					LOG.info("IOException writing question {}", name, e);
+				}
+			}
+			zipOut.close();
+	        outputStream.flush();
+	        outputStream.close();
+	    };
+
+	    return Response.ok(streamingOutput)
+	            .type(MediaType.TEXT_PLAIN)
+	            .header("Content-Disposition","attachment; filename=\"quiz-backup.zip\"")
+	            .build();
+	}
 	
 	class AttributeResponse {
 		private String label;
