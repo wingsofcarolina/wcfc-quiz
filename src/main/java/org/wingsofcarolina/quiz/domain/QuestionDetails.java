@@ -18,17 +18,14 @@ public class QuestionDetails {
 	
 	public QuestionDetails() {}
 	
-	public QuestionDetails(String question, String reference,
-			List<Answer> answers, String discussion) {
+	public QuestionDetails(String question, String reference, List<Answer> answers, String discussion) {
 		this.question = question;
 		this.reference = reference;
 		this.answers = answers;
 		this.discussion = discussion;
 	}
 
-	public QuestionDetails(String question, String discussion, String references,
-			String answer1, String answer2, String answer3, String answer4,
-			String answer5, Boolean correct1, Boolean correct2, Boolean correct3, Boolean correct4, Boolean correct5) {
+	public QuestionDetails(String question, String discussion, String references, List<String> answerText, Integer correct) {
 
 		LOG.info("Question   --> {}", question);
 		LOG.info("Discussion --> {}", discussion);
@@ -37,26 +34,16 @@ public class QuestionDetails {
 		this.question = question;
 		this.discussion = discussion;
 		this.reference = references;
-		
-		// Remove any nulls
-		correct1 = (correct1 == null) ? new Boolean(false) : correct1;
-		correct2 = (correct2 == null) ? new Boolean(false) : correct2;
-		correct3 = (correct3 == null) ? new Boolean(false) : correct3;
-		correct4 = (correct4 == null) ? new Boolean(false) : correct4;
-		correct5 = (correct5 == null) ? new Boolean(false) : correct5;
 
-		LOG.info("Answer1    --> {}, {}", answer1, correct1);
-		LOG.info("Answer2    --> {}, {}", answer2, correct2);
-		LOG.info("Answer3    --> {}, {}", answer3, correct3);
-		LOG.info("Answer4    --> {}, {}", answer4, correct4);
-		LOG.info("Answer5    --> {}, {}", answer5, correct5);
-		
+		int index = 0;
 		answers = new ArrayList<Answer>();
-		if ( ! answer1.isEmpty()) answers.add(new Answer(answer1, correct1));
-		if ( ! answer2.isEmpty()) answers.add(new Answer(answer2, correct2));
-		if ( ! answer3.isEmpty()) answers.add(new Answer(answer3, correct3));
-		if ( ! answer4.isEmpty()) answers.add(new Answer(answer4, correct4));
-		if ( ! answer5.isEmpty()) answers.add(new Answer(answer5, correct5));
+		for (String answer : answerText) {
+			if ( ! answer.isEmpty() ) {
+				LOG.info("Answer{}    --> {}, {}", index, answer, correct == index ? true : false);
+				answers.add(new Answer(answer, correct == index ? true : false));
+				index++;
+			}
+		}
 	}
 
 	public int compareTo(QuestionDetails details) {

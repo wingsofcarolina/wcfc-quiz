@@ -76,6 +76,15 @@ function loadDifficultyAttributes()
 		});
 	});
 }
+
+function setCorrect(item) {
+	console.log("Trigered on : " + item);
+	$('input[type=checkbox]').each(function() 
+	{ 
+	        this.checked = false; 
+	});
+	item.checked = true;
+}
 </script>
 <script src="/static/question-form-validation.js"></script>
 
@@ -108,39 +117,15 @@ function loadDifficultyAttributes()
 <tr><td colspan=2><hr></td></tr>
 <tr><td valign="top" id="answerLabel">Answers</br>(Max 5)</br></br>Select</br>correct</br>answer.</td><td>
 	<table id="answerlist">
-	<tr><td><input type="checkbox" name="correct1" onclick=setCorrect(this)></td><td>A</td><td><textarea name="answer1" rows="2" cols="70"></textarea></td></tr>
-	<tr><td><input type="checkbox" name="correct2" onclick=setCorrect(this)></td><td>B</td><td><textarea name="answer2" rows="2" cols="70"></textarea></td></tr>
-	<tr><td><input type="checkbox" name="correct3" onclick=setCorrect(this)></td><td>C</td><td><textarea name="answer3" rows="2" cols="70"></textarea></td></tr>
-	<tr><td><input type="checkbox" name="correct4" onclick=setCorrect(this)></td><td>D</td><td><textarea name="answer4" rows="2" cols="70"></textarea></td></tr>
-	<tr><td><input type="checkbox" name="correct5" onclick=setCorrect(this)></td><td>E</td><td><textarea name="answer5" rows="2" cols="70"></textarea></td></tr>
+	<tr><td><input type="checkbox" value=0 name="correct" onclick=setCorrect(this)></td><td>A</td><td><textarea name="answer" rows="2" cols="70"></textarea></td></tr>
+	<tr><td><input type="checkbox" value=1 name="correct" onclick=setCorrect(this)></td><td>B</td><td><textarea name="answer" rows="2" cols="70"></textarea></td></tr>
+	<tr><td><input type="checkbox" value=2 name="correct" onclick=setCorrect(this)></td><td>C</td><td><textarea name="answer" rows="2" cols="70"></textarea></td></tr>
+	<tr><td><input type="checkbox" value=3 name="correct" onclick=setCorrect(this)></td><td>D</td><td><textarea name="answer" rows="2" cols="70"></textarea></td></tr>
+	<tr><td><input type="checkbox" value=4 name="correct" onclick=setCorrect(this)></td><td>E</td><td><textarea name="answer" rows="2" cols="70"></textarea></td></tr>
 	</table>
 </td></tr>
 </table>
-<script>
-	function setCorrect(item) {
-		console.log("Trigered on : " + item);
-		$('input[type=checkbox]').each(function() 
-		{ 
-		        this.checked = false; 
-		});
-		item.checked = true;
-		item.value = true;
-	}
-    $('#question').validate({
-        rules: {
-            difficulty: {
-                selectcheck: true
-            },
-         	 attributes: {
-                selectcheck: true
-            }
-        }
-    });
-    
-    jQuery.validator.addMethod('selectcheck', function (value) {
-        return (value != '0');
-    }, "selection required");
-</script>
+
 </p>
 <input type="submit" value="Add Question"></form>
 </p>
