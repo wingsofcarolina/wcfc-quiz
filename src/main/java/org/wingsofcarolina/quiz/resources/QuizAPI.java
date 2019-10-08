@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.CookieParam;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
@@ -310,32 +311,104 @@ public class QuizAPI {
 			@FormParam("references") String references,
 			@FormParam("difficulty") String difficulty,
 			@FormParam("attributes") List<String> attributes,
-			@FormParam("answer1") String answer1,
-			@FormParam("answer2") String answer2,
-			@FormParam("answer3") String answer3,
-			@FormParam("answer4") String answer4,
-			@FormParam("answer5") String answer5,
-			@FormParam("correct1") Boolean correct1,
-			@FormParam("correct2") Boolean correct2,
-			@FormParam("correct3") Boolean correct3,
-			@FormParam("correct4") Boolean correct4,
-			@FormParam("correct5") Boolean correct5
+			@FormParam("answer") List<String> answers,
+			@FormParam("correct") List<Integer> correct
 			) throws Exception, AuthenticationException {
 
 		Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
 		User user = User.getWithClaims(claims);
 		
 		Question q = createQuestion(cookie, typeName, categoryName, question, discussion, references, difficulty,
-				attributes, answer1, answer2, answer3, answer4, answer5, correct1, correct2, correct3, correct4,
-				correct5);
+				attributes, answers, correct.get(0));
 		
 		return new ViewQuestionResponse(q.getQuestionId()).cookie(authUtils.generateCookie(user)).build();
 	}
 	
+	@POST
+	@Path("updateQuestion")
+	@Produces("text/html")
+	public Response updateQuestion(@CookieParam("quiz.token") Cookie cookie,
+			@FormParam("questionId") Long questionId,
+			@FormParam("type") String typeName,
+			@FormParam("category") String categoryName,
+			@FormParam("question") String question,
+			@FormParam("discussion") String discussion,
+			@FormParam("references") String references,
+			@FormParam("difficulty") String difficulty,
+			@FormParam("attributes") List<String> attributes,
+			@FormParam("answer") List<String> answers,
+			@FormParam("correct") List<Integer> correct,
+			@FormParam("overwrite") Boolean overwrite
+			) throws Exception, AuthenticationException {
+		
+		boolean changed = false;
+		if (overwrite == null) overwrite = false;
+		
+		// Add the difficulty to the attributes
+		if (difficulty == null) {
+			difficulty = "EASY";
+		}
+		attributes.add(difficulty);
+		LOG.info("Attributes --> {}", attributes);
+		
+		Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
+		User user = User.getWithClaims(claims);
+		
+		// Get the existing question, and see if it has been deployed
+		Question original = Question.getByQuestionId(questionId);
+		// Pick up the correct answer
+		Integer correctAnswer = correct.get(0);
+
+		if (original != null) {
+			if ( (! original.getDeployed()) || overwrite == true) {
+				// Update Attributes, detecting changes
+				for (String att : attributes) {
+					if ( ! original.hasAttribute(att)) { changed = true; }
+				}
+				if (attributes.size() != original.getAttributes().size()) { changed = true; }
+				if (changed) {
+					original.setAttributes(attributes);
+				}
+								
+				// Update user-changeable details, detecting changes
+				QuestionDetails details = new QuestionDetails(question, discussion, references, answers, correctAnswer);
+				if (details.compareTo(original.getDetails()) != 0) {
+					original.setDetails(details);
+					changed = true;
+				}
+				
+				if (changed) {
+					LOG.info("Updated Question : {}", original.getQuestionId());
+					original.save();
+					Slack.instance().sendMessage("Updated Question : " + original.toString());
+				} else {
+					LOG.info("No changes detected for : {}", original.getQuestionId());
+				}
+				
+				if (changed) {
+					Flash.add(Flash.Code.SUCCESS, "Updated existing question with ID : " + original.getQuestionId());
+				} else {
+					Flash.add(Flash.Code.SUCCESS, "No changes made to question with ID : " + original.getQuestionId());
+				}
+			} else {
+				Question q = createQuestion(cookie, typeName, categoryName, question, discussion, references, difficulty, attributes, answers, correctAnswer);
+				original.setSupercededBy(q.getQuestionId());
+				original.save();
+				LOG.info("Superseded question " + original.getQuestionId() + " with " +  q.getQuestionId());
+				Flash.add(Flash.Code.SUCCESS, "Superseded question " + original.getQuestionId() + " with " + q.getQuestionId());
+				Slack.instance().sendMessage("Superseded question " + original.getQuestionId() + " with " + q.getQuestionId() + " at " + dateFormatGmt.format(new Date()));
+				
+				return new ViewQuestionResponse(q.getQuestionId()).cookie(authUtils.generateCookie(user)).build();
+			}
+		} else {
+			Flash.add(Flash.Code.ERROR, "Question with ID " + questionId + " not found.");			
+		}
+		return new ViewQuestionResponse(original.getQuestionId()).cookie(authUtils.generateCookie(user)).build();
+	}
+	
 	private Question createQuestion(Cookie cookie, String typeName, String categoryName, String question,
-			String discussion, String references, String difficulty, List<String> attributes, String answer1,
-			String answer2, String answer3, String answer4, String answer5, Boolean correct1, Boolean correct2,
-			Boolean correct3, Boolean correct4, Boolean correct5) throws Exception {
+			String discussion, String references, String difficulty, List<String> attributes, List<String> answers,
+			Integer correct) throws Exception {
 
 		LOG.info("Type       --> {}", typeName);
 		LOG.info("Category   --> {}", categoryName);
@@ -364,105 +437,13 @@ public class QuizAPI {
 			}
 		}
 		
-		Question q = new Question(type, category, attributes, new QuestionDetails(question, discussion, references, answer1,
-				answer2, answer3, answer4, answer5, correct1, correct2, correct3, correct4, correct5));
+		Question q = new Question(type, category, attributes, new QuestionDetails(question, discussion, references, answers, correct));
 		Slack.instance().sendMessage("Created Question : " + q.getQuestionId());
 		LOG.info("Created Question : {}", q.getQuestionId());
 		q.save();
 		
 		Flash.add(Flash.Code.SUCCESS, "Created new question with ID : " + q.getQuestionId());
 		return q;
-	}
-	
-	@POST
-	@Path("updateQuestion")
-	@Produces("text/html")
-	public Response updateQuestion(@CookieParam("quiz.token") Cookie cookie,
-			@FormParam("questionId") Long questionId,
-			@FormParam("type") String typeName,
-			@FormParam("category") String categoryName,
-			@FormParam("question") String question,
-			@FormParam("discussion") String discussion,
-			@FormParam("references") String references,
-			@FormParam("difficulty") String difficulty,
-			@FormParam("attributes") List<String> attributes,
-			@FormParam("answer1") String answer1,
-			@FormParam("answer2") String answer2,
-			@FormParam("answer3") String answer3,
-			@FormParam("answer4") String answer4,
-			@FormParam("answer5") String answer5,
-			@FormParam("correct1") Boolean correct1,
-			@FormParam("correct2") Boolean correct2,
-			@FormParam("correct3") Boolean correct3,
-			@FormParam("correct4") Boolean correct4,
-			@FormParam("correct5") Boolean correct5,
-			@FormParam("overwrite") Boolean overwrite
-			) throws Exception, AuthenticationException {
-		
-		boolean changed = false;
-		LOG.info("QuestionId --> {}", questionId);
-
-		// Add the difficulty to the attributes
-		if (difficulty == null) {
-			difficulty = "EASY";
-		}
-		attributes.add(difficulty);
-		LOG.info("Attributes --> {}", attributes);
-		
-		Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
-		User user = User.getWithClaims(claims);
-		
-		// Get the existing question, and see if it has been deployed
-		Question original = Question.getByQuestionId(questionId);
-	
-		if (original != null) {
-			if ( (! original.getDeployed()) || overwrite == true) {
-				// Update Attributes, detecting changes
-				for (String att : attributes) {
-					if ( ! original.hasAttribute(att)) { changed = true; }
-				}
-				if (attributes.size() != original.getAttributes().size()) { changed = true; }
-				if (changed) {
-					original.setAttributes(attributes);
-				}
-				
-				// Update user-changeable details, detecting changes
-				QuestionDetails details = new QuestionDetails(question, discussion, references, answer1,
-						answer2, answer3, answer4, answer5, correct1, correct2, correct3, correct4, correct5);
-				if (details.compareTo(original.getDetails()) != 0) {
-					original.setDetails(details);
-					changed = true;
-				}
-				
-				if (changed) {
-					LOG.info("Updated Question : {}", original.getQuestionId());
-					original.save();
-					Slack.instance().sendMessage("Updated Question : " + original.toString());
-				} else {
-					LOG.info("No changes detected for : {}", original.getQuestionId());
-				}
-				
-				if (changed) {
-					Flash.add(Flash.Code.SUCCESS, "Updated existing question with ID : " + original.getQuestionId());
-				} else {
-					Flash.add(Flash.Code.SUCCESS, "No changes made to question with ID : " + original.getQuestionId());
-				}
-			} else {
-				Question q = createQuestion(cookie, typeName, categoryName, question, discussion, references, difficulty,
-						attributes, answer1, answer2, answer3, answer4, answer5, correct1, correct2, correct3, correct4,
-						correct5);
-				original.setSupercededBy(q.getQuestionId());
-				original.save();
-				LOG.info("Superseded question " + original.getQuestionId() + " with " +  q.getQuestionId());
-				Flash.add(Flash.Code.SUCCESS, "Superseded question " + original.getQuestionId() + " with " + q.getQuestionId());
-				Slack.instance().sendMessage("Superseded question " + original.getQuestionId() + " with " + q.getQuestionId() + " at " + dateFormatGmt.format(new Date()));
-				
-				return new ViewQuestionResponse(q.getQuestionId()).cookie(authUtils.generateCookie(user)).build();
-			}
-		} else {
-			Flash.add(Flash.Code.ERROR, "Question with ID " + questionId + " not found.");			
-		}
-		return new ViewQuestionResponse(original.getQuestionId()).cookie(authUtils.generateCookie(user)).build();
 	}
 	
 	/**

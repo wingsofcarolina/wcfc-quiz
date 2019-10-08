@@ -77,6 +77,16 @@ function loadDifficultyAttributes()
 		});
 	});
 }
+
+function setCorrect(item) {
+	console.log("Trigered on : " + item);
+	$('input[type=checkbox]').each(function() 
+	{ 
+	        this.checked = false; 
+	});
+	item.checked = true;
+}
+
 </script>
 <script src="/static/question-form-validation.js"></script>
 
@@ -107,59 +117,32 @@ Fill in the Blank
 <tr><td colspan=2><hr></td></tr>
 <tr><td valign="top" id="answerLabel">Answers</br>(Max 5)</br></br>Select</br>correct</br>answer.</td><td>
 	<table id="answerlist">
-	<tr><td><input type="checkbox" name="correct1" onclick=setCorrect(this)
-	<#if question.getAnswerAt(1).isCorrect()>checked value="true"<#else>value="false"</#if>
-	></td><td>A</td><td><textarea name="answer1" rows="2" cols="70">${question.getAnswerAt(1).getAnswer()}</textarea></td></tr>
-	<tr><td><input type="checkbox" name="correct2" onclick=setCorrect(this)
-	<#if question.getAnswerAt(2).isCorrect()>checked value="true"<#else>value="false"</#if>
-	></td><td>B</td><td><textarea name="answer2" rows="2" cols="70">${question.getAnswerAt(2).getAnswer()}</textarea></td></tr>
-	<tr><td><input type="checkbox" name="correct3" onclick=setCorrect(this)
-	<#if question.getAnswerAt(3).isCorrect()>checked value="true"<#else>value="false"</#if>
-	></td><td>C</td><td><textarea name="answer3" rows="2" cols="70">${question.getAnswerAt(3).getAnswer()}</textarea></td></tr>
-	<tr><td><input type="checkbox" name="correct4" onclick=setCorrect(this)
-	<#if question.getAnswerAt(4).isCorrect()>checked value="true"<#else>value="false"</#if>
-	></td><td>D</td><td><textarea name="answer4" rows="2" cols="70">${question.getAnswerAt(4).getAnswer()}</textarea></td></tr>
-	<tr><td><input type="checkbox" name="correct5" onclick=setCorrect(this)
-	<#if question.getAnswerAt(5).isCorrect()>checked value="true"<#else>value="false"</#if>
-	></td><td>E</td><td><textarea name="answer5" rows="2" cols="70">${question.getAnswerAt(5).getAnswer()}</textarea></td></tr>
+	<tr><td><input type="checkbox" value=0 name="correct" onclick=setCorrect(this)<#if question.getAnswerAt(1).isCorrect()> checked value="true"<#else></#if>></td>
+	<td>A</td><td><textarea name="answer" rows="2" cols="70">${question.getAnswerAt(1).getAnswer()}</textarea></td></tr>
+	<tr><td><input type="checkbox" value=1 name="correct" onclick=setCorrect(this)<#if question.getAnswerAt(2).isCorrect()> checked value="true"<#else></#if>></td>
+	<td>B</td><td><textarea name="answer" rows="2" cols="70">${question.getAnswerAt(2).getAnswer()}</textarea></td></tr>
+	<tr><td><input type="checkbox" value=2 name="correct" onclick=setCorrect(this)<#if question.getAnswerAt(3).isCorrect()> checked value="true"<#else></#if>></td>
+	<td>C</td><td><textarea name="answer" rows="2" cols="70">${question.getAnswerAt(3).getAnswer()}</textarea></td></tr>
+	<tr><td><input type="checkbox" value=3 name="correct" onclick=setCorrect(this)<#if question.getAnswerAt(4).isCorrect()> checked value="true"<#else></#if>></td>
+	<td>D</td><td><textarea name="answer" rows="2" cols="70">${question.getAnswerAt(4).getAnswer()}</textarea></td></tr>
+	<tr><td><input type="checkbox" value=4 name="correct" onclick=setCorrect(this)<#if question.getAnswerAt(5).isCorrect()> checked value="true"<#else></#if>></td>
+	<td>E</td><td><textarea name="answer" rows="2" cols="70">${question.getAnswerAt(5).getAnswer()}</textarea></td></tr>
 	</table>
 </td></tr>
 </table>
-<script>
-	function setCorrect(item) {
-		console.log("Trigered on : " + item);
-		$('input[type=checkbox]').each(function() 
-		{ 
-		        this.checked = false; 
-		});
-		item.checked = true;
-		item.value = true;
-	}
-    $('#question').validate({
-        rules: {
-            difficulty: {
-                selectcheck: true
-            },
-         	 attributes: {
-                selectcheck: true
-            }
-        }
-    });
-    
-    jQuery.validator.addMethod('selectcheck', function (value) {
-        return (value != '0');
-    }, "selection required");
-</script>
 </p>
 <input type="submit" value="Update Question"><p>
 ++++
 <#if question.deployed == true>
 ++++
+</br>
 <input type="checkbox" value=true name="overwrite">Overwrite previously deployed question?
+
 ++++
 </#if>
 ++++
 </form>
+
 </p>
 <div class="paragraph">
 <p><form action="/question/${question.questionId}" method="get"><input type="submit" value="Cancel" /></form></p>
