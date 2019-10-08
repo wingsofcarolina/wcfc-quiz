@@ -3,7 +3,7 @@
 <#setting number_format="#0">
 
 <#if user.isAdmin()>
-navbar:${user.userId}[buttons="HomeNavButton;RecipeNavButton;ViewNavButton;AddNavButton;EditNavButton;ProfileNavButton", active="ProfileNavButton"]
+navbar:${user.userId}[buttons="HomeNavButton;ViewNavButton;AddNavButton;EditNavButton;ProfileNavButton", active="ProfileNavButton"]
 <#else>
 navbar:${user.userId}[buttons="HomeNavButton;ProfileNavButton", active="ProfileNavButton"]
 </#if>

@@ -7,7 +7,7 @@
 <#setting number_format="#0">
 
 <#if user.isAdmin()>
-navbar:${user.userId}[buttons="HomeNavButton;RecipeNavButton;ViewNavButton;AddNavButton;EditNavButton;ProfileNavButton", active="AddNavButton"]
+navbar:${user.userId}[buttons="HomeNavButton;ViewNavButton;AddNavButton;EditNavButton;ProfileNavButton", active="AddNavButton"]
 <#else>
 navbar:${user.userId}[buttons="HomeNavButton;ProfileNavButton", active="HomeNavButton"]
 </#if>

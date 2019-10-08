@@ -1,7 +1,7 @@
 = Update Recipe
 
 <#if user.isAdmin()>
-navbar:${user.userId}[buttons="HomeNavButton;RecipeNavButton;ViewNavButton;AddNavButton;EditNavButton;ProfileNavButton", active="RecipeNavButton"]
+navbar:${user.userId}[buttons="HomeNavButton;ViewNavButton;AddNavButton;EditNavButton;ProfileNavButton", active="RecipeNavButton"]
 </#if>
 
 ++++

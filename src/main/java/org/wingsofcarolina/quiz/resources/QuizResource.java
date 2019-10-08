@@ -356,10 +356,10 @@ public class QuizResource {
 	}
 	
 	@GET
-	@Path("recipe")
+	@Path("recipe/{quiz}")
 	@Produces("text/html")
 	public Response showRecipe(@CookieParam("quiz.token") Cookie cookie,
-			@QueryParam("quiz") String quiz) throws Exception, AuthenticationException {
+			@PathParam("quiz") String quiz) throws Exception, AuthenticationException {
 		Quiz.QuizType quizType = null;
 
 		if (cookie != null) {
