@@ -200,8 +200,9 @@ public class Question {
 	}
 
 	public Answer getAnswerAt(int index) {
-		if (index-1 < details.getAnswers().size()) {
-			return details.getAnswers().get(index-1);
+		List<Answer> answers = details.getAnswers();
+		if (answers != null && index-1 < answers.size()) {
+			return answers.get(index-1);
 		} else {
 			return new EmptyAnswer();
 		}
