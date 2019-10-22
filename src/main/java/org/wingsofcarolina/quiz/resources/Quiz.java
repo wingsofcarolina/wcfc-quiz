@@ -22,19 +22,20 @@ import org.wingsofcarolina.quiz.domain.persistence.Persistence;
 public class Quiz {
 	private static final Logger LOG = LoggerFactory.getLogger(Quiz.class);
 
-	public enum QuizType { FAR, SOP_STUDENT, SOP_PILOT, SOP_INSTRUCTOR, C152, C172, PA28, M20J };
-
 	public final static Integer MONTHS_TO_LIVE = 3;
 	
 	private long quizId;
 	private String quizName;
-	private QuizType quizType;
 	private Category category;
 	private List<Question> questions = new ArrayList<Question>();
 	@Transient
 	private Date createdDate = new Date();
-
+	
+	private Recipe recipe = null;
 	private QuizConfiguration config = null;
+
+	// This attribute determines which Recipe to pick up
+	private String attribute = null;
 
 	public Quiz() {}
 	
@@ -44,52 +45,35 @@ public class Quiz {
 		switch (request) {
 			case "far":
 				category = Category.FAR;
-				quizType = QuizType.FAR;
 				quizName = "FAR 61/91";
 				break;
-			case "sop-student":
+			case "sop":
 				category = Category.SOP;
-				quizType = QuizType.SOP_STUDENT;
-				quizName = "SOP - Student Pilot";
+				quizName = "SOP";
 				break;
-			case "sop-pilot":
-				category = Category.SOP;
-				quizType = QuizType.SOP_PILOT;
-				quizName = "SOP - Licensed Pilot"; 
-				break;
-			case "sop-instructor":
-				category = Category.SOP;
-				quizType = QuizType.SOP_INSTRUCTOR;
-				quizName = "SOP - Instructor";
-				break;
-			case "c152": category = Category.C152; quizType = QuizType.C152; quizName = "Cessna 152"; break;
-			case "c172": category = Category.C172; quizType = QuizType.C172; quizName = "Cessna 172 Skyhawk"; break;
-			case "pa28": category = Category.PA28; quizType = QuizType.PA28; quizName = "Piper PA-28 Warrior"; break;
-			case "m20j": category = Category.M20J; quizType = QuizType.M20J; quizName = "Mooney M20J"; break;
+			case "c152": category = Category.C152; quizName = "Cessna 152"; break;
+			case "c172": category = Category.C172; quizName = "Cessna 172 Skyhawk"; break;
+			case "pa28": category = Category.PA28; quizName = "Piper PA-28 Warrior"; break;
+			case "m20j": category = Category.M20J; quizName = "Mooney M20J"; break;
 		}			
 	}
-	
-	public static QuizType getTypeFromName(String name) {
-		QuizType type = null; 
+
+	public Quiz(QuizConfiguration config, String category, String attribute) {
+		this(config, category);
+		this.attribute = attribute;
+	}
+
+	public static Category getTypeFromName(String name) {
+		Category category = null; 
 		switch (name) {
-			case "far":
-				type = QuizType.FAR;
-				break;
-			case "sop-student":
-				type = QuizType.SOP_STUDENT;
-				break;
-			case "sop-pilot":
-				type = QuizType.SOP_PILOT;
-				break;
-			case "sop-instructor":
-				type = QuizType.SOP_INSTRUCTOR;
-				break;
-			case "c152": type = QuizType.C152; break;
-			case "c172": type = QuizType.C172; break;
-			case "pa28": type = QuizType.PA28; break;
-			case "m20j": type = QuizType.M20J; break;
+			case "far": category = Category.FAR; break;
+			case "sop": category = Category.SOP; break;
+			case "c152": category = Category.C152; break;
+			case "c172": category = Category.C172; break;
+			case "pa28": category = Category.PA28; break;
+			case "m20j": category = Category.M20J; break;
 		}
-		return type;
+		return category;
 	}
 
 	public long getQuizId() {
@@ -136,7 +120,7 @@ public class Quiz {
 		List<Question> pool = new ArrayList<Question>();
 
 		// Pick up the recipe for the desired quiz
-		Recipe recipe = Recipe.getRecipeByType(quizType);
+		recipe = Recipe.getRecipeByCategoryAndAttribute(category, attribute);
 
 		// Iterate over all sections
 		for (Section section : recipe.getSections()) {
@@ -255,14 +239,6 @@ public class Quiz {
 	
 	protected void addQuestion(Question question) {
 		questions.add(question);
-	}
-
-	public QuizType getQuizType() {
-		return quizType;
-	}
-
-	protected void setQuizType(QuizType quizType) {
-		this.quizType = quizType;
 	}
 
 	public void setQuizId(long quizId) {

@@ -24,12 +24,20 @@ public class RecipeDAO extends BasicDAO<Recipe, ObjectId> {
 		return result;
 	}
 	
-	public Recipe getRecipeByType(Quiz.QuizType quizType) {
-		List<Recipe> result = getDatastore().find(Recipe.class).filter("quizType = ", quizType).asList();
+	public Recipe getRecipeByCategoryAndAttribute(Category category, String attribute) {
+		Recipe recipe = null;
+		List<Recipe> result = getDatastore().find(Recipe.class).filter("category = ", category).asList();
 		if (result.size() > 0) {
-			return result.get(0);
-		} else {
-			return null;
-		}
+			if (result.size() == 1 || attribute == null) {
+				recipe = result.get(0);
+			} else {
+				for (Recipe r : result) {
+					if (r.getAttribute().toString().contentEquals(attribute.toUpperCase())) {
+						recipe = r;
+					}
+				}
+			}
+		} 
+		return recipe;
 	}
 }

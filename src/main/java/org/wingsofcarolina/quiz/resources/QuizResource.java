@@ -49,7 +49,6 @@ import org.wingsofcarolina.quiz.domain.presentation.QuestionWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.QuizBuildErrorWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.Renderer;
 import org.wingsofcarolina.quiz.domain.presentation.Wrapper;
-import org.wingsofcarolina.quiz.resources.Quiz.QuizType;
 import org.wingsofcarolina.quiz.responses.RedirectResponse;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -198,12 +197,18 @@ public class QuizResource {
 	@GET
 	@Path("generate")
 	@Produces("text/html")
-	public Response generate(@QueryParam("quiz") String quizType) throws Exception {
+	public Response generate(
+			@QueryParam("quiz") String category,
+			@QueryParam("attribute") String attribute) throws Exception {
 		Quiz quiz = null;
 		String output = "";
 		try {
 			// Build the quiz itself
-			quiz = new Quiz(config, quizType);
+			if (attribute == null) {
+				quiz = new Quiz(config, category);
+			} else {
+				quiz = new Quiz(config, category, attribute);
+			}
 			quiz.build();
 
 			// Render the output for the club member
@@ -217,7 +222,7 @@ public class QuizResource {
 			ByteArrayInputStream inputStream = generator.generate(quiz);
 			return Response.ok().type("application/pdf").entity(inputStream).build();
 		} catch (QuizBuildException e) {
-			Recipe recipe = Recipe.getRecipeByType(quiz.getQuizType());
+			Recipe recipe = Recipe.getRecipeByCategoryAndAttribute(quiz.getCategory(), attribute);
 			ObjectMapper mapper = new ObjectMapper();
 			mapper.enable(SerializationFeature.INDENT_OUTPUT);
 			output = mapper.writeValueAsString(recipe);
@@ -359,8 +364,9 @@ public class QuizResource {
 	@Path("recipe/{quiz}")
 	@Produces("text/html")
 	public Response showRecipe(@CookieParam("quiz.token") Cookie cookie,
-			@PathParam("quiz") String quiz) throws Exception, AuthenticationException {
-		Quiz.QuizType quizType = null;
+			@PathParam("quiz") String quiz,
+			@QueryParam("attribute") String attribute) throws Exception, AuthenticationException {
+		Category category = null;
 
 		if (cookie != null) {
 			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.USER);
@@ -369,31 +375,25 @@ public class QuizResource {
 			String output = "";
 			switch (quiz.toLowerCase()) {
 			case "far":
-				quizType = QuizType.FAR;
+				category = Category.FAR;
 				break;
-			case "sop-student":
-				quizType = QuizType.SOP_STUDENT;
-				break;
-			case "sop-pilot":
-				quizType = QuizType.SOP_PILOT;
-				break;
-			case "sop-instructor":
-				quizType = QuizType.SOP_INSTRUCTOR;
+			case "sop":
+				category = Category.SOP;
 				break;
 			case "c152":
-				quizType = QuizType.C152;
+				category = Category.C152;
 				break;
 			case "c172":
-				quizType = QuizType.C172;
+				category = Category.C172;
 				break;
 			case "pa28":
-				quizType = QuizType.PA28;
+				category = Category.PA28;
 				break;
 			case "m20j":
-				quizType = QuizType.M20J;
+				category = Category.M20J;
 				break;
 			}
-			Recipe recipe = Recipe.getRecipeByType(quizType);
+			Recipe recipe = Recipe.getRecipeByCategoryAndAttribute(category, attribute);
 			
 			if (recipe != null) {
 				ObjectMapper mapper = new ObjectMapper();

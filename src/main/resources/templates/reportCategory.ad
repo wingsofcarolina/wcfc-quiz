@@ -19,7 +19,9 @@ navbar:${user.userId}[buttons="HomeNavButton;ProfileNavButton", active="HomeNavB
 ${question.category} / 
 <#if question.attributes??>
 <#list question.attributes as attribute>
+<#if attribute??>
 ${attribute}&nbsp;
+</#if>
 </#list>
 <#else>
 No Attributes Assigned!

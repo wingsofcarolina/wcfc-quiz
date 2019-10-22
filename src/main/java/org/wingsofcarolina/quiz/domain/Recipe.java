@@ -16,21 +16,30 @@ public class Recipe {
 	@JsonIgnore
     private ObjectId id;
     
-    Quiz.QuizType quizType;
+    Category category;
+    String attribute;
     List<Section> sections;
     
     public Recipe() {}
 
-	public Recipe(Quiz.QuizType quizType) {
-		this.quizType = quizType;
+	public Recipe(Category category) {
+		this.category = category;
 	}
 
-	public Quiz.QuizType getQuizType() {
-		return quizType;
+	public Category getCategory() {
+		return category;
 	}
 
-	public void setQuizType(Quiz.QuizType quizType) {
-		this.quizType = quizType;
+	public void setCategory(Category category) {
+		this.category = category;
+	}
+
+	public String getAttribute() {
+		return attribute;
+	}
+
+	public void setAttribute(String attribute) {
+		this.attribute = attribute;
 	}
 
 	public List<Section> getSections() {
@@ -50,7 +59,11 @@ public class Recipe {
 
 	@Override
 	public String toString() {
-		return "Recipe [quizType=" + quizType + ", sections=" + sections + "]";
+		if (attribute != null) {
+			return "Recipe [category=" + category + ", attribute=" + attribute + ", sections=" + sections + "]";
+		} else {
+			return "Recipe [category=" + category + ", sections=" + sections + "]";
+		}
 	}
 
 	/*
@@ -61,9 +74,9 @@ public class Recipe {
 		return recipeDao.getAllRecipes();
 	}
 
-	public static Recipe getRecipeByType(Quiz.QuizType quizType) {
+	public static Recipe getRecipeByCategoryAndAttribute(Category category, String attribute) {
 		RecipeDAO recipeDao = (RecipeDAO) Persistence.instance().get(Recipe.class);
-		return recipeDao.getRecipeByType(quizType);
+		return recipeDao.getRecipeByCategoryAndAttribute(category, attribute);
 	}
 	
 	@SuppressWarnings("unchecked")

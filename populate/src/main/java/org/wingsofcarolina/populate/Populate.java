@@ -53,14 +53,14 @@ public class Populate {
 	
 	private void run() throws FileNotFoundException, IOException {
 //		resetQuestionValue();
-		createUsers();
+//		createUsers();
 		createRecipes();
-		createFARQuestions();
-		sopQuestions();
-		createAirplaneQuestions(Category.C152);
-		createAirplaneQuestions(Category.C172);
-		createAirplaneQuestions(Category.PA28);
-		createAirplaneQuestions(Category.M20J);
+//		createFARQuestions();
+//		sopQuestions();
+//		createAirplaneQuestions(Category.C152);
+//		createAirplaneQuestions(Category.C172);
+//		createAirplaneQuestions(Category.PA28);
+//		createAirplaneQuestions(Category.M20J);
 		
 		System.out.println("Done.");
 	}
@@ -136,28 +136,29 @@ public class Populate {
 	}
 	
 	private void createRecipes() {
-		createRecipe(Quiz.QuizType.FAR, Arrays.asList(Attribute.ANY));
-		createRecipe(Quiz.QuizType.SOP_STUDENT, Arrays.asList(Attribute.ANY));
-		createRecipe(Quiz.QuizType.SOP_PILOT, Arrays.asList(Attribute.ANY));
-		createRecipe(Quiz.QuizType.SOP_INSTRUCTOR, Arrays.asList(Attribute.ANY));
-		createRecipe(Quiz.QuizType.C152, Arrays.asList(Attribute.GENERAL, Attribute.EASY));
-		createRecipe(Quiz.QuizType.C172, Arrays.asList(Attribute.GENERAL));
-		createRecipe(Quiz.QuizType.PA28, Arrays.asList(Attribute.GENERAL));
+		createRecipe(Category.FAR, null, Arrays.asList(Attribute.ANY));
+		createRecipe(Category.SOP, Attribute.STUDENT, Arrays.asList(Attribute.ANY));
+		createRecipe(Category.SOP, Attribute.PILOT, Arrays.asList(Attribute.ANY));
+		createRecipe(Category.SOP, Attribute.INSTRUCTOR, Arrays.asList(Attribute.ANY));
+		createRecipe(Category.C152, null, Arrays.asList(Attribute.GENERAL, Attribute.EASY));
+		createRecipe(Category.C172, null, Arrays.asList(Attribute.GENERAL));
+		createRecipe(Category.PA28, null, Arrays.asList(Attribute.GENERAL));
 		List<Long> required = new ArrayList<Long>();
 		required.add((long) 1960);
 		required.add((long) 1961);
 		required.add((long) 1962);
 		required.add((long) 1963);
 		required.add((long) 3000);
-		createRecipe(Quiz.QuizType.M20J, Arrays.asList(Attribute.GENERAL), required);
+		createRecipe(Category.M20J, null, Arrays.asList(Attribute.GENERAL), required);
 	}
 	
-	private void createRecipe(Quiz.QuizType quizType, List<String> attributes) {
-		createRecipe(quizType, attributes, null);
+	private void createRecipe(Category category, String attribute, List<String> attributes) {
+		createRecipe(category, attribute, attributes, null);
 	}
 	
-	private Recipe createRecipe(Quiz.QuizType quizType, List<String> attributes, List<Long> required) {
-		Recipe recipe = new Recipe(quizType);
+	private Recipe createRecipe(Category category, String attribute, List<String> attributes, List<Long> required) {
+		Recipe recipe = new Recipe(category);
+		recipe.setAttribute(attribute);
 		Section section = new Section("only");
 		recipe.addSection(section);
 		section.addSelection(new Selection(5, attributes));
@@ -166,7 +167,7 @@ public class Populate {
 		}
 		recipe.save();
 		
-		if (quizType == Quiz.QuizType.M20J) {
+		if (category == Category.M20J) {
 			try {
 				objectMapper.writeValue(new File("recipe.json"), recipe);
 			} catch (IOException e) {

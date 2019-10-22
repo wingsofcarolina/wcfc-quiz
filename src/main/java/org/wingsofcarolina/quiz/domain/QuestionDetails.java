@@ -39,11 +39,20 @@ public class QuestionDetails {
 		answers = new ArrayList<Answer>();
 		for (String answer : answerText) {
 			if ( ! answer.isEmpty() ) {
-				LOG.info("Answer{}    --> {}, {}", index, answer, correct == index ? true : false);
-				answers.add(new Answer(answer, correct == index ? true : false));
+				if (correct == null) {
+					LOG.info("Answer{}    --> {}, fill in the blank", index, answer);
+					answers.add(new Answer(answer));
+				} else {
+					LOG.info("Answer{}    --> {}, {}", index, answer, correct == index ? true : false);
+					answers.add(new Answer(answer, correct == index ? true : false));
+				}
 				index++;
 			}
 		}
+	}
+
+	public QuestionDetails(String question, String discussion, String references, List<String> answers) {
+		this(question, discussion, references, answers, null);
 	}
 
 	public int compareTo(QuestionDetails details) {

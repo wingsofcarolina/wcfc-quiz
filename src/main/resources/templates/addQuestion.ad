@@ -1,9 +1,5 @@
 = Add Question
 
-+++
-<script src="/static/jsoneditor.js"></script>
-+++
-
 <#setting number_format="#0">
 
 <#if user.isAdmin()>
@@ -47,7 +43,7 @@ $(document).on("keydown", ":input:not(textarea)", function(event) {
 });
 
 $(document).ready(function(){
-	loadAttributes("c152");
+	loadAttributes("far");
 	loadDifficultyAttributes();
 });
 
@@ -85,6 +81,19 @@ function setCorrect(item) {
 	});
 	item.checked = true;
 }
+
+function show_hide_checkboxes(value) {
+	var do_show = true;
+	if (value == 'fib') {
+		do_show = false;
+	} 
+    var rows = document.getElementById('answerlist').rows;
+
+    for (var row = 0; row < rows.length; row++) {
+        var cols = rows[row].cells;
+        cols[0].style.display = do_show ? '' : 'none';
+    }
+}
 </script>
 <script src="/static/question-form-validation.js"></script>
 
@@ -92,7 +101,7 @@ function setCorrect(item) {
 
 <table>
 <tr><td>Type</td><td>
-<select id="q-type" name="type">
+<select id="q-type" name="type" onchange="show_hide_checkboxes(this.value)">
   <option value="multi">Multiple Choice</option>
   <option value="fib">Fill in the Blank</option>
 </select>
@@ -100,9 +109,7 @@ function setCorrect(item) {
 <tr><td>Category</td><td>
 <select id="q-category" name="category" onchange=loadAttributes(this.value)>
   <option value="far">FAR 61/91, Pre-Solo</option>
-  <option value="sop-student">SOP/FS Student Pilots</option>
-  <option value="sop-pilot">SOP/FS Licensed Pilots</option>
-  <option value="sop-instructor">SOP/FS Instructors</option>
+  <option value="sop">SOP/FS</option>
   <option value="c152">C-152</option>
   <option value="c172">C-172 Skyhawk</option>
   <option value="pa28">PA-28 Warrior</option>

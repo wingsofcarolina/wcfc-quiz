@@ -24,6 +24,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.HttpHeaders;
@@ -320,13 +321,20 @@ public class QuizAPI {
 			@FormParam("correct") List<Integer> correct
 			) throws Exception, AuthenticationException {
 
+		Question newQuestion;
+
 		Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
 		User user = User.getWithClaims(claims);
 		
-		Question q = createQuestion(cookie, typeName, categoryName, question, discussion, references, difficulty,
+		if (typeName.contentEquals("fib")) {
+			newQuestion = createQuestion(cookie, typeName, categoryName, question, discussion, references, difficulty,
+					attributes, answers, null);
+		} else {
+			newQuestion = createQuestion(cookie, typeName, categoryName, question, discussion, references, difficulty,
 				attributes, answers, correct.get(0));
+		}
 		
-		return new ViewQuestionResponse(q.getQuestionId()).cookie(authUtils.generateCookie(user)).build();
+		return new ViewQuestionResponse(newQuestion.getQuestionId()).cookie(authUtils.generateCookie(user)).build();
 	}
 	
 	@POST
@@ -415,6 +423,8 @@ public class QuizAPI {
 			String discussion, String references, String difficulty, List<String> attributes, List<String> answers,
 			Integer correct) throws Exception {
 
+		Question newQuestion;
+		
 		LOG.info("Type       --> {}", typeName);
 		LOG.info("Category   --> {}", categoryName);
 		LOG.info("Question   --> {}", question);
@@ -429,7 +439,7 @@ public class QuizAPI {
 		
 		Type type = null;
 		Category category = null;
-		if (categoryName.toUpperCase().equals("SOP")) {
+		if (categoryName.toUpperCase().startsWith("SOP")) {
 		    type = Type.BLANK;
 		    category = Category.SOP;
 		} else {
@@ -442,13 +452,17 @@ public class QuizAPI {
 			}
 		}
 		
-		Question q = new Question(type, category, attributes, new QuestionDetails(question, discussion, references, answers, correct));
-		Slack.instance().sendMessage("Created Question : " + q.getQuestionId());
-		LOG.info("Created Question : {}", q.getQuestionId());
-		q.save();
+		if (correct == null) {
+			newQuestion = new Question(type, category, attributes, new QuestionDetails(question, discussion, references, answers));
+		} else {
+			newQuestion = new Question(type, category, attributes, new QuestionDetails(question, discussion, references, answers, correct));
+		}
+		Slack.instance().sendMessage("Created Question : " + newQuestion.getQuestionId());
+		LOG.info("Created Question : {}", newQuestion.getQuestionId());
+		newQuestion.save();
 		
-		Flash.add(Flash.Code.SUCCESS, "Created new question with ID : " + q.getQuestionId());
-		return q;
+		Flash.add(Flash.Code.SUCCESS, "Created new question with ID : " + newQuestion.getQuestionId());
+		return newQuestion;
 	}
 	
 	/**
@@ -504,13 +518,13 @@ public class QuizAPI {
 		Recipe newRecipe = objectMapper.readValue(recipe, Recipe.class);
 
 		// Get rid of the old recipe
-		Recipe original = Recipe.getRecipeByType(newRecipe.getQuizType());
+		Recipe original = Recipe.getRecipeByCategoryAndAttribute(newRecipe.getCategory(), newRecipe.getAttribute().toString());
 		original.delete();
 		
 		// Replace it with the new recipe
 		newRecipe.save();
 		
-		Flash.add(Flash.Code.SUCCESS, "Recipe type " + newRecipe.getQuizType() + " updated.");			
+		Flash.add(Flash.Code.SUCCESS, "Recipe type " + newRecipe.getCategory() + " updated.");			
 
 		return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
 	}
@@ -569,7 +583,8 @@ public class QuizAPI {
 	@GET
 	@Path("attributes/{category}")
 	@Produces("application/json")
-	public Response attributes(@PathParam("category") String category) {
+	public Response attributes(@PathParam("category") String category,
+			@QueryParam("attribute") String attribute) {
 		List<String> attributes = Attribute.attributes(category);
 		return Response.ok().entity(attributes).build();
 	}

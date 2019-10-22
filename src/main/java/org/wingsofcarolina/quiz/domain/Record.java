@@ -6,11 +6,9 @@ import java.util.List;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Id;
-import org.wingsofcarolina.quiz.domain.dao.QuestionDAO;
 import org.wingsofcarolina.quiz.domain.dao.RecordDAO;
 import org.wingsofcarolina.quiz.domain.persistence.Persistence;
 import org.wingsofcarolina.quiz.resources.Quiz;
-import org.wingsofcarolina.quiz.resources.Quiz.QuizType;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -21,7 +19,6 @@ public class Record {
     
 	private Long quizId;
 	private String quizName;
-	private QuizType quizType;
 	private Category category;
 	private Date createdDate = new Date();
     private List<Long> questionIds = new ArrayList<Long>();
@@ -31,7 +28,6 @@ public class Record {
 	public Record(Quiz quiz) {
 		this.quizId = quiz.getQuizId();
 		this.quizName = quiz.getQuizName();
-		this.quizType = quiz.getQuizType();
 		this.category = quiz.getCategory();
 		for (Question question : quiz.getQuestions()) {
 			questionIds.add(question.getQuestionId());
@@ -56,14 +52,6 @@ public class Record {
 
 	public void setQuizName(String quizName) {
 		this.quizName = quizName;
-	}
-
-	public QuizType getQuizType() {
-		return quizType;
-	}
-
-	public void setQuizType(QuizType quizType) {
-		this.quizType = quizType;
 	}
 
 	public Category getCategory() {

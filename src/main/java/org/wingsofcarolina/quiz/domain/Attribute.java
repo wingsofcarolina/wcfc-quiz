@@ -30,6 +30,7 @@ public class Attribute {
 			WB, SYSTEMS, SERVICING, SUPPLEMENTS, MISCELLANEOUS, AIRCRAFT_RULES);
 
 	// SOP/FAR attributes
+	public static String FAR = "FAR";
 	public static String SOP_I = "SOP_I";
 	public static String SOP_II = "SOP_II";
 	public static String SOP_III = "SOP_III";
@@ -42,7 +43,7 @@ public class Attribute {
 	public static String INSTRUCTOR = "INSTRUCTOR";
 	public static String PILOT = "PILOT";
 	public static String ANY = "ANY";
-	public static List<String> sop_attributes = Arrays.asList(SOP_I, SOP_II, SOP_III, SOP_IV, SOP_V, SOP_VI, SOP_VII, FS);
+	public static List<String> sop_attributes = Arrays.asList(FAR, SOP_I, SOP_II, SOP_III, SOP_IV, SOP_V, SOP_VI, SOP_VII, FS);
 	public static List<String> level_attributes = Arrays.asList(STUDENT, INSTRUCTOR, PILOT);
 	
 	public static List<String> attributes(String category) {
