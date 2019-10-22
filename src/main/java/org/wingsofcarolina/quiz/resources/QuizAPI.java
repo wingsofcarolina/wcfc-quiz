@@ -354,6 +354,8 @@ public class QuizAPI {
 			@FormParam("overwrite") Boolean overwrite
 			) throws Exception, AuthenticationException {
 		
+		Integer correctAnswer = null;
+		
 		boolean changed = false;
 		if (overwrite == null) overwrite = false;
 		
@@ -370,7 +372,9 @@ public class QuizAPI {
 		// Get the existing question, and see if it has been deployed
 		Question original = Question.getByQuestionId(questionId);
 		// Pick up the correct answer
-		Integer correctAnswer = correct.get(0);
+		if ( ! typeName.contentEquals("BLANK")) {
+			correctAnswer = correct.get(0);
+		}
 
 		if (original != null) {
 			if ( (! original.getDeployed()) || overwrite == true) {

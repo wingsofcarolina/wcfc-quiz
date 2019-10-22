@@ -107,7 +107,6 @@ public class PDFGenerator {
 		PdfDocument pdf = new PdfDocument(writer);
 		Document document = new Document(pdf);
 		document.setBottomMargin(110.0f);
-		LOG.info("Bottom Margin : {}", document.getBottomMargin());
 		document.setFont(normal).setFontSize(10);
 		PageXofY event = new PageXofY(pdf, quiz);
         pdf.addEventHandler(PdfDocumentEvent.END_PAGE, event);

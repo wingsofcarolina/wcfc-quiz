@@ -39,6 +39,9 @@ select {
 $(document).ready(function(){
 	loadAttributes();
 	loadDifficultyAttributes();
+<#if question.type != "CHOICE">
+	show_hide_checkboxes('fib');
+</#if>
 });
 
 function loadAttributes()
@@ -87,6 +90,18 @@ function setCorrect(item) {
 	item.checked = true;
 }
 
+function show_hide_checkboxes(value) {
+	var do_show = true;
+	if (value == 'fib') {
+		do_show = false;
+	} 
+    var rows = document.getElementById('answerlist').rows;
+
+    for (var row = 0; row < rows.length; row++) {
+        var cols = rows[row].cells;
+        cols[0].style.display = do_show ? '' : 'none';
+    }
+}
 </script>
 <script src="/static/question-form-validation.js"></script>
 
