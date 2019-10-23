@@ -1,5 +1,7 @@
 package org.wingsofcarolina.quiz;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
@@ -9,6 +11,7 @@ import org.knowm.dropwizard.sundial.SundialConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wingsofcarolina.quiz.authentication.AuthenticationExceptionMapper;
+import org.wingsofcarolina.quiz.authentication.HashUtils;
 import org.wingsofcarolina.quiz.authentication.Privilege;
 import org.wingsofcarolina.quiz.common.RuntimeExceptionMapper;
 import org.wingsofcarolina.quiz.domain.User;
@@ -83,5 +86,60 @@ public class QuizService extends Application<QuizConfiguration> {
 		env.jersey().register(quiz);
 		env.jersey().register(new QuizAPI(config));
 		env.healthChecks().register("check", new MinimalHealthCheck());
+		
+		// Now create two mandatory default users, if they don't exist
+		// Create some initial dummy data
+		User user = createUser("Dwight Frye", "dfrye@planez.co", "REDACTED");
+		if (user != null) {
+			user.addPriv(Privilege.ADMIN);
+			user.save();
+		}
+		user = createUser("George Scheer", "george.scheer@gmail.com", "REDACTED");
+		if (user != null) {
+			user.addPriv(Privilege.ADMIN);
+			user.save();
+		}
 	}
+	
+	private User createUser(String name, String email, String password) {
+		User user = null;
+		if (User.getByEmail(email) == null) {
+			user = addUser(name, email, password, Privilege.USER);
+			user.save();
+		}
+		return user;
+	}
+	
+	public User addUser(String name, String email, String password, Privilege priv) {
+		String hashedPw = null;
+		try {
+			if (password != null) {
+				hashedPw = HashUtils.generateStrongPasswordHash(password);
+			}
+			
+			User user = User.getByEmail(email);
+			if (user == null) {
+				if (hashedPw == null) {
+					user = new User(email);
+				} else {
+					user = new User(email, hashedPw);
+				}
+				if (name == null) {
+					name = "none";
+				}
+				user.setName(name);
+				user.addPriv(priv);
+				user.save();
+				System.out.println("New user  : " + user);
+			} else {
+				System.out.println("User '" + user.getEmail() + "' already exists.");
+			}
+
+			return user;
+		} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
 }

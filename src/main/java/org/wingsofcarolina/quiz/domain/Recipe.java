@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Id;
+import org.wingsofcarolina.quiz.domain.dao.QuestionDAO;
 import org.wingsofcarolina.quiz.domain.dao.RecipeDAO;
 import org.wingsofcarolina.quiz.domain.persistence.Persistence;
 import org.wingsofcarolina.quiz.resources.Quiz;
@@ -69,6 +70,11 @@ public class Recipe {
 	/*
 	 * Database Management Functionality
 	 */
+	public static void drop() {
+		RecipeDAO recipeDao = (RecipeDAO) Persistence.instance().get(Recipe.class);
+		recipeDao.drop();
+	}
+	
 	public static List<Recipe> getAllRecipes() {
 		RecipeDAO recipeDao = (RecipeDAO) Persistence.instance().get(Recipe.class);
 		return recipeDao.getAllRecipes();

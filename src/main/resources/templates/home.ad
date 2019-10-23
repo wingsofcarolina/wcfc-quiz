@@ -67,8 +67,8 @@ function query(msg, redirect) {
 <li><a href="/updateRecipe">Update a quiz recipe</a><br>
 <li><a href="/browseQuestions">Browse questions</a><br>
 <li><a href="/searchQuestions">Search questions</a><br>
-<li><a id="restoreQuestions" href="#" onclick="query('Really? Overwrite ALL currently saved Questions?', '/api/backupQuestions');return false;">Create Question Backup Files</a>
-<li><a id="restoreQuestions" href="#" onclick="query('Really? Restore ALL the Questions?', '/api/restoreQuestions');return false;">Restore Question Backup Files</a>
+<li><a id="backup" href="#" onclick="query('Really? Overwrite ALL currently saved Data?', '/api/backup');return false;">Create Recipe and Question Backup Files</a>
+<li><a id="restore" href="#" onclick="query('Really? Restore ALL the Data?', '/api/restore');return false;">Restore Recipe and Question Backup Files</a>
 <li><a href="/register">Register a new instructor within the system</a>
 <li><a href="/version">Show system version information</a><br>
 </ul>

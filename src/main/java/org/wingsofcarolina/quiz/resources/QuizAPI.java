@@ -230,16 +230,17 @@ public class QuizAPI {
 	}
 
 	@GET
-	@Path("backupQuestions")
-	public Response backupQuestions(@CookieParam("quiz.token") Cookie cookie) throws AuthenticationException {
-		int count = 0;
+	@Path("backup")
+	public Response backupDatabase(@CookieParam("quiz.token") Cookie cookie) throws AuthenticationException {
+		int q_count = 0;
+		int r_count = 0;
 		
 		Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
 		User user = User.getWithClaims(claims);
 		
 		// Notify someone that a backup has been requested
-		Slack.instance().sendMessage("Backup of all questions requested at " + dateFormatGmt.format(new Date()));
-		LOG.info("Backup of all questions requested at {}", dateFormatGmt.format(new Date()));
+		Slack.instance().sendMessage("Backup database requested at " + dateFormatGmt.format(new Date()));
+		LOG.info("Backup of database requested at {}", dateFormatGmt.format(new Date()));
 
 		// Make the directory if it doesn't exist
 		new File(dataDir).mkdir();
@@ -247,23 +248,43 @@ public class QuizAPI {
 		
 		List<Question> questions = Question.getAllQuestions();
 		for (Question question : questions) {
-			String name = questionDir + "/" + question.getQuestionId() + ".json";
+			String name = questionDir + "/q-" + question.getQuestionId() + ".json";
 			try {
 				objectMapper.writeValue(new File(name), question);
-				count++;
+				q_count++;
 			} catch (IOException e) {
 				LOG.info("IOException writing question {}", name, e);
 			}
 		}
-		
-		LOG.info("The number of questions saved : {}", count);
-		Flash.add(Flash.Code.SUCCESS, "Saved " + count + " questions from the database.");
+
+		String name;
+		List<Recipe> recipes = Recipe.getAllRecipes();
+		for (Recipe recipe : recipes) {
+			if (recipe.getAttribute() == null) {
+				name = questionDir + "/r-" + recipe.getCategory() + ".json";
+			} else {
+				name = questionDir + "/r-" + recipe.getCategory() + "-" + recipe.getAttribute() + ".json";
+			}
+			try {
+				objectMapper.writeValue(new File(name), recipe);
+				r_count++;
+			} catch (IOException e) {
+				LOG.info("IOException writing recipe {}", name, e);
+			}
+		}
+
+		LOG.info("The number of recipes saved : {}", r_count);
+		LOG.info("The number of questions saved : {}", q_count);
+		Flash.add(Flash.Code.SUCCESS, "Saved " + r_count + " recipes and " + q_count + " questions from the database.");
 		return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
 	}
 
 	@GET
-	@Path("restoreQuestions")
-	public Response restoreQuestions(@CookieParam("quiz.token") Cookie cookie) throws AuthenticationException {
+	@Path("restore")
+	public Response restoreDatabase(@CookieParam("quiz.token") Cookie cookie) throws AuthenticationException {
+		int q_count = 0;
+		int r_count = 0;
+
 		Long maxID = 0L;
 		
 		Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
@@ -273,25 +294,42 @@ public class QuizAPI {
 		Slack.instance().sendMessage("Restore of all questions requested at " + dateFormatGmt.format(new Date()));
 		LOG.info("Restore of all questions requested at {}", dateFormatGmt.format(new Date()));
 
-		// First delete all questions (shudder)
+		// First delete all questions and recipes (shudder)
+		Recipe.drop();
 		Question.drop();
 
 		// Then pull in each file, one at a time, and create/save the question
-		int count = 0;
 		File folder = new File(questionDir);
 		if (folder.isDirectory()) {
+			// Restore the Recipes first
 			File[] listOfFiles = folder.listFiles();
 			for (File file : listOfFiles) {
-				try {
-					Question question = objectMapper.readValue(file, Question.class);
-					if (question.getQuestionId() > maxID) {
-						maxID = question.getQuestionId();
+				if (file.getName().startsWith(("r-"))) {
+					try {
+						Recipe recipe = objectMapper.readValue(file, Recipe.class);
+						recipe.save();
+					} catch (IOException e) {
+						LOG.error("Failed reastoring recipe from file : {}", e.getMessage());
 					}
-					question.save();
-				} catch (IOException e) {
-					LOG.error("Failed reastoring question from file : {}", e.getMessage());
+					r_count++;
 				}
-				count++;
+			}
+			
+			// Then restore the questions
+			listOfFiles = folder.listFiles();
+			for (File file : listOfFiles) {
+				if (file.getName().startsWith(("q-"))) {
+					try {
+						Question question = objectMapper.readValue(file, Question.class);
+						if (question.getQuestionId() > maxID) {
+							maxID = question.getQuestionId();
+						}
+						question.save();
+					} catch (IOException e) {
+						LOG.error("Failed reastoring question from file : {}", e.getMessage());
+					}
+					q_count++;
+				}
 			}
 			LOG.info("Resetting maximum question ID in database to : {}", maxID);
 			AutoIncrement inc = Persistence.instance().setID(Question.ID_KEY, maxID);
@@ -299,10 +337,11 @@ public class QuizAPI {
 			LOG.error("Directory {} not found during question database recovery.", questionDir);
 		}
 
-		LOG.info("The number of questions restored : {}", count);
+		LOG.info("The number of recipes restored : {}", r_count);
+		LOG.info("The number of questions restored : {}", q_count);
 
-		Flash.add(Flash.Code.SUCCESS, "Restored " + count + " questions into the database.");
-		Slack.instance().sendMessage("Restored " + count + " questions into the database.");
+		Flash.add(Flash.Code.SUCCESS, "Restored " + r_count + " recipes and " + q_count + " questions into the database.");
+		Slack.instance().sendMessage("Restored " + r_count + " recipes and " + q_count + " questions into the database.");
 		return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
 	}
 
@@ -596,7 +635,7 @@ public class QuizAPI {
 	@GET
 	@Path("download")
 	@Produces(MediaType.TEXT_PLAIN)
-	public Response downloadQuestions(@CookieParam("quiz.token") Cookie cookie) throws AuthenticationException {
+	public Response downloadBackup(@CookieParam("quiz.token") Cookie cookie) throws AuthenticationException {
 		
 		if (cookie != null) {
 			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
@@ -609,12 +648,35 @@ public class QuizAPI {
 			LOG.info("Download of all questions requested at {}", dateFormatGmt.format(new Date()));
 			
 		    StreamingOutput streamingOutput = outputStream -> {
+				String name;
+
 		        ZipOutputStream zipOut = new ZipOutputStream(new BufferedOutputStream(outputStream));
 	
-		        // Iterate over all questions creating the zip output file
+		        // Iterate over all recipes creating the zip output file
+				List<Recipe> recipes = Recipe.getAllRecipes();
+				for (Recipe recipe : recipes) {
+					if (recipe.getAttribute() == null) {
+						name = "quizdata/r-" + recipe.getCategory() + ".json";
+					} else {
+						name = "quizdata/r-" + recipe.getCategory() + "-" + recipe.getAttribute() + ".json";
+					}
+			        ZipEntry zipEntry = new ZipEntry(name);
+			        zipOut.putNextEntry(zipEntry);
+					try {
+						ByteArrayOutputStream bos = new ByteArrayOutputStream();
+						objectMapper.writeValue(bos, recipe);
+						byte[] ba = bos.toByteArray();
+	                    zipOut.write(ba, 0, ba.length);
+		                zipOut.flush();
+					} catch (IOException e) {
+						LOG.info("IOException writing recipe {}", name, e);
+					}
+				}
+
+				// Iterate over all questions creating the zip output file
 				List<Question> questions = Question.getAllQuestions();
 				for (Question question : questions) {
-					String name = "quiz-" + now + "/" + question.getQuestionId() + ".json";
+					name = "quizdata/q-" + question.getQuestionId() + ".json";
 			        ZipEntry zipEntry = new ZipEntry(name);
 			        zipOut.putNextEntry(zipEntry);
 					try {
