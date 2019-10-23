@@ -67,7 +67,7 @@ metadata:
     app: wcfc-quiz
 spec:
   progressDeadlineSeconds: 600
-  replicas: 1
+  replicas: 2
   revisionHistoryLimit: 2
   selector:
     matchLabels:
@@ -84,7 +84,7 @@ spec:
         run: wcfc-quiz
     spec:
       containers:
-      - image: planez.co:5000/wcfc-quiz:latest
+      - image: planez.co:5000/wcfc-quiz:1.0.1
         env:
         - name: MODE
           value: DEV

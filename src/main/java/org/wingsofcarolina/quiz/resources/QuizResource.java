@@ -44,6 +44,7 @@ import org.wingsofcarolina.quiz.domain.presentation.QuestionListWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.QuestionWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.QuizBuildErrorWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.Renderer;
+import org.wingsofcarolina.quiz.domain.presentation.Version;
 import org.wingsofcarolina.quiz.domain.presentation.Wrapper;
 import org.wingsofcarolina.quiz.responses.RedirectResponse;
 
@@ -152,7 +153,7 @@ public class QuizResource {
 	public Response login() throws Exception {
 		String output = "";
 		try {
-			output = renderer.render(Templates.LOGIN, new Object()).toString();
+			output = renderer.render(Templates.LOGIN, new Version(buildProperties)).toString();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

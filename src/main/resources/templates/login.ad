@@ -50,4 +50,10 @@ Instructors needing to retrieve a quiz key log in:
   <input type="submit" name="type" value="Login">
 </form>
 </p>
+<hr>
+</center>
+<div id=footer style="background:lightgray">
+<div style="float:left">Version : ${version}</div>
+<div style="float:right">Commit : ${commit}</div>
+</div>
 ++++
