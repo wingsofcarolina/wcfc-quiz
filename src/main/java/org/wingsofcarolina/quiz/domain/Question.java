@@ -30,7 +30,7 @@ public class Question {
 	private Long questionId;
 	private Boolean deployed = false;
 	private Boolean deleted = false;
-	private long supercededBy = -1;
+	private long supersededBy = -1;
 	private Date createdDate = new Date();
 	@JsonIgnore
 	@Transient
@@ -73,8 +73,8 @@ public class Question {
 	}
 	
 	@JsonIgnore
-	public boolean isSuperceded() {
-		return supercededBy != -1;
+	public boolean isSuperseded() {
+		return supersededBy != -1;
 	}
 
 	public long getQuestionId() {
@@ -148,12 +148,12 @@ public class Question {
 		this.deleted = deleted;
 	}
 
-	public long getSupercededBy() {
-		return supercededBy;
+	public long getSupersededBy() {
+		return supersededBy;
 	}
 	
-	public void setSupercededBy(long supercededBy) {
-		this.supercededBy = supercededBy;
+	public void setSupersededBy(long supersededBy) {
+		this.supersededBy = supersededBy;
 	}
 
 	public Date getCreatedDate() {
@@ -282,6 +282,6 @@ public class Question {
 	@Override
 	public String toString() {
 		return "Question [id=" + id + ", index=" + index + ", details=" + details + ", questionId=" + questionId
-				+ ", deployed=" + deployed + ", supercededBy=" + supercededBy + ", createdDate=" + createdDate + "]";
+				+ ", deployed=" + deployed + ", supersededBy=" + supersededBy + ", createdDate=" + createdDate + "]";
 	}
 }

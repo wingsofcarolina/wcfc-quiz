@@ -20,8 +20,8 @@ function query(msg, redirect) {
 <table width=100%>
 <tr><td width=10%>ID</td><td><strong>${question.questionId}</strong></td></tr>
 
-<#if question.isSuperceded()>
-<tr><td valign="top">Superceded</td><td><strong>${question.getSupercededBy()}</strong> -- Question ${question.questionId} locked</td></tr>
+<#if question.isSuperseded()>
+<tr><td valign="top">Superseded</td><td><strong>${question.getSupersededBy()}</strong> -- Question ${question.questionId} locked</td></tr>
 </#if>
 
 <tr><td>Type</td><td><strong>
@@ -82,7 +82,7 @@ button:/previewQuestion/${question.questionId}[method="get",label="Preview Quest
 
 button:/previewKey/${question.questionId}[method="get",label="Preview Key",target="preview"]
 ++++
-<#if ! question.isSuperceded()>
+<#if ! question.isSuperseded()>
 ++++
 button:/updateQuestion/${question.questionId}[method="get",label="Edit/Update Question"]
 ++++

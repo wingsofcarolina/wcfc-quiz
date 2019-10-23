@@ -72,7 +72,7 @@ public class Populate {
 		
 		for (Question question : questions) {
 			question.setDeployed(false);
-			question.setSupercededBy(-1);
+			question.setSupersededBy(-1);
 			question.save();
 			count++;
 		}

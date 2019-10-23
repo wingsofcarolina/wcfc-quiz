@@ -511,7 +511,7 @@ public class QuizAPI {
 			} else {
 				Question q = createQuestion(cookie, typeName, categoryName, question, discussion, references,
 						difficulty, attributes, answers, correctAnswer);
-				original.setSupercededBy(q.getQuestionId());
+				original.setSupersededBy(q.getQuestionId());
 				original.save();
 				LOG.info("Superseded question " + original.getQuestionId() + " with " + q.getQuestionId());
 				Flash.add(Flash.Code.SUCCESS,
@@ -597,7 +597,7 @@ public class QuizAPI {
 		String referer = headers.getRequestHeader("referer").get(0);
 
 		Question question = Question.getByQuestionId(questionId);
-		if (question.isSuperceded() || question.getDeployed() == true) {
+		if (question.isSuperseded() || question.getDeployed() == true) {
 			Flash.add(Flash.Code.ERROR,
 					"Question " + question.getQuestionId() + " is either superseded or deployed and can't be deleted.");
 			return new RedirectResponse(referer).cookie(authUtils.generateCookie(user)).build();

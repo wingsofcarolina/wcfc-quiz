@@ -131,8 +131,8 @@ public class Quiz {
 			if (section.getRequired() != null) {
 				for (Long id : section.getRequired()) {
 					Question candidate = Question.getByQuestionId(id);
-					while (candidate != null && candidate.isSuperceded()) {
-						candidate = Question.getByQuestionId(candidate.getSupercededBy());
+					while (candidate != null && candidate.isSuperseded()) {
+						candidate = Question.getByQuestionId(candidate.getSupersededBy());
 					}
 
 					if (candidate != null) {
@@ -169,8 +169,8 @@ public class Quiz {
 					
 					// If the question has been supersededed, then find the most
 					// current version and use that instead.
-					while (candidate != null && candidate.isSuperceded()) {
-						candidate = Question.getByQuestionId(candidate.getSupercededBy());
+					while (candidate != null && candidate.isSuperseded()) {
+						candidate = Question.getByQuestionId(candidate.getSupersededBy());
 					}
 					
 					// If the candidate is _not_ already in the pool (which can
