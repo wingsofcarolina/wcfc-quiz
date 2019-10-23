@@ -58,6 +58,11 @@
 			<version>${dropwizard.version}</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>io.dropwizard</groupId>
+			<artifactId>dropwizard-forms</artifactId>
+			<version>${dropwizard.version}</version>
+		</dependency>
 		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>

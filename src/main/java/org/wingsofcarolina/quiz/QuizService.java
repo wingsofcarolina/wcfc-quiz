@@ -25,6 +25,7 @@ import de.thomaskrille.dropwizard_template_config.TemplateConfigBundle;
 import de.thomaskrille.dropwizard_template_config.TemplateConfigBundleConfiguration;
 import io.dropwizard.Application;
 import io.dropwizard.assets.AssetsBundle;
+import io.dropwizard.forms.MultiPartBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 
@@ -45,6 +46,7 @@ public class QuizService extends Application<QuizConfiguration> {
 		// bootstrap.addBundle(new AssetsBundle("/doc", "/doc", "index.html","html"));
 		bootstrap.addBundle(new TemplateConfigBundle(new TemplateConfigBundleConfiguration()));
         bootstrap.addBundle(new AssetsBundle("/assets/", "/static"));
+        bootstrap.addBundle(new MultiPartBundle());
         bootstrap.addBundle(new SundialBundle<QuizConfiguration>() {
 
             @Override

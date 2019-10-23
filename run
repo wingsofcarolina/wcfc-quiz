@@ -1,3 +1,0 @@
-#!/bin/bash
-
-docker run -it --name planez-ui --rm -p8313:8313 planez.co:5000/planez-ui:latest $@

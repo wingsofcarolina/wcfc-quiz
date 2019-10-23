@@ -61,11 +61,17 @@ public class Persistence {
 	}
 
 	public AutoIncrement setID(final String key, final long setvalue) {
+		AutoIncrement inc = null;
 		List<AutoIncrement> autoIncrement = datastore.find(AutoIncrement.class).filter("_id = ", key).asList();
-		AutoIncrement inc = autoIncrement.get(0);
-		if (inc != null) {
-			inc.setValue(setvalue);
+		if (autoIncrement == null || autoIncrement.size() == 0) {
+			inc = new AutoIncrement(key, setvalue);
 			datastore.save(inc);
+		} else {
+			if (autoIncrement != null && autoIncrement.get(0) != null) {
+				inc = autoIncrement.get(0);
+				inc.setValue(setvalue);
+				datastore.save(inc);
+			}
 		}
 		return inc;
 	}
