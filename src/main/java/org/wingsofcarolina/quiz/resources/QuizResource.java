@@ -47,6 +47,8 @@ import org.wingsofcarolina.quiz.domain.presentation.Renderer;
 import org.wingsofcarolina.quiz.domain.presentation.Version;
 import org.wingsofcarolina.quiz.domain.presentation.Wrapper;
 import org.wingsofcarolina.quiz.responses.RedirectResponse;
+import org.wingsofcarolina.quiz.scripting.Execute;
+import org.wingsofcarolina.quiz.scripting.QuizContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -71,7 +73,7 @@ public class QuizResource {
 	private Renderer renderer;
 	
 	ObjectMapper objectMapper;
-	Map<String, Object> buildProperties;
+	Map<String, Object> buildProperties = null;
 
 	private SimpleDateFormat dateFormatGmt;
 	private static final Integer pageCount = 10;
@@ -565,6 +567,30 @@ public class QuizResource {
 		}
 	}
 
+	@GET
+	@Path("script")
+	@Produces("text/html")
+	public Response script(@CookieParam("quiz.token") Cookie cookie) throws Exception, AuthenticationException {
+		if (cookie != null) {
+			Jws<Claims> claims = authUtils.validateUser(cookie.getValue());
+			User user = User.getWithClaims(claims);
+			if (user != null) {
+				Execute execute = new Execute(new QuizContext(config));
+				Map<String, String> args = null;
+				String result = execute.run("hello_script()", args );
+				return Response.ok().entity(result).cookie(authUtils.generateCookie(user)).build();
+			} else {
+				return new RedirectResponse(Pages.LOGIN_PAGE).build();
+			}
+		} else {
+			return new RedirectResponse(Pages.LOGIN_PAGE).build();
+		}
+	}
+
+	
+	/////////////////////////////
+	// Supporting methods 
+	/////////////////////////////
 	public User addUser(String email) {
 		return this.addUser(null, email, null, Privilege.USER);
 	}
