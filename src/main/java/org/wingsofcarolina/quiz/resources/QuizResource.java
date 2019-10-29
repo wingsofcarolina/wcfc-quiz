@@ -48,7 +48,6 @@ import org.wingsofcarolina.quiz.domain.presentation.Version;
 import org.wingsofcarolina.quiz.domain.presentation.Wrapper;
 import org.wingsofcarolina.quiz.responses.RedirectResponse;
 import org.wingsofcarolina.quiz.scripting.Execute;
-import org.wingsofcarolina.quiz.scripting.QuizContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -200,18 +199,20 @@ public class QuizResource {
 			@QueryParam("quiz") String category,
 			@QueryParam("attribute") String attribute) throws Exception {
 		Quiz quiz = null;
+		
 		String output = "";
 		try {
 			// Build the quiz itself
 			if (attribute == null) {
-				quiz = new Quiz(config, category);
+				quiz = new Quiz(category);
 			} else {
-				quiz = new Quiz(config, category, attribute);
+				quiz = new Quiz(category, attribute);
 			}
-			quiz.build();
+			QuizContext context = new QuizContext(quiz, config);
+			quiz.build(context);
 
 			// Render the output for the club member
-			PDFGenerator generator = new PDFGenerator(config);
+			PDFGenerator generator = new PDFGenerator(context);
 
 			// Store the quiz question set for later retrieval
 			Record record = quiz.getRecord();
@@ -248,7 +249,7 @@ public class QuizResource {
 			User user = User.getWithClaims(claims);
 			Question question = Question.getByQuestionId(questionId);
 			if (question != null) {
-				PDFGenerator generator = new PDFGenerator(config);
+				PDFGenerator generator = new PDFGenerator(new QuizContext(new Quiz(), config));
 		
 				ByteArrayInputStream inputStream = generator.generate(question);
 				return Response.ok().type("application/pdf").entity(inputStream).build();
@@ -566,27 +567,6 @@ public class QuizResource {
 			return new RedirectResponse(Pages.LOGIN_PAGE).build();
 		}
 	}
-
-	@GET
-	@Path("script")
-	@Produces("text/html")
-	public Response script(@CookieParam("quiz.token") Cookie cookie) throws Exception, AuthenticationException {
-		if (cookie != null) {
-			Jws<Claims> claims = authUtils.validateUser(cookie.getValue());
-			User user = User.getWithClaims(claims);
-			if (user != null) {
-				Execute execute = new Execute(new QuizContext(config));
-				Map<String, String> args = null;
-				String result = execute.run("hello_script()", args );
-				return Response.ok().entity(result).cookie(authUtils.generateCookie(user)).build();
-			} else {
-				return new RedirectResponse(Pages.LOGIN_PAGE).build();
-			}
-		} else {
-			return new RedirectResponse(Pages.LOGIN_PAGE).build();
-		}
-	}
-
 	
 	/////////////////////////////
 	// Supporting methods 

@@ -8,6 +8,7 @@ import java.util.Map;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wingsofcarolina.quiz.resources.QuizContext;
 
 import groovy.lang.Binding;
 import groovy.lang.GroovyCodeSource;
@@ -25,6 +26,10 @@ public class Execute {
         config.setScriptBaseClass("org.wingsofcarolina.quiz.scripting.QuizDSL");
     }
 
+	public String run(String script) {
+		return run(script, null);
+	}
+	
     public String run(String scriptText, Map<String, String> args) {
         return run(scriptText, null, args);
     }
@@ -54,6 +59,7 @@ public class Execute {
             script.run();
         } catch(Exception e) {
             LOG.info("Script execution error", e);
+            throw e;
         } finally {
             System.setOut(orig);
         }

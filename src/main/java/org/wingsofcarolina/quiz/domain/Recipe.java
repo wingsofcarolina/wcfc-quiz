@@ -5,11 +5,8 @@ import java.util.List;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Id;
-import org.wingsofcarolina.quiz.domain.dao.QuestionDAO;
 import org.wingsofcarolina.quiz.domain.dao.RecipeDAO;
 import org.wingsofcarolina.quiz.domain.persistence.Persistence;
-import org.wingsofcarolina.quiz.resources.Quiz;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class Recipe {
@@ -20,6 +17,7 @@ public class Recipe {
     Category category;
     String attribute;
     List<Section> sections;
+    String script = null;
     
     public Recipe() {}
 
@@ -41,6 +39,14 @@ public class Recipe {
 
 	public void setAttribute(String attribute) {
 		this.attribute = attribute;
+	}
+
+	public String getScript() {
+		return script;
+	}
+
+	public void setScript(String script) {
+		this.script = script;
 	}
 
 	public List<Section> getSections() {
@@ -80,6 +86,12 @@ public class Recipe {
 		return recipeDao.getAllRecipes();
 	}
 
+
+	public static Recipe getRecipeByCategory(Category category) {
+		RecipeDAO recipeDao = (RecipeDAO) Persistence.instance().get(Recipe.class);
+		return recipeDao.getRecipeByCategory(category);
+	}
+	
 	public static Recipe getRecipeByCategoryAndAttribute(Category category, String attribute) {
 		RecipeDAO recipeDao = (RecipeDAO) Persistence.instance().get(Recipe.class);
 		return recipeDao.getRecipeByCategoryAndAttribute(category, attribute);
@@ -94,5 +106,4 @@ public class Recipe {
 	public void delete() {
 		Persistence.instance().get(Recipe.class).delete(this);
 	}
-
 }

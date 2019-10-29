@@ -5,11 +5,58 @@ navbar:${user.userId}[buttons="HomeNavButton;ViewNavButton;AddNavButton;EditNavB
 </#if>
 
 ++++
+<script>
+$(document).ready(function(){
+	load_recipe("far");
+});
+
+function show_hide_attribute(value) {
+	var do_show = false;
+	if (value == 'sop') {
+		do_show = true;
+	} 
+	var element = document.getElementById('r-attribute');
+	element.style.display = do_show ? '' : 'none';
+}
+
+function load_recipe() {
+	var category = document.getElementById('category').value;
+	var attribute = document.getElementById('attribute').value;
+	show_hide_attribute(category);
+
+	if (category != "sop")
+		var url = "api/recipe/" + category;
+	else
+		var url = "api/recipe/" + category + "?attribute=" + attribute;
+	
+    var $el = $("#script");
+	$el.empty(); // remove old options
+	$.getJSON( url , function( data ) {
+		$el.val(data.script);
+	});
+}
+
+</script>
 <form name="question" action="/api/updateRecipe" method="post">
 
 <table>
-<tr><td colspan=2>Enter the raw JSON which defines the Recipe below.</td><td>
-<tr><td valign="top">Recipe</td><td><textarea name="recipe" rows="15" cols="70" placeholder=" Enter the recipe JSON here."></textarea></td></tr>
+<tr><td>Category</td><td>
+<select id="category" name="category" onchange=load_recipe()>
+  <option value="far">FAR 61/91, Pre-Solo</option>
+  <option value="sop">SOP/FS</option>
+  <option value="c152">C-152</option>
+  <option value="c172">C-172 Skyhawk</option>
+  <option value="pa28">PA-28 Warrior</option>
+  <option value="m20j">M20J Mooney</option>
+</select></td></tr>
+<tr id="r-attribute"><td>Attribute</td><td>
+<select id="attribute" name="attribute" onchange=load_recipe()>
+  <option value="STUDENT">Student</option>
+  <option value="PILOT">Pilot</option>
+  <option value="INSTRUCTOR">Instructor</option>
+</select></td></tr>
+<tr><td colspan=2>Enter the quiz script text used in the Recipe below.</td><tr>
+<tr><td valign="top">Recipe</td><td><textarea id="script" name="script" rows="25" cols="80" placeholder=" Enter the recipe script here."></textarea></td></tr>
 </table>
 </p>
 <input type="submit" value="Update Recipe"></form>

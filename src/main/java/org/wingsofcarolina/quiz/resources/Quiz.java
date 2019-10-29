@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.mongodb.morphia.annotations.Transient;
 import org.slf4j.Logger;
@@ -18,6 +19,9 @@ import org.wingsofcarolina.quiz.domain.Recipe;
 import org.wingsofcarolina.quiz.domain.Section;
 import org.wingsofcarolina.quiz.domain.Selection;
 import org.wingsofcarolina.quiz.domain.persistence.Persistence;
+import org.wingsofcarolina.quiz.scripting.Execute;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class Quiz {
 	private static final Logger LOG = LoggerFactory.getLogger(Quiz.class);
@@ -32,15 +36,16 @@ public class Quiz {
 	private Date createdDate = new Date();
 	
 	private Recipe recipe = null;
-	private QuizConfiguration config = null;
+	private QuizContext context = null;
+
+	Execute execute;
 
 	// This attribute determines which Recipe to pick up
 	private String attribute = null;
 
 	public Quiz() {}
 	
-	public Quiz(QuizConfiguration config, String request) {
-		this.config  = config;
+	public Quiz(String request) {
 		this.quizId = Persistence.instance().getID("quiz", 1000);
 		switch (request) {
 			case "far":
@@ -55,11 +60,11 @@ public class Quiz {
 			case "c172": category = Category.C172; quizName = "Cessna 172 Skyhawk"; break;
 			case "pa28": category = Category.PA28; quizName = "Piper PA-28 Warrior"; break;
 			case "m20j": category = Category.M20J; quizName = "Mooney M20J"; break;
-		}			
+		}
 	}
 
-	public Quiz(QuizConfiguration config, String category, String attribute) {
-		this(config, category);
+	public Quiz(String category, String attribute) {
+		this(category);
 		this.attribute = attribute;
 	}
 
@@ -96,6 +101,10 @@ public class Quiz {
 		return createdDate;
 	}
 
+	public QuizContext getContext() {
+		return context;
+	}
+	
 	public Date getSunsetDate() {
 	       // convert date to calendar
         Calendar c = Calendar.getInstance();
@@ -116,7 +125,10 @@ public class Quiz {
 	 * @return
 	 * @throws QuizBuildException 
 	 */
-	public Quiz build() throws QuizBuildException {
+	public Quiz build(QuizContext context) throws QuizBuildException {
+		this.context = context;
+		execute = new Execute(context);
+
 		List<Question> pool = new ArrayList<Question>();
 
 		// Pick up the recipe for the desired quiz
@@ -153,7 +165,7 @@ public class Quiz {
 				if (atts.contains(Attribute.ANY)) {
 					candidates = Question.getSelected(category);
 				} else {
-					candidates = Question.getSelected(category, atts);
+					candidates = Question.getSelectedWithAll(category, atts);
 				}
 				int candidateCount = candidates.size();
 				if (candidateCount < selection.getCount()) {
@@ -194,12 +206,18 @@ public class Quiz {
 			questions.add(entity);
 			
 			// Make note that the question has now been 'deployed'
-			if (config.getMode().contentEquals("PROD")) {
+			if (context.getConfiguration().getMode().contentEquals("PROD")) {
 				if ( ! entity.getDeployed()) {
 					entity.setDeployed(true);
 					entity.save();
 				}
 			}
+		}
+		
+		if (recipe.getScript() != null) {
+			Map<String, String> args = null;
+			String result = execute.run(recipe.getScript(), args );
+			LOG.info("Script returned : {}", result);
 		}
 		return this;
 	}
@@ -237,10 +255,31 @@ public class Quiz {
 		return quiz;
 	}
 	
-	protected void addQuestion(Question question) {
+	public void addQuestion(Question question) {
 		questions.add(question);
 	}
 
+
+	public void addAll(List<Question> questions) {
+		for (Question question : questions) {
+			addQuestion(question);
+		}
+	}
+	
+	@JsonIgnore
+	public boolean hasQuestion(Question candidate) {
+		if (candidate != null) {
+			long id = candidate.getQuestionId();
+			for (Question question : questions) {
+				if (question.getQuestionId() == id) {
+					LOG.info("Found a conflict, rejecting {}", id);
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
 	public void setQuizId(long quizId) {
 		this.quizId = quizId;
 	}
