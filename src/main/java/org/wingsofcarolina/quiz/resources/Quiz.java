@@ -129,130 +129,23 @@ public class Quiz {
 		this.context = context;
 		execute = new Execute(context);
 
-		List<Question> pool = new ArrayList<Question>();
-
 		// Pick up the recipe for the desired quiz
 		recipe = Recipe.getRecipeByCategoryAndAttribute(category, attribute);
 
-		// Iterate over all sections
-		for (Section section : recipe.getSections()) {
-			// Create a place to deposit all the candidate questions
-			List<Question> candidates = new ArrayList<Question>();
-			
-			// If there are any required questions, pull them into the pool
-			if (section.getRequired() != null) {
-				for (Long id : section.getRequired()) {
-					Question candidate = Question.getByQuestionId(id);
-					while (candidate != null && candidate.isSuperseded()) {
-						candidate = Question.getByQuestionId(candidate.getSupersededBy());
-					}
-
-					if (candidate != null) {
-						pool.add(candidate);
-						if ( ! candidate.getDeployed()) {
-							candidate.setDeployed(true);
-							candidate.save();
-						}
-					} else {
-						LOG.error("Required question {} not found. WTF?", id);
-					}
-				}
-			}
-			
-			// Next iterate over all selections within the section
-			for (Selection selection : section.getSelections()) {
-				List<String> atts = selection.getAttributes();
-				if (atts.contains(Attribute.ANY)) {
-					candidates = Question.getSelected(category);
-				} else {
-					candidates = Question.getSelectedWithAll(category, atts);
-				}
-				int candidateCount = candidates.size();
-				if (candidateCount < selection.getCount()) {
-					throw new QuizBuildException("Not enough candidates to satisfy the Recipe. Had " + candidateCount + " but wanted " + selection.getCount() + ".");
-				}
-				
-				// Select the desired number of questions from the candidates
-				int i = 0;
-				while (i < selection.getCount()) {
-					int pick = 	(int)(Math.random() * candidates.size());
-					Question candidate = candidates.get(pick);
-					candidates.remove(pick);
-					
-					// If the question has been supersededed, then find the most
-					// current version and use that instead.
-					while (candidate != null && candidate.isSuperseded()) {
-						candidate = Question.getByQuestionId(candidate.getSupersededBy());
-					}
-					
-					// If the candidate is _not_ already in the pool (which can
-					// happen due to conflicts with the REQUIRED list) then we
-					// can add it, otherwise we skip it and press on.
-					if (notInPool(candidate, pool)) {
-						pool.add(candidate);
-						i++;
-					}
-				}
-			}
-		}
-		
-		// Pull randomly from the pool, setting sequence number as we go
-		int count = pool.size();
-		for (int i = 0; i < count; i++) {
-			int size = pool.size();
-			int pick = (int)(Math.random() * size);
-			Question entity = pool.remove(pick);
-			entity.setIndex(i + 1);
-			questions.add(entity);
-			
-			// Make note that the question has now been 'deployed'
-			if (context.getConfiguration().getMode().contentEquals("PROD")) {
-				if ( ! entity.getDeployed()) {
-					entity.setDeployed(true);
-					entity.save();
-				}
-			}
-		}
-		
 		if (recipe.getScript() != null) {
 			Map<String, String> args = null;
 			String result = execute.run(recipe.getScript(), args );
+			System.out.println("===> " + result);
 			LOG.info("Script returned : {}", result);
 		}
+		
+		// Add index/sequence numbers to the questions
+    	int index = 0;
+    	for (Question question : questions) {
+    		question.setIndex(index++);
+    	}
+    	
 		return this;
-	}
-	
-	/**
-	 * Ensure that we don't allow duplicates in the pool
-	 * 
-	 * @param candidate
-	 * @param pool
-	 * @return
-	 */
-	public boolean notInPool(Question candidate, List<Question> pool) {
-		for (Question selected : pool) {
-			if (selected.getQuestionId() == candidate.getQuestionId()) {
-				return false;
-			}
-		}
-		return true;
-	}
-	
-	/**
-	 * 
-	 */
-	public static Quiz quizFromRecord(Record record) {
-		Quiz quiz = new Quiz();
-		quiz.setQuizId(record.getQuizId());
-		quiz.setQuizName(record.getQuizName());
-		quiz.setCategory(record.getCategory());
-		int i = 1;
-		for (Long id : record.getQuestionIds()) {
-			Question question = Question.getByQuestionId(id);
-			question.setIndex(i++);
-			quiz.addQuestion(question);
-		}
-		return quiz;
 	}
 	
 	public void addQuestion(Question question) {
@@ -278,6 +171,23 @@ public class Quiz {
 			}
 		}
 		return false;
+	}
+	
+	/**
+	 * 
+	 */
+	public static Quiz quizFromRecord(Record record) {
+		Quiz quiz = new Quiz();
+		quiz.setQuizId(record.getQuizId());
+		quiz.setQuizName(record.getQuizName());
+		quiz.setCategory(record.getCategory());
+		int i = 1;
+		for (Long id : record.getQuestionIds()) {
+			Question question = Question.getByQuestionId(id);
+			question.setIndex(i++);
+			quiz.addQuestion(question);
+		}
+		return quiz;
 	}
 	
 	public void setQuizId(long quizId) {

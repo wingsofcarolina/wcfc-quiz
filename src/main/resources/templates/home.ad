@@ -53,18 +53,7 @@ function query(msg, redirect) {
 <li><a href="report/PA28">Warrior Questions</a>
 <li><a href="report/M20J">Mooney Questions</a>
 </ul>
-<li><b>Show quiz recipe for :</b>
-<ul>
-<li><a href="recipe/FAR">FAR Questions</a>
-<li><a href="recipe/SOP?attribute=student">SOP - Student Questions</a>
-<li><a href="recipe/SOP?attribute=pilot">SOP - Pilot Questions</a>
-<li><a href="recipe/SOP?attribute=instructor">SOP - Instructor Questions</a>
-<li><a href="recipe/C152">Cessna 152 Questions</a>
-<li><a href="recipe/C172">Cessna 172 Questions</a>
-<li><a href="recipe/PA28">Warrior Questions</a>
-<li><a href="recipe/M20J">Mooney Questions</a>
-</ul>
-<li><a href="/updateRecipe">Update a quiz recipe</a><br>
+<li><a href="/updateRecipe">Edit a quiz recipe</a><br>
 <li><a href="/browseQuestions">Browse questions</a><br>
 <li><a href="/searchQuestions">Search questions</a><br>
 <li><a id="backup" href="#" onclick="query('Really? Overwrite ALL currently saved Data?', '/api/backup');return false;">Create Recipe and Question Backup Files</a>

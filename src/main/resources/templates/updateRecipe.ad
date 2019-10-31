@@ -5,8 +5,16 @@ navbar:${user.userId}[buttons="HomeNavButton;ViewNavButton;AddNavButton;EditNavB
 </#if>
 
 ++++
+<script src="/static/ace/ace.js"></script>
+
 <script>
 $(document).ready(function(){
+	window.aceEditor = ace.edit("editor");
+	window.aceEditor.setFontSize("16px");
+	var textarea = $('textarea[name="script"]');
+	window.aceEditor.getSession().on("change", function () {
+	    textarea.val(editor.getSession().getValue());
+	});
 	load_recipe("far");
 });
 
@@ -29,18 +37,24 @@ function load_recipe() {
 	else
 		var url = "api/recipe/" + category + "?attribute=" + attribute;
 	
-    var $el = $("#script");
-	$el.empty(); // remove old options
 	$.getJSON( url , function( data ) {
-		$el.val(data.script);
+		var script = data.script
+		if (script == null) {
+			script = "";
+		}
+		window.aceEditor.setValue(data.script);
+		window.aceEditor.gotoLine(1);
+		
+		var textarea = $('textarea[name="script"]');
+		textarea.val(data.script);
 	});
 }
-
 </script>
+
 <form name="question" action="/api/updateRecipe" method="post">
 
 <table>
-<tr><td>Category</td><td>
+<tr><td width=10>Category</td><td>
 <select id="category" name="category" onchange=load_recipe()>
   <option value="far">FAR 61/91, Pre-Solo</option>
   <option value="sop">SOP/FS</option>
@@ -56,9 +70,18 @@ function load_recipe() {
   <option value="INSTRUCTOR">Instructor</option>
 </select></td></tr>
 <tr><td colspan=2>Enter the quiz script text used in the Recipe below.</td><tr>
-<tr><td valign="top">Recipe</td><td><textarea id="script" name="script" rows="25" cols="80" placeholder=" Enter the recipe script here."></textarea></td></tr>
+<tr><td colspan=2>
+<div id="editor" style="height: 500px; width: 0750px">Enter script text here .....</div>
+<script>
+    var editor = ace.edit("editor");
+    editor.session.setMode("ace/mode/groovy");
+</script>
+</td></tr>
 </table>
 </p>
-<input type="submit" value="Update Recipe"></form>
+<textarea name="script" style="display: none;"></textarea>
+<input type="submit" value="Update Recipe">
+</form>
 </p>
+
 ++++

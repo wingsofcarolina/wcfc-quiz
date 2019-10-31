@@ -621,13 +621,13 @@ public class QuizAPI {
 
 	@POST
 	@Path("updateRecipe")
-	@Produces("text/html")
+	@Produces(MediaType.TEXT_HTML)
 	public Response updateRecipe(@CookieParam("quiz.token") Cookie cookie,
 			@FormParam("category") String category,
 			@FormParam("attribute") String attribute,
-			@FormParam("script") String script)
-			throws Exception, AuthenticationException {
-
+			@FormParam("script") String script
+			) throws Exception, AuthenticationException {
+		
 		Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
 		User user = User.getWithClaims(claims);
 
@@ -653,7 +653,11 @@ public class QuizAPI {
 		// Save the recipe
 		recipe.save();
 
-		Flash.add(Flash.Code.SUCCESS, "Recipe type " + recipe.getCategory() + " updated.");
+		if (attribute != null) {
+			Flash.add(Flash.Code.SUCCESS, "Recipe type " + recipe.getCategory() + " updated.");
+		} else {
+			Flash.add(Flash.Code.SUCCESS, "Recipe type " + recipe.getCategory() + "/" + attribute + " updated.");
+		}
 
 		return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
 	}

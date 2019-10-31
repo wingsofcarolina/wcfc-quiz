@@ -10,6 +10,7 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wingsofcarolina.quiz.domain.Attribute;
 import org.wingsofcarolina.quiz.domain.Category;
 import org.wingsofcarolina.quiz.domain.Question;
 import org.wingsofcarolina.quiz.resources.Quiz;
@@ -250,14 +251,18 @@ public abstract class QuizDSL extends Script {
     public List<Question> getQuestionsWithAny(List<String> atts) {
     	Category category = context.getQuiz().getCategory();
     	List<Question> result = new ArrayList<Question>();
-    	for (Question question : Question.getSelected(category)) {
-    		for (String attribute : question.getAttributes()) {
-    			if (atts.contains(attribute)) {
-    				result.add(question);
-    				break;
-    			}
-    		}
-    	}
+		if (atts.contains(Attribute.ANY)) {
+			result = Question.getSelected(category);
+		} else {
+	    	for (Question question : Question.getSelected(category)) {
+	    		for (String attribute : question.getAttributes()) {
+	    			if (atts.contains(attribute)) {
+	    				result.add(question);
+	    				break;
+	    			}
+	    		}
+	    	}
+		}
 		return result;
     }
 }
