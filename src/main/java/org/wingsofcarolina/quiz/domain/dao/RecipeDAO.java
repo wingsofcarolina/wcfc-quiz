@@ -25,6 +25,15 @@ public class RecipeDAO extends BasicDAO<Recipe, ObjectId> {
 		return result;
 	}
 	
+	public Recipe getRecipeByCategory(Category category) {
+		Recipe recipe = null;
+		List<Recipe> result = getDatastore().find(Recipe.class).filter("category = ", category).asList();
+		if (result != null) {
+			recipe = result.get(0);
+		} 
+		return recipe;
+	}
+	
 	public Recipe getRecipeByCategoryAndAttribute(Category category, String attribute) {
 		Recipe recipe = null;
 		List<Recipe> result = getDatastore().find(Recipe.class).filter("category = ", category).asList();
@@ -45,4 +54,5 @@ public class RecipeDAO extends BasicDAO<Recipe, ObjectId> {
 	public void drop() {
 		getDatastore().getCollection(Recipe.class).drop();
 	}
+
 }

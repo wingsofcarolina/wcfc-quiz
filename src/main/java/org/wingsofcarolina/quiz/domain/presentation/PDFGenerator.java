@@ -9,6 +9,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 
+import org.eclipse.jetty.server.handler.ContextHandler.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wingsofcarolina.quiz.QuizConfiguration;
@@ -16,6 +17,7 @@ import org.wingsofcarolina.quiz.common.QuizBuildException;
 import org.wingsofcarolina.quiz.domain.Answer;
 import org.wingsofcarolina.quiz.domain.Question;
 import org.wingsofcarolina.quiz.resources.Quiz;
+import org.wingsofcarolina.quiz.resources.QuizContext;
 
 import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.io.image.ImageDataFactory;
@@ -50,13 +52,11 @@ public class PDFGenerator {
 	private static final Logger LOG = LoggerFactory.getLogger(PDFGenerator.class);
 
 	private PdfFont normal;
-	private PdfFont italic;
-	private QuizConfiguration config;
+	private QuizContext context;
 	
-	public PDFGenerator(QuizConfiguration config) throws IOException {
-		this.config = config;
+	public PDFGenerator(QuizContext context) throws IOException {
+		this.context = context;
 		normal = PdfFontFactory.createFont(StandardFonts.HELVETICA, true);
-		italic = PdfFontFactory.createFont(StandardFonts.HELVETICA_OBLIQUE, true);
 	}
 
 	public ByteArrayInputStream generate(Quiz quiz) throws QuizBuildException, URISyntaxException, MalformedURLException, IOException {		
@@ -176,7 +176,7 @@ public class PDFGenerator {
 	
 	private void addDocumentHeader(Quiz quiz, Document document) throws URISyntaxException, MalformedURLException, IOException {
 		// Generate header
-		byte[] bytes = Files.readAllBytes(new File(config.getAssetDirectory() + "/WCFC-logo-transparent.jpg").toPath());
+		byte[] bytes = Files.readAllBytes(new File(context.getConfiguration().getAssetDirectory() + "/WCFC-logo-transparent.jpg").toPath());
 		Image img = new Image(ImageDataFactory.create(bytes));
 		img.setWidth(150.0f);
 		
@@ -228,13 +228,22 @@ public class PDFGenerator {
 				+ " points from 100 for each wrong answer) on the checkout form and file the quiz in "
 				+ " the Pilot Records folder.");
 		document.add(instructor);
-		Paragraph pilot = new Paragraph();
-		text = new Text("Pilot : ");
-		pilot.add(text.setBold());
-		pilot.add("Information required to correctly answer the following questions may be "
-				+ " found in FAR Parts 61 and 91, the WCFC SOPs, and club checklists, documents and "
-				+ " instructional practices.");
-		document.add(pilot);
+//		Paragraph pilot = new Paragraph();
+//		text = new Text("Pilot : ");
+//		pilot.add(text.setBold());
+//		pilot.add("Information required to correctly answer the following questions may be "
+//				+ " found in FAR Parts 61 and 91, the WCFC SOPs, and club checklists, documents and "
+//				+ " instructional practices.");
+//		document.add(pilot);
+		
+		// Add any Front Matter that might have been configured
+		if (context.getVariable("instructions") != null) {
+			Paragraph instructions = new Paragraph();
+			text = new Text("Pilot : ");
+			instructions.add(text.setBold());
+			instructions.add(context.getVariable("instructions"));
+			document.add(instructions);
+		}
 
 		SolidLine line = new SolidLine(1f);
 		LineSeparator ls = new LineSeparator(line);

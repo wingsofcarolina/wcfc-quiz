@@ -10,7 +10,9 @@ import java.security.spec.InvalidKeySpecException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -59,8 +61,11 @@ import org.wingsofcarolina.quiz.domain.presentation.Renderer;
 import org.wingsofcarolina.quiz.responses.LoginResponse;
 import org.wingsofcarolina.quiz.responses.RedirectResponse;
 import org.wingsofcarolina.quiz.responses.ViewQuestionResponse;
+import org.wingsofcarolina.quiz.scripting.Execute;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import groovy.lang.MissingPropertyException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 
@@ -616,29 +621,70 @@ public class QuizAPI {
 
 	@POST
 	@Path("updateRecipe")
-	@Produces("text/html")
-	public Response updateRecipe(@CookieParam("quiz.token") Cookie cookie, @FormParam("recipe") String recipe)
+	@Produces(MediaType.TEXT_HTML)
+	public Response updateRecipe(@CookieParam("quiz.token") Cookie cookie,
+			@FormParam("category") String category,
+			@FormParam("attribute") String attribute,
+			@FormParam("script") String script
+			) throws Exception, AuthenticationException {
+		
+		Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
+		User user = User.getWithClaims(claims);
+
+		// Retrieve the recipe
+		Recipe recipe;
+		if (attribute == null) {
+			recipe = Recipe.getRecipeByCategory(Category.valueOf(category.toUpperCase()));
+		} else {
+			recipe = Recipe.getRecipeByCategoryAndAttribute(Category.valueOf(category.toUpperCase()),
+				attribute.toUpperCase());
+		}
+
+		// Create a new recipe, if needed
+		if (recipe == null) {
+			recipe = new Recipe();
+			recipe.setCategory(Category.valueOf(category.toUpperCase()));
+			if (attribute != null) {
+				recipe.setAttribute(attribute);
+			}
+		}
+		recipe.setScript(script);
+		
+		// Save the recipe
+		recipe.save();
+
+		if (attribute != null) {
+			Flash.add(Flash.Code.SUCCESS, "Recipe type " + recipe.getCategory() + " updated.");
+		} else {
+			Flash.add(Flash.Code.SUCCESS, "Recipe type " + recipe.getCategory() + "/" + attribute + " updated.");
+		}
+
+		return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
+	}
+
+	@GET
+	@Path("recipe/{category}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getRecipe(@CookieParam("quiz.token") Cookie cookie,
+			@PathParam("category") String category,
+			@QueryParam("attribute") String attribute)
 			throws Exception, AuthenticationException {
 
 		Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
 		User user = User.getWithClaims(claims);
 
-		// Create the new recipe object
-		Recipe newRecipe = objectMapper.readValue(recipe, Recipe.class);
+		// Retrieve the recipe
+		Recipe recipe;
+		if (attribute == null) {
+			recipe = Recipe.getRecipeByCategory(Category.valueOf(category.toUpperCase()));
+		} else {
+			recipe = Recipe.getRecipeByCategoryAndAttribute(Category.valueOf(category.toUpperCase()),
+				attribute.toUpperCase());
+		}
+		return Response.ok().entity(recipe).cookie(authUtils.generateCookie(user)).build();
 
-		// Get rid of the old recipe
-		Recipe original = Recipe.getRecipeByCategoryAndAttribute(newRecipe.getCategory(),
-				newRecipe.getAttribute().toString());
-		original.delete();
-
-		// Replace it with the new recipe
-		newRecipe.save();
-
-		Flash.add(Flash.Code.SUCCESS, "Recipe type " + newRecipe.getCategory() + " updated.");
-
-		return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
 	}
-
+	
 	private String getUserCredentials(String email) {
 		User user = User.getByEmail(email);
 		if (user != null) {
@@ -698,6 +744,21 @@ public class QuizAPI {
 		return Response.ok().entity(attributes).build();
 	}
 
+	@POST
+	@Path("script")
+	public Response runScript(String script) {
+		String result;
+		
+		Execute execute = new Execute(new QuizContext(new Quiz(), config));
+		try {
+			result = execute.run(script);
+		} catch (Exception mpe) {
+			result = mpe.getLocalizedMessage();
+		}
+
+		return Response.ok().entity(result).build();
+	}
+	
 	@GET
 	@Path("download")
 	@Produces(MediaType.TEXT_PLAIN)

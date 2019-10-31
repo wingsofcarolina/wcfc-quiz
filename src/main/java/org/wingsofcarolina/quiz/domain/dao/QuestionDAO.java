@@ -56,7 +56,7 @@ public class QuestionDAO extends BasicDAO<Question, ObjectId> {
 		return result;
 	}
 	
-	public List<Question> getSelected(Category category, List<String> attributes) {
+	public List<Question> getSelectedWithAll(Category category, List<String> attributes) {
 		if (attributes == null || attributes.isEmpty()) {
 			return getSelected(category);
 		} else {
@@ -70,8 +70,8 @@ public class QuestionDAO extends BasicDAO<Question, ObjectId> {
 			}
 			query.get();
 			
-			List<Question> foo = query.order("questionid").asList();
-			return foo;
+			List<Question> result = query.order("questionid").asList();
+			return result;
 		}
 	}
 

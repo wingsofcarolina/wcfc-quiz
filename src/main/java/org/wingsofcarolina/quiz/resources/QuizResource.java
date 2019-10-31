@@ -47,6 +47,7 @@ import org.wingsofcarolina.quiz.domain.presentation.Renderer;
 import org.wingsofcarolina.quiz.domain.presentation.Version;
 import org.wingsofcarolina.quiz.domain.presentation.Wrapper;
 import org.wingsofcarolina.quiz.responses.RedirectResponse;
+import org.wingsofcarolina.quiz.scripting.Execute;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -71,7 +72,7 @@ public class QuizResource {
 	private Renderer renderer;
 	
 	ObjectMapper objectMapper;
-	Map<String, Object> buildProperties;
+	Map<String, Object> buildProperties = null;
 
 	private SimpleDateFormat dateFormatGmt;
 	private static final Integer pageCount = 10;
@@ -198,18 +199,20 @@ public class QuizResource {
 			@QueryParam("quiz") String category,
 			@QueryParam("attribute") String attribute) throws Exception {
 		Quiz quiz = null;
+		
 		String output = "";
 		try {
 			// Build the quiz itself
 			if (attribute == null) {
-				quiz = new Quiz(config, category);
+				quiz = new Quiz(category);
 			} else {
-				quiz = new Quiz(config, category, attribute);
+				quiz = new Quiz(category, attribute);
 			}
-			quiz.build();
+			QuizContext context = new QuizContext(quiz, config);
+			quiz.build(context);
 
 			// Render the output for the club member
-			PDFGenerator generator = new PDFGenerator(config);
+			PDFGenerator generator = new PDFGenerator(context);
 
 			// Store the quiz question set for later retrieval
 			Record record = quiz.getRecord();
@@ -246,7 +249,7 @@ public class QuizResource {
 			User user = User.getWithClaims(claims);
 			Question question = Question.getByQuestionId(questionId);
 			if (question != null) {
-				PDFGenerator generator = new PDFGenerator(config);
+				PDFGenerator generator = new PDFGenerator(new QuizContext(new Quiz(), config));
 		
 				ByteArrayInputStream inputStream = generator.generate(question);
 				return Response.ok().type("application/pdf").entity(inputStream).build();
@@ -564,7 +567,10 @@ public class QuizResource {
 			return new RedirectResponse(Pages.LOGIN_PAGE).build();
 		}
 	}
-
+	
+	/////////////////////////////
+	// Supporting methods 
+	/////////////////////////////
 	public User addUser(String email) {
 		return this.addUser(null, email, null, Privilege.USER);
 	}

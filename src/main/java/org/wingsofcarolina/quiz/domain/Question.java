@@ -259,9 +259,9 @@ public class Question {
 		return questionDao.getSelected(category);
 	}
 
-	public static List<Question> getSelected(Category category, List<String> attributes) {
+	public static List<Question> getSelectedWithAll(Category category, List<String> attributes) {
 		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
-		return questionDao.getSelected(category, attributes);
+		return questionDao.getSelectedWithAll(category, attributes);
 	}
 
 	public static Question getByQuestionId(Long id) {
@@ -281,7 +281,7 @@ public class Question {
 
 	@Override
 	public String toString() {
-		return "Question [id=" + id + ", index=" + index + ", details=" + details + ", questionId=" + questionId
-				+ ", deployed=" + deployed + ", supersededBy=" + supersededBy + ", createdDate=" + createdDate + "]";
+		return "Question [questionId=" + questionId + ", index=" + index + ", details=" + details +
+				", deployed=" + deployed + ", supersededBy=" + supersededBy + ", createdDate=" + createdDate + "]";
 	}
 }

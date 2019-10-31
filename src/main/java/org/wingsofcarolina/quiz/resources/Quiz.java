@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.mongodb.morphia.annotations.Transient;
 import org.slf4j.Logger;
@@ -18,6 +19,9 @@ import org.wingsofcarolina.quiz.domain.Recipe;
 import org.wingsofcarolina.quiz.domain.Section;
 import org.wingsofcarolina.quiz.domain.Selection;
 import org.wingsofcarolina.quiz.domain.persistence.Persistence;
+import org.wingsofcarolina.quiz.scripting.Execute;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class Quiz {
 	private static final Logger LOG = LoggerFactory.getLogger(Quiz.class);
@@ -32,15 +36,16 @@ public class Quiz {
 	private Date createdDate = new Date();
 	
 	private Recipe recipe = null;
-	private QuizConfiguration config = null;
+	private QuizContext context = null;
+
+	Execute execute;
 
 	// This attribute determines which Recipe to pick up
 	private String attribute = null;
 
 	public Quiz() {}
 	
-	public Quiz(QuizConfiguration config, String request) {
-		this.config  = config;
+	public Quiz(String request) {
 		this.quizId = Persistence.instance().getID("quiz", 1000);
 		switch (request) {
 			case "far":
@@ -55,11 +60,11 @@ public class Quiz {
 			case "c172": category = Category.C172; quizName = "Cessna 172 Skyhawk"; break;
 			case "pa28": category = Category.PA28; quizName = "Piper PA-28 Warrior"; break;
 			case "m20j": category = Category.M20J; quizName = "Mooney M20J"; break;
-		}			
+		}
 	}
 
-	public Quiz(QuizConfiguration config, String category, String attribute) {
-		this(config, category);
+	public Quiz(String category, String attribute) {
+		this(category);
 		this.attribute = attribute;
 	}
 
@@ -96,6 +101,10 @@ public class Quiz {
 		return createdDate;
 	}
 
+	public QuizContext getContext() {
+		return context;
+	}
+	
 	public Date getSunsetDate() {
 	       // convert date to calendar
         Calendar c = Calendar.getInstance();
@@ -116,108 +125,52 @@ public class Quiz {
 	 * @return
 	 * @throws QuizBuildException 
 	 */
-	public Quiz build() throws QuizBuildException {
-		List<Question> pool = new ArrayList<Question>();
+	public Quiz build(QuizContext context) throws QuizBuildException {
+		this.context = context;
+		execute = new Execute(context);
 
 		// Pick up the recipe for the desired quiz
 		recipe = Recipe.getRecipeByCategoryAndAttribute(category, attribute);
 
-		// Iterate over all sections
-		for (Section section : recipe.getSections()) {
-			// Create a place to deposit all the candidate questions
-			List<Question> candidates = new ArrayList<Question>();
-			
-			// If there are any required questions, pull them into the pool
-			if (section.getRequired() != null) {
-				for (Long id : section.getRequired()) {
-					Question candidate = Question.getByQuestionId(id);
-					while (candidate != null && candidate.isSuperseded()) {
-						candidate = Question.getByQuestionId(candidate.getSupersededBy());
-					}
-
-					if (candidate != null) {
-						pool.add(candidate);
-						if ( ! candidate.getDeployed()) {
-							candidate.setDeployed(true);
-							candidate.save();
-						}
-					} else {
-						LOG.error("Required question {} not found. WTF?", id);
-					}
-				}
-			}
-			
-			// Next iterate over all selections within the section
-			for (Selection selection : section.getSelections()) {
-				List<String> atts = selection.getAttributes();
-				if (atts.contains(Attribute.ANY)) {
-					candidates = Question.getSelected(category);
-				} else {
-					candidates = Question.getSelected(category, atts);
-				}
-				int candidateCount = candidates.size();
-				if (candidateCount < selection.getCount()) {
-					throw new QuizBuildException("Not enough candidates to satisfy the Recipe. Had " + candidateCount + " but wanted " + selection.getCount() + ".");
-				}
-				
-				// Select the desired number of questions from the candidates
-				int i = 0;
-				while (i < selection.getCount()) {
-					int pick = 	(int)(Math.random() * candidates.size());
-					Question candidate = candidates.get(pick);
-					candidates.remove(pick);
-					
-					// If the question has been supersededed, then find the most
-					// current version and use that instead.
-					while (candidate != null && candidate.isSuperseded()) {
-						candidate = Question.getByQuestionId(candidate.getSupersededBy());
-					}
-					
-					// If the candidate is _not_ already in the pool (which can
-					// happen due to conflicts with the REQUIRED list) then we
-					// can add it, otherwise we skip it and press on.
-					if (notInPool(candidate, pool)) {
-						pool.add(candidate);
-						i++;
-					}
-				}
-			}
+		if (recipe.getScript() != null) {
+			Map<String, String> args = null;
+			String result = execute.run(recipe.getScript(), args );
+			System.out.println("===> " + result);
+			LOG.info("Script returned : {}", result);
 		}
 		
-		// Pull randomly from the pool, setting sequence number as we go
-		int count = pool.size();
-		for (int i = 0; i < count; i++) {
-			int size = pool.size();
-			int pick = (int)(Math.random() * size);
-			Question entity = pool.remove(pick);
-			entity.setIndex(i + 1);
-			questions.add(entity);
-			
-			// Make note that the question has now been 'deployed'
-			if (config.getMode().contentEquals("PROD")) {
-				if ( ! entity.getDeployed()) {
-					entity.setDeployed(true);
-					entity.save();
-				}
-			}
-		}
+		// Add index/sequence numbers to the questions
+    	int index = 0;
+    	for (Question question : questions) {
+    		question.setIndex(index++);
+    	}
+    	
 		return this;
 	}
 	
-	/**
-	 * Ensure that we don't allow duplicates in the pool
-	 * 
-	 * @param candidate
-	 * @param pool
-	 * @return
-	 */
-	public boolean notInPool(Question candidate, List<Question> pool) {
-		for (Question selected : pool) {
-			if (selected.getQuestionId() == candidate.getQuestionId()) {
-				return false;
+	public void addQuestion(Question question) {
+		questions.add(question);
+	}
+
+
+	public void addAll(List<Question> questions) {
+		for (Question question : questions) {
+			addQuestion(question);
+		}
+	}
+	
+	@JsonIgnore
+	public boolean hasQuestion(Question candidate) {
+		if (candidate != null) {
+			long id = candidate.getQuestionId();
+			for (Question question : questions) {
+				if (question.getQuestionId() == id) {
+					LOG.info("Found a conflict, rejecting {}", id);
+					return true;
+				}
 			}
 		}
-		return true;
+		return false;
 	}
 	
 	/**
@@ -237,10 +190,6 @@ public class Quiz {
 		return quiz;
 	}
 	
-	protected void addQuestion(Question question) {
-		questions.add(question);
-	}
-
 	public void setQuizId(long quizId) {
 		this.quizId = quizId;
 	}
