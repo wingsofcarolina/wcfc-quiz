@@ -104,7 +104,7 @@ public class QuizAPI {
 	public Response login(@FormParam("email") String email, @FormParam("password") String password,
 			@FormParam("type") String type) throws Exception {
 
-		if (email == null || password == null) {
+		if (email.isEmpty() || password.isEmpty()) {
 			Flash.add(Flash.Code.ERROR, "Either email or password missing, try again");
 			return new RedirectResponse(Pages.LOGIN_PAGE).build();
 		}

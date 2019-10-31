@@ -37,6 +37,7 @@ import org.wingsofcarolina.quiz.common.Pages;
 import org.wingsofcarolina.quiz.common.QuizBuildException;
 import org.wingsofcarolina.quiz.common.Templates;
 import org.wingsofcarolina.quiz.domain.*;
+import org.wingsofcarolina.quiz.domain.presentation.CategoryChartWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.CategoryReportWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.JsonWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.PDFGenerator;
@@ -354,6 +355,27 @@ public class QuizResource {
 			List<Question> questions = Question.getSelected(cat);
 			CategoryReportWrapper wrapper = new CategoryReportWrapper(user, questions, cat);
 			String output = renderer.render("reportCategory.ad", wrapper).toString();
+			return Response.ok().entity(output).cookie(authUtils.generateCookie(user)).build();
+		} else {
+			return new RedirectResponse(Pages.LOGIN_PAGE).build();
+		}
+	}
+	
+	@GET
+	@Path("chart/{category}")
+	@Produces("text/html")
+	public Response chartCategory(@CookieParam("quiz.token") Cookie cookie,
+			@PathParam("category") String category) throws AuthenticationException, IOException {
+
+		if (cookie != null) {
+			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.USER);
+			User user = User.getWithClaims(claims);
+			Category cat = Category.valueOf(category);
+			List<Question> questions = Question.getSelected(cat);
+			
+			CategoryChartWrapper wrapper = new CategoryChartWrapper(user, questions, cat);
+			
+			String output = renderer.render("chartCategory.ad", wrapper).toString();
 			return Response.ok().entity(output).cookie(authUtils.generateCookie(user)).build();
 		} else {
 			return new RedirectResponse(Pages.LOGIN_PAGE).build();

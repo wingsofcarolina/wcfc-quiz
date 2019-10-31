@@ -1,0 +1,43 @@
+= Category Graph
+
+<#setting number_format="#0">
+
+<#if user.isAdmin()>
+navbar:${user.userId}[buttons="HomeNavButton;ViewNavButton;AddNavButton;EditNavButton;ProfileNavButton"]
+<#else>
+navbar:${user.userId}[buttons="HomeNavButton;ProfileNavButton", active="HomeNavButton"]
+</#if>
+
+== Category : ${category}
+
+++++
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <script type="text/javascript">
+    google.charts.load("current", {packages:["corechart"]});
+    google.charts.setOnLoadCallback(drawChart);
+    function drawChart() {
+	  var data = google.visualization.arrayToDataTable([
+	     ['Attribute', 'Easy', 'Medium', 'Hard'],
+++++
+<#list stats.attributes as attribute>
+++++
+	     ['${attribute.name}', ${attribute.easy}, ${attribute.medium}, ${attribute.hard}],
+++++	
+</#list>
+++++
+	  ]);
+	  var options = {title: 'Distribution of Questions',
+	  					isStacked:true,
+	  					xAxis: {title: 'Question Count',
+               				 minValue: 4,                    
+               				 viewWindow:{min:0}, 
+                				 format: '0',                     }
+	  				  };  
+
+      var view = new google.visualization.DataView(data);
+      var chart = new google.visualization.BarChart(document.getElementById("barchart_values"));
+      chart.draw(view, options);
+  }
+  </script>
+<div id="barchart_values" style="width: 1000px; height: 700px;"></div>
+++++

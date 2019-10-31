@@ -46,12 +46,12 @@ function query(msg, redirect) {
 <ul>
 <li><b>Quiz category reports:</b>
 <ul>
-<li><a href="report/FAR">FAR Questions</a>
-<li><a href="report/SOP">SOP Questions</a>
-<li><a href="report/C152">Cessna 152 Questions</a>
-<li><a href="report/C172">Cessna 172 Questions</a>
-<li><a href="report/PA28">Warrior Questions</a>
-<li><a href="report/M20J">Mooney Questions</a>
+<li><button onclick="window.location.href = 'chart/FAR';">Chart</button> &nbsp; <a href="report/FAR">FAR Questions</a> 
+<li><button onclick="window.location.href = 'chart/SOP';">Chart</button> &nbsp; <a href="report/SOP">SOP Questions</a>
+<li><button onclick="window.location.href = 'chart/C152';">Chart</button> &nbsp; <a href="report/C152">Cessna 152 Questions</a>
+<li><button onclick="window.location.href = 'chart/C172';">Chart</button> &nbsp; <a href="report/C172">Cessna 172 Questions</a>
+<li><button onclick="window.location.href = 'chart/PA28';">Chart</button> &nbsp; <a href="report/PA28">Warrior Questions</a>
+<li><button onclick="window.location.href = 'chart/M20J';">Chart</button> &nbsp; <a href="report/M20J">Mooney Questions</a>
 </ul>
 <li><a href="/updateRecipe">Edit a quiz recipe</a><br>
 <li><a href="/browseQuestions">Browse questions</a><br>
