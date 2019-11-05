@@ -9,6 +9,7 @@ public class QuizContext {
 	private final Quiz quiz;
     private final QuizConfiguration configuration;
     private Map<String,String> variables = new HashMap<String, String>();
+	private boolean test = false;
     
     public QuizContext(Quiz quiz, QuizConfiguration configuration) {
     	this.quiz = quiz;
@@ -33,5 +34,13 @@ public class QuizContext {
 	
 	public String getVariable(String name) {
 		return variables.get(name);
+	}
+
+	public void setTest(boolean b) {
+		this.test = b;
+	}
+	
+	public boolean getTest() {
+		return this.test;
 	}
 }

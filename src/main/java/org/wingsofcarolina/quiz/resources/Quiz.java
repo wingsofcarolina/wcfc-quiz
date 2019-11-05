@@ -131,7 +131,10 @@ public class Quiz {
 
 		// Pick up the recipe for the desired quiz
 		recipe = Recipe.getRecipeByCategoryAndAttribute(category, attribute);
-
+		if (recipe == null) {
+			throw new QuizBuildException("No Recipe found for selected category : " + category);
+		}
+		
 		if (recipe.getScript() != null) {
 			Map<String, String> args = null;
 			String result = execute.run(recipe.getScript(), args );
@@ -165,7 +168,6 @@ public class Quiz {
 			long id = candidate.getQuestionId();
 			for (Question question : questions) {
 				if (question.getQuestionId() == id) {
-					LOG.info("Found a conflict, rejecting {}", id);
 					return true;
 				}
 			}

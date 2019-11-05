@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.text.SimpleDateFormat;
@@ -65,7 +66,6 @@ import org.wingsofcarolina.quiz.scripting.Execute;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import groovy.lang.MissingPropertyException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 
@@ -412,7 +412,7 @@ public class QuizAPI {
 		stream.close();
 		
 		LOG.info("Resetting maximum question ID in database to : {}", maxID);
-		AutoIncrement inc = Persistence.instance().setID(Question.ID_KEY, maxID);
+		Persistence.instance().setID(Question.ID_KEY, maxID);
 		
 		return Response.status(200).entity("Zip file uploaded by " + user.getName() + "\n").build();
 
@@ -738,7 +738,7 @@ public class QuizAPI {
 
 	@GET
 	@Path("attributes/{category}")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response attributes(@PathParam("category") String category, @QueryParam("attribute") String attribute) {
 		List<String> attributes = Attribute.attributes(category);
 		return Response.ok().entity(attributes).build();
@@ -746,19 +746,54 @@ public class QuizAPI {
 
 	@POST
 	@Path("script")
-	public Response runScript(String script) {
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response runScript(Map<String, String> request) {
 		String result;
+		String status = "success";
+		String category = request.get("category");
+		String script = request.get("script");
+		Map<String, String> response = new HashMap<String, String>();
 		
-		Execute execute = new Execute(new QuizContext(new Quiz(), config));
+		QuizContext context= new QuizContext(new Quiz(category), config);
+		context.setTest(true);
+		Execute execute = new Execute(context);
 		try {
 			result = execute.run(script);
 		} catch (Exception mpe) {
 			result = mpe.getLocalizedMessage();
+			status = "failure";
 		}
 
-		return Response.ok().entity(result).build();
+		// Generate output report
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream ps = new PrintStream(baos);
+        ps.println("<h3>Script Output : </h3>");
+        ps.println(result);
+        ps.println("<h3>Questions : </h3><ul>");
+        List<Question> questions = context.getQuiz().getQuestions();
+        for (Question question : questions) {
+        	ps.println("<li>" + question.getQuestionId() + " : " + trim(question.getQuestion()));
+        }
+        ps.println("</ul>");
+        ps.println("Total number of questions : " + questions.size());
+        ps.close();
+		
+		response.put("status", status);
+		response.put("result", baos.toString());
+		
+		return Response.ok().entity(response).build();
 	}
 	
+    private String trim(String line) {
+    	String result = line;
+    	int pos = line.indexOf('\n');
+    	if (pos != -1) {
+    		result = line.substring(0, pos);
+    	}
+    	return result;
+    }
+    
 	@GET
 	@Path("download")
 	@Produces(MediaType.TEXT_PLAIN)

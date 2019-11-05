@@ -37,17 +37,50 @@ function load_recipe() {
 	else
 		var url = "api/recipe/" + category + "?attribute=" + attribute;
 	
+	window.aceEditor.setValue("");
 	$.getJSON( url , function( data ) {
 		var script = data.script
 		if (script == null) {
 			script = "";
 		}
-		window.aceEditor.setValue(data.script);
+		window.aceEditor.setValue(script);
 		window.aceEditor.gotoLine(1);
 		
 		var textarea = $('textarea[name="script"]');
 		textarea.val(data.script);
 	});
+}
+
+function test_script() {
+	var category = document.getElementById('category').value;
+	var script = window.aceEditor.getSession().getValue();
+	var data = {category:category, script:script};
+    
+	$.ajax({
+       url: '/api/script',
+       type: 'post',
+       dataType: 'json',
+       contentType: 'application/json',
+       data: JSON.stringify(data),
+       success: function (data) {
+			var w = window.open('about:blank', 'Results');
+		    w.document.open();
+		    w.document.write("<html>");
+		    w.document.write("<link rel=\"stylesheet\" href=\"/static/default.css\">");
+		    w.document.write("<body class=\"article\">");
+		    w.document.write("<div id=\"content\">");
+		    w.document.write("<h1>Script Test Results</h1>");
+		    w.document.write(data.result);
+		    w.document.write("<hr></p><button onclick=\"javascript:window.open('','_self').close();\">Close Browser Page</button></p></p>");
+		    w.document.write("</div>");
+		    w.document.write("</body>");
+		    w.document.write("</html>");
+		    w.document.close();
+       },
+       error: function(XMLHttpRequest, textStatus, errorThrown) {
+			alert("Error : " + errorThrown);
+		}
+    });
 }
 </script>
 
@@ -69,8 +102,8 @@ function load_recipe() {
   <option value="PILOT">Pilot</option>
   <option value="INSTRUCTOR">Instructor</option>
 </select></td></tr>
-<tr><td colspan=2>Enter the quiz script text used in the Recipe below.</td><tr>
-<tr><td colspan=2>
+<tr><td colspan=3>Enter the quiz script text used in the Recipe below.</td><tr>
+<tr><td colspan=3>
 <div id="editor" style="height: 500px; width: 0750px">Enter script text here .....</div>
 <script>
     var editor = ace.edit("editor");
@@ -78,10 +111,10 @@ function load_recipe() {
 </script>
 </td></tr>
 </table>
-</p>
 <textarea name="script" style="display: none;"></textarea>
 <input type="submit" value="Update Recipe">
 </form>
 </p>
+<button onclick="test_script();">Test Recipe</button>
 
 ++++

@@ -48,22 +48,26 @@ public class Execute {
         StringReader reader = new StringReader(scriptText);
         GroovyCodeSource source = new GroovyCodeSource(reader, scriptName, "/groovy/shell");
         QuizDSL script = (QuizDSL) shell.parse(source);
-        //binding.setProperty("context", context);    // Decide if we want to give scripts access to the context
+        binding.setProperty("context", context);    // Decide if we want to give scripts access to the context
         if (args != null) {
         	binding.setProperty("args", args);
         }
         script.setContext(context);
-        PrintStream orig = System.out;
-        System.setOut(new PrintStream(baos));
+        PrintStream origOut = System.out;
+        PrintStream origErr = System.err;
+        PrintStream newStream = new PrintStream(baos);
+        System.setOut(newStream);
+        System.setErr(newStream);
         try {
             script.run();
         } catch(Exception e) {
             LOG.info("Script execution error", e);
             throw e;
         } finally {
-            System.setOut(orig);
+            System.setErr(origErr);
+            System.setOut(origOut);
         }
-
+        
         return baos.toString();
     }
 }

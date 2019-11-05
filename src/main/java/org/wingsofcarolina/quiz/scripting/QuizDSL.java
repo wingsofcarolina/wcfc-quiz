@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.wingsofcarolina.quiz.domain.Attribute;
 import org.wingsofcarolina.quiz.domain.Category;
 import org.wingsofcarolina.quiz.domain.Question;
-import org.wingsofcarolina.quiz.resources.Quiz;
 import org.wingsofcarolina.quiz.resources.QuizContext;
 
 import groovy.lang.Script;
@@ -41,10 +40,15 @@ public abstract class QuizDSL extends Script {
     public Object methodMissing(String name, Object args) {
         List<Object> argsList = Arrays.asList((Object[]) args);
         LOG.debug("methodMissing called for ---> {}", name);
+        if (context.getTest()) {
+        	System.out.println("<br>ERROR : methodMissing called for : " + name);
+        }
         return "methodMissing called with name '" + name + "' and args = " + argsList;
     }
     
-    // Methods supporting the Prefect DSL functions
+    ///////////////////////////////////////////////
+    // Methods supporting the Quiz DSL functions
+    ///////////////////////////////////////////////
     public void instructions(String value) {
     	context.setVariable("instructions", value);
     }
@@ -65,18 +69,34 @@ public abstract class QuizDSL extends Script {
     }
     
     // Start a "section" of the quiz
-    public void startSection(Integer sectionCount, String sectionName) {
-    	LOG.info("Starting new section : {}", sectionName);
+    public void start(Integer sectionCount, String sectionName) {
+    	if (context.getTest()) {
+        	System.out.println("<br>INFO  : Starting new section : " + sectionName);
+    	} else {
+        	LOG.info("Starting new section : {}", sectionName);
+    	}
     	this.sectionCount = sectionCount;
     	section = new HashSet<Question>();
     }
     
     // Apply the collection set of questions to the quiz
-    public void applySection(String name) {
-    	LOG.info("Applying collected section : {}", name);
-    	List<Question> questions = new ArrayList<Question>();
-    	questions.addAll(section);
-    	context.getQuiz().addAll(questions);
+    public void end(String name) {
+    	if (context.getTest()) {
+        	System.out.println("<br>INFO  : Applying collected section : " + name);
+    	} else {
+        	LOG.info("Applying collected section : {}", name);
+    	}
+    	if (section != null) {
+	    	List<Question> questions = new ArrayList<Question>();
+	    	questions.addAll(section);
+	    	context.getQuiz().addAll(questions);
+    	} else {
+    		if (context.getTest()) {
+            	System.out.println("<br>ERROR : Attempted to add an empty/null section to the quiz. Why?");
+    		} else {
+        		LOG.info("Attempted to add an empty/null section to the quiz. Why?");
+    		}
+    	}
     }
     
     // Add questions to the selected set of questions in the quiz
@@ -108,7 +128,11 @@ public abstract class QuizDSL extends Script {
 				}
 			}
     	} else {
-    		LOG.info("Attempted to add questions outside of a section");
+    		if (context.getTest()) {
+            	System.out.println("<br>ERROR : Attempted to add an empty/null section to the quiz. Why?");
+    		} else {
+        		LOG.info("Attempted to add an empty/null section to the quiz. Why?");
+    		}
     	}
     }
     
@@ -139,60 +163,21 @@ public abstract class QuizDSL extends Script {
 					}
 				}
 	    	} else {
-	    		LOG.info("Selection attempted with an undersize pool, wanted {} and only had {}", count, pool.size());
+	    		if (context.getTest()) {
+	    			System.out.println("<br>ERROR : Selection attempted with an undersize pool, wanted " + count + " and only had " + pool.size());
+	    		} else {
+		    		LOG.info("Selection attempted with an undersize pool, wanted {} and only had {}", count, pool.size());
+	    		}
 	    	}
     	} else {
-    		LOG.info("Attempted to add questions outside of a section");
+    		if (context.getTest()) {
+        		System.out.println("<br>ERROR : Attempted to add questions outside of a section");
+    		} else {
+        		LOG.info("Attempted to add questions outside of a section");
+    		}
     	}
     }
-
-    // Follow the superseded chain to the current version of the question
-    // being processed. 
-    private Question resolve(Question question) {
-    	Question result = question;
-    	
-    	while (question.isSuperseded()) {
-    		long nextId = question.getSupersededBy();
-    		LOG.info("Question {} superseded by {}", question.getQuestionId(), nextId);
-    		result = Question.getByQuestionId(nextId);
-    	}
-    	
-    	return result;
-    }
-    
-    private List<Question> randomize(List<Question> pool) {
-    	List<Question> result = new ArrayList<Question>();
-    	
-    	if (pool.size() > 0) {
-			do {
-				int size = pool.size();
-				if (size > 0) {
-					int pick = (int)(Math.random() * size);
-					result.add(pool.remove(pick));
-				} else {
-					LOG.info("Why did the pool get to zero???");
-				}
-			} while (pool.size() > 0);
-    	}
-    	
-    	return result;
-    }
-    
-    private boolean alreadySelected(Question candidate) {
-    	if (context.getQuiz().hasQuestion(candidate)) {
-    		return true;
-    	}
-    	long id = candidate.getQuestionId();
-		for (Question question : section) {
-			if (question.getQuestionId() == id) {
-				LOG.info("Found a conflict, rejecting {}", id);
-				return true;
-			}
-		}
-
-    	return false;
-    }
-    
+        
     // Create a mutually exclusive pool
     public void exclusive(String name, List<Integer>questionIds) {
     	if (name != null && questionIds != null && questionIds.size() > 1) {
@@ -203,7 +188,11 @@ public abstract class QuizDSL extends Script {
 	    		if (question != null) {
 	    			group.add(qid);
 	    		} else {
-	    			LOG.info("Requested question {} not found", id);
+	    			if (context.getTest()) {
+	            		System.out.println("<br>ERROR : Requested question " + id + " not found");
+	    			} else {
+	    				LOG.info("Requested question {} not found", id);
+	    			}
 	    		}
 	    	}
 	      	exclusives.put(name, group);
@@ -212,7 +201,7 @@ public abstract class QuizDSL extends Script {
     
     // Filter the list returning only those questions which contain the 
     // indicated attribute.
-    public List<Question> filter(String attribute, List<Question> pool) {
+    public List<Question> filterOnly(String attribute, List<Question> pool) {
     	List<Question> result = new ArrayList<Question>();
     	for (Question question: pool) {
     		if (question.getAttributes().contains(attribute)) {
@@ -223,7 +212,7 @@ public abstract class QuizDSL extends Script {
     }
     
     // Get a list of questions by question IDs
-    public List<Question> getQuestions(List<Integer> questionIds) {
+    public List<Question> include(List<Integer> questionIds) {
     	Set<Question> questions = new HashSet<Question>();
     	for (Integer id : questionIds) {
     		Question question = Question.getByQuestionId(new Long(id));
@@ -231,24 +220,32 @@ public abstract class QuizDSL extends Script {
     			if (question.getCategory().equals(context.getQuiz().getCategory())) {
     				questions.add(question);
     			} else {
-        			LOG.info("Requested question {} does not match quiz category {}", id, context.getQuiz().getCategory());
+    				if (context.getTest()) {
+	            		System.out.println("<br>ERROR : Requested question " + id + " does not match quiz category " + context.getQuiz().getCategory());
+    				} else {
+    					LOG.info("Requested question {} does not match quiz category {}", id, context.getQuiz().getCategory());
+    				}
     			}
     		} else {
-    			LOG.info("Requested question {} not found", id);
+    			if (context.getTest()) {
+            		System.out.println("<br>ERROR : Requested question " + id + " not found");
+    			} else {
+    				LOG.info("Requested question {} not found", id);
+    			}
     		}
     	}
     	return new ArrayList<Question>(questions);
     }
     
     // Get a list of questions by category
-    public List<Question> getQuestions() {
+    public List<Question> questions() {
     	Category category = context.getQuiz().getCategory();
     	List<Question> result = Question.getSelected(category);
 		return result;
     }
     
     // Get a list of questions by category, filtered by attributes
-    public List<Question> getQuestionsWithAny(List<String> atts) {
+    public List<Question> questionsWithAny(List<String> atts) {
     	Category category = context.getQuiz().getCategory();
     	List<Question> result = new ArrayList<Question>();
 		if (atts.contains(Attribute.ANY)) {
@@ -264,5 +261,68 @@ public abstract class QuizDSL extends Script {
 	    	}
 		}
 		return result;
+    }
+    
+    ///////////////////////////////////////
+    // Supporting methods
+    ///////////////////////////////////////
+    private List<Question> randomize(List<Question> pool) {
+    	List<Question> result = new ArrayList<Question>();
+    	
+    	if (pool.size() > 0) {
+			do {
+				int size = pool.size();
+				if (size > 0) {
+					int pick = (int)(Math.random() * size);
+					result.add(pool.remove(pick));
+				} else {
+					if (context.getTest()) {
+						System.out.println("<br>ERROR : Why did the pool get to zero???");
+					} else {
+						LOG.info("Why did the pool get to zero???");
+					}
+				}
+			} while (pool.size() > 0);
+    	}
+    	
+    	return result;
+    }
+    
+    private boolean alreadySelected(Question candidate) {
+    	if (context.getQuiz().hasQuestion(candidate)) {
+			if (context.getTest()) {
+				System.out.println("<br>INFO : Found a conflict in Quiz, rejecting " + candidate.getQuestionId());
+			} else {
+				LOG.info("Found a conflict, rejecting {}", candidate.getQuestionId());
+			}
+    		return true;
+    	}
+    	long id = candidate.getQuestionId();
+		for (Question question : section) {
+			if (question.getQuestionId() == id) {
+				if (context.getTest()) {
+					System.out.println("<br>INFO : Found a conflict, rejecting " + id);
+				} else {
+					LOG.info("Found a conflict, rejecting {}", id);
+				}
+				return true;
+			}
+		}
+
+    	return false;
+    }
+
+    // Follow the superseded chain to the current version of the question
+    // being processed. 
+    private Question resolve(Question question) {
+    	Question result = question;
+    	
+    	while (question.isSuperseded()) {
+    		long nextId = question.getSupersededBy();
+    		LOG.info("Question {} superseded by {}", question.getQuestionId(), nextId);
+    		result = Question.getByQuestionId(nextId);
+    	}
+    	
+    	return result;
     }
 }
