@@ -9,15 +9,11 @@ import java.util.Map;
 import org.mongodb.morphia.annotations.Transient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wingsofcarolina.quiz.QuizConfiguration;
 import org.wingsofcarolina.quiz.common.QuizBuildException;
-import org.wingsofcarolina.quiz.domain.Attribute;
 import org.wingsofcarolina.quiz.domain.Category;
 import org.wingsofcarolina.quiz.domain.Question;
 import org.wingsofcarolina.quiz.domain.Record;
 import org.wingsofcarolina.quiz.domain.Recipe;
-import org.wingsofcarolina.quiz.domain.Section;
-import org.wingsofcarolina.quiz.domain.Selection;
 import org.wingsofcarolina.quiz.domain.persistence.Persistence;
 import org.wingsofcarolina.quiz.scripting.Execute;
 

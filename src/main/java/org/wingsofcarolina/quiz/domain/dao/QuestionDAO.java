@@ -12,12 +12,6 @@ import org.wingsofcarolina.quiz.domain.Category;
 import org.wingsofcarolina.quiz.domain.Question;
 import org.wingsofcarolina.quiz.domain.Type;
 
-import com.mongodb.BasicDBObjectBuilder;
-import com.mongodb.DBCollection;
-import com.mongodb.WriteResult;
-import com.mongodb.client.model.DeleteOptions;
-
-
 public class QuestionDAO extends BasicDAO<Question, ObjectId> {
 	@SuppressWarnings("unused")
 	private static final Logger LOG = LoggerFactory.getLogger(QuestionDAO.class);

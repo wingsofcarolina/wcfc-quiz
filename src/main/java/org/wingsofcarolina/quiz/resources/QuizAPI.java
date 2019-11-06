@@ -49,7 +49,6 @@ import org.wingsofcarolina.quiz.common.Flash;
 import org.wingsofcarolina.quiz.common.Pages;
 import org.wingsofcarolina.quiz.common.Templates;
 import org.wingsofcarolina.quiz.domain.Attribute;
-import org.wingsofcarolina.quiz.domain.AutoIncrement;
 import org.wingsofcarolina.quiz.domain.Category;
 import org.wingsofcarolina.quiz.domain.Question;
 import org.wingsofcarolina.quiz.domain.QuestionDetails;
@@ -331,7 +330,7 @@ public class QuizAPI {
 				}
 			}
 			LOG.info("Resetting maximum question ID in database to : {}", maxID);
-			AutoIncrement inc = Persistence.instance().setID(Question.ID_KEY, maxID);
+			Persistence.instance().setID(Question.ID_KEY, maxID);
 		} else {
 			LOG.error("Directory {} not found during question database recovery.", questionDir);
 		}
@@ -352,9 +351,6 @@ public class QuizAPI {
 	public Response uploadFile(@CookieParam("quiz.token") Cookie cookie, 
 			@FormDataParam("file") final InputStream fileInputStream,
 			@FormDataParam("file") final FormDataContentDisposition contentDispositionHeader) throws IOException, AuthenticationException  {
-
-		int q_count = 0;
-		int r_count = 0;
 
 		Long maxID = 0L;
 
@@ -391,7 +387,6 @@ public class QuizAPI {
 				LOG.info("Deserializing recipe {}", entry.getName());
 				Recipe recipe = objectMapper.readValue(result.toString("UTF-8"), Recipe.class);
 				recipe.save();
-				r_count++;
 			} else if (entry.getName().startsWith("quizdata/q-")) {
 				LOG.info("Deserializing question {}", entry.getName());
 				Question question = objectMapper.readValue(result.toString("UTF-8"), Question.class);
@@ -399,7 +394,6 @@ public class QuizAPI {
 					maxID = question.getQuestionId();
 				}
 				question.save();
-				q_count++;
 			} else {
 				LOG.error("Found an entry in the upload file that can't be deserialized : {}", entry.getName());
 			}
@@ -765,7 +759,7 @@ public class QuizAPI {
 			status = "failure";
 		}
 
-		// Generate output report
+		// Generate output report (including HTML, ugh)
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintStream ps = new PrintStream(baos);
         ps.println("<h3>Script Output : </h3>");
@@ -773,7 +767,7 @@ public class QuizAPI {
         ps.println("<h3>Questions : </h3><ul>");
         List<Question> questions = context.getQuiz().getQuestions();
         for (Question question : questions) {
-        	ps.println("<li>" + question.getQuestionId() + " : " + trim(question.getQuestion()));
+        	ps.println("<li><a href=\"/question/" + question.getQuestionId() + "\">" + question.getQuestionId() + "</a> : " + trim(question.getQuestion()));
         }
         ps.println("</ul>");
         ps.println("Total number of questions : " + questions.size());
@@ -801,7 +795,7 @@ public class QuizAPI {
 
 		if (cookie != null) {
 			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
-			User user = User.getWithClaims(claims);
+			User.getWithClaims(claims);
 
 			String now = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date());
 

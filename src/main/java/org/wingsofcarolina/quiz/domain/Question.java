@@ -13,7 +13,6 @@ import org.wingsofcarolina.quiz.domain.persistence.Persistence;
 import org.wingsofcarolina.quiz.domain.presentation.CmRenderer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.itextpdf.layout.element.IBlockElement;
 import com.itextpdf.layout.element.Paragraph;
 
 public class Question {

@@ -9,8 +9,6 @@ import org.slf4j.LoggerFactory;
 public class QuestionDetails {
 	private static final Logger LOG = LoggerFactory.getLogger(QuestionDetails.class);
 
-	private static final int MAX_ANSWERS = 5;
-	
 	private String question;
 	private String discussion;
 	private String reference;
