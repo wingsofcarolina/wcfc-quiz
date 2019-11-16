@@ -25,7 +25,6 @@ public class CssHeaderProcessor extends DocinfoProcessor {
     public String process(Document document) {
     	StringBuffer sb = new StringBuffer();
         sb.append("<script src=\"/static/jquery-3.4.0.js\"></script>\n");
-        sb.append("<script src=\"/static/jquery.validate.js\"></script>");
         return sb.toString();
     }
 }

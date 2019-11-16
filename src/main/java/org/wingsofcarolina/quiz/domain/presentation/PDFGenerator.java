@@ -155,21 +155,31 @@ public class PDFGenerator {
 		table.addCell(cell);
 		
 		int aIndex = 0;
-		for (Answer answer : question.getAnswers()) {
+		if (question.getAnswers() == null || question.getAnswers().size() == 0) {
 			cell = new Cell();
 			cell.setBorder(Border.NO_BORDER);
-			cell.setTextAlignment(TextAlignment.RIGHT);
-			cell.add(new Paragraph(characters[aIndex] + " : "));
-			cell.setWidth(CELL_WIDTH);
-			cell.setPaddingTop(0);
+			cell.setFontSize(12);
+			graph.add(new Text("This question has no answers at this time."));
+			graph.add(new Text("Until answers are added, this question can NOT be saved in the database."));
+			cell.add(graph);
 			table.addCell(cell);
-			
-			cell = new Cell();
-			cell.setBorder(Border.NO_BORDER);
-			cell.add(answer.getAnswerAsIText());
-			cell.setPaddingTop(0);
-			table.addCell(cell);
-			aIndex++;
+		} else {
+			for (Answer answer : question.getAnswers()) {
+				cell = new Cell();
+				cell.setBorder(Border.NO_BORDER);
+				cell.setTextAlignment(TextAlignment.RIGHT);
+				cell.add(new Paragraph(characters[aIndex] + " : "));
+				cell.setWidth(CELL_WIDTH);
+				cell.setPaddingTop(0);
+				table.addCell(cell);
+				
+				cell = new Cell();
+				cell.setBorder(Border.NO_BORDER);
+				cell.add(answer.getAnswerAsIText());
+				cell.setPaddingTop(0);
+				table.addCell(cell);
+				aIndex++;
+			}
 		}
 		return table;
 	}

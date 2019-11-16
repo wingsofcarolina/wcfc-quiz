@@ -1,5 +1,6 @@
 package org.wingsofcarolina.quiz.domain;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -26,6 +27,7 @@ public class Question {
     private Category category;
     private QuestionDetails details;
 	private List<String> attributes;
+	private List<Long> exclusive;
 	private Long questionId;
 	private Boolean deployed = false;
 	private Boolean deleted = false;
@@ -129,6 +131,21 @@ public class Question {
 			}
 		}
 		return false;
+	}
+	
+	public List<Long> getExclusive() {
+		return exclusive;
+	}
+
+	public void setExclusive(List<Long> exclusive) {
+		this.exclusive = exclusive;
+	}
+	
+	public void addExclusive(Long questionId) {
+		if (exclusive == null) {
+			exclusive = new ArrayList<Long>();
+		}
+		exclusive.add(questionId);
 	}
 
 	public Boolean getDeployed() {
