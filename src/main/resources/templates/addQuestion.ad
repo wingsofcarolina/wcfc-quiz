@@ -95,8 +95,6 @@ function show_hide_checkboxes(value) {
     }
 }
 </script>
-<script src="/static/question-form-validation.js"></script>
-
 <form name="question" action="/api/addQuestion" method="post">
 
 <table>

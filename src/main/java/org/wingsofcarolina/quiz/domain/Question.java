@@ -151,6 +151,21 @@ public class Question {
 		}
 		return false;
 	}
+	
+	public List<Long> getExclusive() {
+		return exclusive;
+	}
+
+	public void setExclusive(List<Long> exclusive) {
+		this.exclusive = exclusive;
+	}
+	
+	public void addExclusive(Long questionId) {
+		if (exclusive == null) {
+			exclusive = new ArrayList<Long>();
+		}
+		exclusive.add(questionId);
+	}
 
 	public Boolean getDeployed() {
 		return deployed;

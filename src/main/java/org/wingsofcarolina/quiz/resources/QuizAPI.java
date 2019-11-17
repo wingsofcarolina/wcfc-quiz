@@ -48,6 +48,7 @@ import org.wingsofcarolina.quiz.authentication.Privilege;
 import org.wingsofcarolina.quiz.common.Flash;
 import org.wingsofcarolina.quiz.common.Pages;
 import org.wingsofcarolina.quiz.common.Templates;
+import org.wingsofcarolina.quiz.domain.Answer;
 import org.wingsofcarolina.quiz.domain.Attribute;
 import org.wingsofcarolina.quiz.domain.Category;
 import org.wingsofcarolina.quiz.domain.Question;
@@ -426,11 +427,21 @@ public class QuizAPI {
 
 		Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
 		User user = User.getWithClaims(claims);
+		
+		// Shortcut out if there are no answers ... that just ain't right
+		if (empty(answers)) {
+			Flash.add(Flash.Code.ERROR, "A question may not be saved with no answers.");
+			return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
+		}
 
 		if (typeName.contentEquals("fib")) {
 			newQuestion = createQuestion(cookie, typeName, categoryName, question, discussion, references, difficulty,
 					attributes, answers, null);
 		} else {
+			if (correct == null || correct.size() == 0) {
+				Flash.add(Flash.Code.ERROR, "A question may not be saved with no correct answer set.");
+				return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
+			}
 			newQuestion = createQuestion(cookie, typeName, categoryName, question, discussion, references, difficulty,
 					attributes, answers, correct.get(0));
 		}
@@ -448,6 +459,15 @@ public class QuizAPI {
 			@FormParam("attributes") List<String> attributes, @FormParam("answer") List<String> answers,
 			@FormParam("correct") List<Integer> correct, @FormParam("overwrite") Boolean overwrite)
 			throws Exception, AuthenticationException {
+		
+		Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
+		User user = User.getWithClaims(claims);
+
+		// Shortcut out if there are no answers ... that just ain't right
+		if (empty(answers)) {
+			Flash.add(Flash.Code.ERROR, "A question may not be saved with no answers.");
+			return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
+		}
 
 		Integer correctAnswer = null;
 
@@ -461,9 +481,6 @@ public class QuizAPI {
 		}
 		attributes.add(difficulty);
 		LOG.info("Attributes --> {}", attributes);
-
-		Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
-		User user = User.getWithClaims(claims);
 
 		// Get the existing question, and see if it has been deployed
 		Question original = Question.getByQuestionId(questionId);
@@ -526,6 +543,18 @@ public class QuizAPI {
 		return new ViewQuestionResponse(original.getQuestionId()).cookie(authUtils.generateCookie(user)).build();
 	}
 
+	// Determine of an array of answer strings is empty or not
+	private boolean empty(List<String> answers) {
+		if (answers != null || answers.size() > 0) {
+			for (String answer : answers) {
+				if ( ! answer.isEmpty()) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+	
 	private Question createQuestion(Cookie cookie, String typeName, String categoryName, String question,
 			String discussion, String references, String difficulty, List<String> attributes, List<String> answers,
 			Integer correct) throws Exception {

@@ -65,7 +65,6 @@ function loadAttributes()
 function loadDifficultyAttributes()
 {
 	var url = "/api/question/difficulty/${question.questionId}";
-	console.log(url);
     var $el = $("#difficulty");
 	$el.empty(); // remove old options
 	$.getJSON( url , function( data ) {
@@ -82,7 +81,6 @@ function loadDifficultyAttributes()
 }
 
 function setCorrect(item) {
-	console.log("Trigered on : " + item);
 	$('input[type=checkbox]').each(function() 
 	{ 
 	        this.checked = false; 
@@ -103,7 +101,15 @@ function show_hide_checkboxes(value) {
     }
 }
 </script>
-<script src="/static/question-form-validation.js"></script>
+<script>
+function getInput(msg, redirect) {
+	var questionId = prompt(msg);
+	if (questionId != null) {
+		console.log('Adding mutual exclusion question -->  ' + questionId);
+	}
+}
+</script>
+<a id="backup" href="#" onclick="getInput('Add Mutual Exclusion?');return false;">Mutual Exclusion</a>
 
 <form name="question" action="/api/updateQuestion" method="post">
 <input type="hidden" name="questionId" value="${question.questionId}" />
