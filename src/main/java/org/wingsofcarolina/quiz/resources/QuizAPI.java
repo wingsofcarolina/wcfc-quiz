@@ -785,7 +785,7 @@ public class QuizAPI {
 		Map<String, String> response = new HashMap<String, String>();
 		
 		QuizContext context= new QuizContext(new Quiz(category), config);
-		context.setTest(true);
+		context.setTestRun(true);
 		Execute execute = new Execute(context);
 		try {
 			result = execute.run(script);

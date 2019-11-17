@@ -40,7 +40,7 @@ public abstract class QuizDSL extends Script {
     public Object methodMissing(String name, Object args) {
         List<Object> argsList = Arrays.asList((Object[]) args);
         LOG.debug("methodMissing called for ---> {}", name);
-        if (context.getTest()) {
+        if (context.getTestRun()) {
         	System.out.println("<br>ERROR : methodMissing called for : " + name);
         }
         return "methodMissing called with name '" + name + "' and args = " + argsList;
@@ -70,7 +70,7 @@ public abstract class QuizDSL extends Script {
     
     // Start a "section" of the quiz
     public void start(Integer sectionCount, String sectionName) {
-    	if (context.getTest()) {
+    	if (context.getTestRun()) {
         	System.out.println("<br>INFO  : Starting new section : " + sectionName);
     	} else {
         	LOG.info("Starting new section : {}", sectionName);
@@ -81,7 +81,7 @@ public abstract class QuizDSL extends Script {
     
     // Apply the collection set of questions to the quiz
     public void end(String name) {
-    	if (context.getTest()) {
+    	if (context.getTestRun()) {
         	System.out.println("<br>INFO  : Applying collected section : " + name);
     	} else {
         	LOG.info("Applying collected section : {}", name);
@@ -91,7 +91,7 @@ public abstract class QuizDSL extends Script {
 	    	questions.addAll(section);
 	    	context.getQuiz().addAll(questions);
     	} else {
-    		if (context.getTest()) {
+    		if (context.getTestRun()) {
             	System.out.println("<br>ERROR : Attempted to add an empty/null section to the quiz. Why?");
     		} else {
         		LOG.info("Attempted to add an empty/null section to the quiz. Why?");
@@ -112,8 +112,9 @@ public abstract class QuizDSL extends Script {
 				// Resolve the actual question (i.e. follow the superseded chain)
 				entity = resolve(entity);
 				
-				// Add the question to the section if it has not been used before
-				if ( ! alreadySelected(entity)) {
+				// Add the question to the section if it has not been used before and
+				// isn't conflicting with a mutually exclusive question already selected
+				if ( ! excluded(entity) && !alreadySelected(entity)) {
 					// Add it and keep track of the count
 					section.add(entity);
 					sectionCount--;
@@ -128,7 +129,7 @@ public abstract class QuizDSL extends Script {
 				}
 			}
     	} else {
-    		if (context.getTest()) {
+    		if (context.getTestRun()) {
             	System.out.println("<br>ERROR : Attempted to add an empty/null section to the quiz. Why?");
     		} else {
         		LOG.info("Attempted to add an empty/null section to the quiz. Why?");
@@ -147,8 +148,9 @@ public abstract class QuizDSL extends Script {
 					// Shortcut out if we've collected enough questions
 					if (sectionCount == 0) break;
 					
-					// Add the question to the section if it has not been used before
-					if ( ! alreadySelected(entity)) {
+					// Add the question to the section if it has not been used before and
+					// isn't conflicting with a mutually exclusive question already selected
+					if ( ! excluded(entity) && !alreadySelected(entity)) {
 						// Add it and keep track of the count
 						section.add(entity);
 						sectionCount--;
@@ -163,14 +165,14 @@ public abstract class QuizDSL extends Script {
 					}
 				}
 	    	} else {
-	    		if (context.getTest()) {
+	    		if (context.getTestRun()) {
 	    			System.out.println("<br>ERROR : Selection attempted with an undersize pool, wanted " + count + " and only had " + pool.size());
 	    		} else {
 		    		LOG.info("Selection attempted with an undersize pool, wanted {} and only had {}", count, pool.size());
 	    		}
 	    	}
     	} else {
-    		if (context.getTest()) {
+    		if (context.getTestRun()) {
         		System.out.println("<br>ERROR : Attempted to add questions outside of a section");
     		} else {
         		LOG.info("Attempted to add questions outside of a section");
@@ -188,7 +190,7 @@ public abstract class QuizDSL extends Script {
 	    		if (question != null) {
 	    			group.add(qid);
 	    		} else {
-	    			if (context.getTest()) {
+	    			if (context.getTestRun()) {
 	            		System.out.println("<br>ERROR : Requested question " + id + " not found");
 	    			} else {
 	    				LOG.info("Requested question {} not found", id);
@@ -220,14 +222,14 @@ public abstract class QuizDSL extends Script {
     			if (question.getCategory().equals(context.getQuiz().getCategory())) {
     				questions.add(question);
     			} else {
-    				if (context.getTest()) {
+    				if (context.getTestRun()) {
 	            		System.out.println("<br>ERROR : Requested question " + id + " does not match quiz category " + context.getQuiz().getCategory());
     				} else {
     					LOG.info("Requested question {} does not match quiz category {}", id, context.getQuiz().getCategory());
     				}
     			}
     		} else {
-    			if (context.getTest()) {
+    			if (context.getTestRun()) {
             		System.out.println("<br>ERROR : Requested question " + id + " not found");
     			} else {
     				LOG.info("Requested question {} not found", id);
@@ -276,7 +278,7 @@ public abstract class QuizDSL extends Script {
 					int pick = (int)(Math.random() * size);
 					result.add(pool.remove(pick));
 				} else {
-					if (context.getTest()) {
+					if (context.getTestRun()) {
 						System.out.println("<br>ERROR : Why did the pool get to zero???");
 					} else {
 						LOG.info("Why did the pool get to zero???");
@@ -288,27 +290,51 @@ public abstract class QuizDSL extends Script {
     	return result;
     }
     
+    // Determine if the candidate has already been placed in the selected
+    // set for the quiz being generated, and reject it if so.
     private boolean alreadySelected(Question candidate) {
     	if (context.getQuiz().hasQuestion(candidate)) {
-			if (context.getTest()) {
-				System.out.println("<br>INFO : Found a conflict in Quiz, rejecting " + candidate.getQuestionId());
+			if (context.getTestRun()) {
+				System.out.println("<br>INFO : Found a duplicate in Quiz, skipping " + candidate.getQuestionId());
 			} else {
-				LOG.info("Found a conflict, rejecting {}", candidate.getQuestionId());
+				LOG.info("Found a duplicate, skipping {}", candidate.getQuestionId());
 			}
     		return true;
     	}
     	long id = candidate.getQuestionId();
 		for (Question question : section) {
 			if (question.getQuestionId() == id) {
-				if (context.getTest()) {
-					System.out.println("<br>INFO : Found a conflict, rejecting " + id);
+				if (context.getTestRun()) {
+					System.out.println("<br>INFO : Found a duplicate, skipping " + id);
 				} else {
-					LOG.info("Found a conflict, rejecting {}", id);
+					LOG.info("Found a duplicate, skipping {}", id);
 				}
 				return true;
 			}
 		}
 
+    	return false;
+    }
+    
+    // Determine if the candidate question should be rejected due to a
+    // mutually exclusive question already being in the selected set of
+    // questions. 
+    private boolean excluded(Question candidate) {
+    	if (candidate.getExcludes() != null) {
+	    	Set<Question> questionSet = new HashSet<Question>();
+	    	questionSet.addAll(context.getQuiz().getQuestions());
+	    	questionSet.addAll(section);
+	    	for (Question question : questionSet) {
+	    		if (candidate.getExcludes().contains(question.getQuestionId())) {
+	    			if (context.getTestRun()) {
+	    				System.out.println("<br>INFO : Found a mutual exclusion in quiz, skipping " + candidate.getQuestionId());
+	    			} else {
+	    				LOG.info("Found a mutual exclusion in quiz, skipping {}", candidate.getQuestionId());
+	    			}
+	        		return true;
+	    		}
+	    	}
+    	}
     	return false;
     }
 

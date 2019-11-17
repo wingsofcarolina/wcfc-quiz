@@ -134,7 +134,6 @@ public class Quiz {
 		if (recipe.getScript() != null) {
 			Map<String, String> args = null;
 			String result = execute.run(recipe.getScript(), args );
-			System.out.println("===> " + result);
 			LOG.info("Script returned : {}", result);
 		}
 		
