@@ -151,25 +151,27 @@ public class QuizAPI {
 
 		User user = null;
 
-		if (email == null || password == null) {
-			Flash.add(Flash.Code.ERROR, "No email or password provided, try again.");
-			return new RedirectResponse(Pages.REGISTER_PAGE).build();
-		} else if (!password.equals(passwordVerify)) {
-			Flash.add(Flash.Code.ERROR, "Passwords do not match.");
-			return new RedirectResponse(Pages.REGISTER_PAGE).build();
+		if (action.equals("Register")) {
+			if (email == null || password == null) {
+				Flash.add(Flash.Code.ERROR, "No email or password provided, try again.");
+				return new RedirectResponse(Pages.REGISTER_PAGE).build();
+			} else if (!password.equals(passwordVerify)) {
+				Flash.add(Flash.Code.ERROR, "Passwords do not match.");
+				return new RedirectResponse(Pages.REGISTER_PAGE).build();
+			}
+	
+			if (User.getByEmail(email) == null) {
+				user = QuizResource.instance().addUser(name, email, password, Privilege.USER);
+				user.save();
+			} else {
+				Flash.add(Flash.Code.ERROR, "User already exists.");
+				return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(requester)).build();
+			}
+	
+			// Generate user token
+			LOG.info("Registered  : {}", user);
+			Flash.add(Flash.Code.SUCCESS, "User with registered successfully.");
 		}
-
-		if (User.getByEmail(email) == null) {
-			user = QuizResource.instance().addUser(name, email, password, Privilege.USER);
-			user.save();
-		} else {
-			Flash.add(Flash.Code.ERROR, "User already exists.");
-			return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(requester)).build();
-		}
-
-		// Generate user token
-		LOG.info("Registered  : {}", user);
-		Flash.add(Flash.Code.SUCCESS, "User with registered successfully.");
 		return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(requester)).build();
 	}
 
