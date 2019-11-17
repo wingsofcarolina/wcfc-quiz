@@ -16,6 +16,8 @@ import org.wingsofcarolina.quiz.domain.presentation.CmRenderer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.itextpdf.layout.element.Paragraph;
 
+import jline.internal.Log;
+
 public class Question {
     @Id
 	@JsonIgnore
@@ -27,7 +29,7 @@ public class Question {
     private Category category;
     private QuestionDetails details;
 	private List<String> attributes;
-	private List<Long> exclusive;
+	private List<Long> excludes;
 	private Long questionId;
 	private Boolean deployed = false;
 	private Boolean deleted = false;
@@ -84,6 +86,23 @@ public class Question {
 
 	public void setQuestionId(long questionId) {
 		this.questionId = questionId;
+	}
+	
+	public List<Long> getExcludes() {
+		return excludes;
+	}
+
+	public void setExclusions(List<Integer> exclusions) {
+		// Always replace the existing list
+		excludes = new ArrayList<Long>();
+		
+		// Ensure that we don't add ourselves to the list
+		for (Integer id : exclusions) {
+			Long qid = Long.valueOf(id);
+			if ( ! qid.equals(questionId)) {
+				excludes.add(qid);
+			}
+		}
 	}
 
 	public Integer getIndex() {

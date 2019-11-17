@@ -1,0 +1,40 @@
+= Create Mutual Exclusion Group
+
+<#setting number_format="#0">
+
+<#if user.isAdmin()>
+navbar:${user.userId}[buttons="HomeNavButton;ViewNavButton;AddNavButton;EditNavButton;ProfileNavButton"]
+<#else>
+navbar:${user.userId}[buttons="HomeNavButton;ProfileNavButton", active="HomeNavButton"]
+</#if>
+
+++++
+<script>
+function excludeQuestion() {
+	var qid = $('#questionId').prop('value');
+	var url = "api/question/" + qid;
+	$.getJSON(url, function(data) {
+		var tbody = $('#questionList').find('tbody');
+		tbody.append("<tr><td><input type=\"hidden\" name=\"exclusions\" value=\"" + qid + "\">" + qid + "</td><td>" + data.question + "</td></tr>" );
+	})
+	.fail(function() {
+		$('#flash').addClass('flash-error');
+		$('#flash').html("Question with ID " + qid + " not found.");
+		$('#flash').removeAttr("style");
+	});
+}
+</script>
+
+<input id="questionId" type="text">&nbsp;<button onclick="excludeQuestion()">Question ID</button>
+</p>
+<form name="question" action="/api/createExclusion" method="post">
+<table id="questionList" width="95%">
+<thead><tr><td width="10%">ID</td><td width="90%">Question</td></tr></thead>
+<tbody>
+</tbody>
+</table>
+</p>
+<input type="submit" value="Create Exclusion Group"></form>
+</p>
+++++
+button:/[method="get",label="Cancel"] 

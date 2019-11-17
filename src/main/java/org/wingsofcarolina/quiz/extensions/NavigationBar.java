@@ -26,11 +26,10 @@ public class NavigationBar extends InlineMacroProcessor {
 		}
 		String active = (String)attributes.get("active");
 		if (active == null) {
-			active = "HomeNavButton";
+			active = "";
 		}
 		
 		StringBuffer sb = new StringBuffer();
-		sb.append("<link rel=\"stylesheet\" href=\"/static/quiz-style.css\">");
 		sb.append("<div class=\"topnav\">\n");
 		if (items != null) {
 			for (String item : items) {
@@ -50,8 +49,10 @@ public class NavigationBar extends InlineMacroProcessor {
 		Message flash = Flash.message();
 		if (flash != null) {
 			sb.append(flash.getDiv());
-			sb.append("<script>setInterval(function(){$(\"#flash\").hide('slow');}, 10000);</script>");
+		} else {
+			sb.append(Flash.getEmptyDiv());
 		}
+		sb.append("<script>setInterval(function(){$(\"#flash\").hide('slow');}, 10000);</script>");
 		return sb.toString();
 	}
 }

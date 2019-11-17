@@ -25,6 +25,7 @@ public class CssHeaderProcessor extends DocinfoProcessor {
     public String process(Document document) {
     	StringBuffer sb = new StringBuffer();
         sb.append("<script src=\"/static/jquery-3.4.0.js\"></script>\n");
+    		sb.append("<link rel=\"stylesheet\" href=\"/static/quiz-style.css\">");
         return sb.toString();
     }
 }
