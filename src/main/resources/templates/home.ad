@@ -43,8 +43,7 @@ function query(msg, redirect) {
 	}
 }
 </script>
-<ul>
-<li><b>Quiz category reports:</b>
+<b>Quiz category reports:</b><br>
 <ul>
 <li><button onclick="window.location.href = 'chart/FAR';">Chart</button> &nbsp; <a href="report/FAR">FAR Questions</a> 
 <li><button onclick="window.location.href = 'chart/SOP';">Chart</button> &nbsp; <a href="report/SOP">SOP Questions</a>
@@ -53,15 +52,23 @@ function query(msg, redirect) {
 <li><button onclick="window.location.href = 'chart/PA28';">Chart</button> &nbsp; <a href="report/PA28">Warrior Questions</a>
 <li><button onclick="window.location.href = 'chart/M20J';">Chart</button> &nbsp; <a href="report/M20J">Mooney Questions</a>
 </ul>
-<li><a href="/updateRecipe">Edit a quiz recipe</a><br>
-<li><a href="/browseQuestions">Browse questions</a><br>
-<li><a href="/searchQuestions">Search questions</a><br>
-<li><a href="/createExclusion">Create exclusion group</a><br>
+
+<b>Question management :</b>
+<ul>
+<li><a href="/updateRecipe">Edit a quiz recipe</a>
+<li><a href="/browseQuestions">Browse questions</a>
+<li><a href="/searchQuestions">Search questions</a>
+<li><a href="/createExclusion">Create exclusion group</a>
+<li><a href="/api/globalKey" target="_blank">Generate a whole-database key</a>
+</ul>
+
+<b>System management :</b>
+<ul>
 <li><a id="backup" href="#" onclick="query('Really? Overwrite ALL currently saved Data?', '/api/backup');return false;">Create Recipe and Question Backup Files</a>
 <li><a id="restore" href="#" onclick="query('Really? Restore ALL the Data?', '/api/restore');return false;">Restore Recipe and Question Backup Files</a>
 <li><a href="/api/download">Download a ZIP file of all Recipes and Questions</a><br>
 <li><a href="/register">Register a new instructor within the system</a>
-<li><a href="/version">Show system version information</a><br>
+<li><a href="/version">Show system version information</a>
 </ul>
 </p>
 ++++

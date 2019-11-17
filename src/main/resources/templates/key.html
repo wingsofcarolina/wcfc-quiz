@@ -25,11 +25,14 @@
 &nbsp;&nbsp;&nbsp;
 <i>{ ${question.category}&nbsp;/&nbsp;
 <#list question.attributes as attribute>
+<#if attribute??>
 ${attribute}&nbsp;
+</#if>
 </#list>
 }</i></p>
 
 <#assign index = 0>
+<#if question.answers??>
 <#list question.answers as answer>
 <#if question.isFillInTheBlank()>
 ${seq[index]} : ${answer.answer}</br>
@@ -42,9 +45,13 @@ ${seq[index]} : ${answer.answer}</br>
 </#if>
 <#assign index=index+1>
 </#list>
+<#else>
+<strong>There are no answers to this question! Please fix ASAP!</strong>
+</#if>
 </p>
 
 <#assign index = 0>
+<#if question.answers??>
 <#list question.answers as answer>
 <#if question.isFillInTheBlank()>
 ${seq[index]} : ${answer.answer}</br>
@@ -56,6 +63,7 @@ Correct Answer is : <strong>${seq[index]}</strong></br>
 <#assign index=index+1>
 </#list>
 </p>
+</#if>
 
 <b>References :</b> ${question.references}</p>
 <b>CFI Discussion :</b> </br>

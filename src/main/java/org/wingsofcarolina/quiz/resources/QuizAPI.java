@@ -229,6 +229,36 @@ public class QuizAPI {
 	}
 
 	@GET
+	@Path("globalKey")
+	@Produces("text/html")
+	public Response globalKey(@CookieParam("quiz.token") Cookie cookie) throws AuthenticationException, IOException {
+
+		String output = "";
+		Jws<Claims> claims = authUtils.validateUser(cookie.getValue());
+		User user = User.getWithClaims(claims);
+
+		Quiz quiz = new Quiz();
+		List<Question> allQuestions = Question.getAllQuestions();
+		
+		// Fabricate a dummy quiz
+		quiz.setQuizId(0L);
+		quiz.addAll(allQuestions);
+		quiz.setQuizName("All Questions");
+		
+		// Set the question numbers for the key
+		int index = 1;
+		for (Question question : allQuestions) {
+			question.setIndex(index++);
+		}
+		
+		output = renderer.render(Templates.KEY, quiz).toString();
+		LOG.info("Global Database Quiz Key retrieved by {}", user.getName());
+		Slack.instance().sendMessage("Global Database Quiz Key  retrieved by " + user.getName()
+				+ " at " + dateFormatGmt.format(new Date()));
+		return Response.ok().entity(output).build();
+	}
+
+	@GET
 	@Path("backup")
 	public Response backupDatabase(@CookieParam("quiz.token") Cookie cookie) throws AuthenticationException {
 		int q_count = 0;
