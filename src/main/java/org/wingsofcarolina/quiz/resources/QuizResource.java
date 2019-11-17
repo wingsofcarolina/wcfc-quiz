@@ -149,6 +149,24 @@ public class QuizResource {
 	}
 
 	@GET
+	@Path("createExclusion")
+	@Produces("text/html")
+	public Response createExclusion(@CookieParam("quiz.token") Cookie cookie) throws Exception, AuthenticationException {
+		if (cookie != null) {
+			Jws<Claims> claims = authUtils.validateUser(cookie.getValue());
+			User user = User.getWithClaims(claims);
+			if (user != null) {
+				String output = renderer.render("createExclusion.ad", new Wrapper(user));
+				return Response.ok().entity(output).cookie(authUtils.generateCookie(user)).build();
+			} else {
+				return Response.status(404).build();
+			}
+		} else {
+			return new RedirectResponse(Pages.HOME_PAGE).build();
+		}
+	}
+
+	@GET
 	@Path("login")
 	@Produces("text/html")
 	public Response login() throws Exception {

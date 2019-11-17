@@ -32,6 +32,15 @@ Fill in the Blank
 </#if>
 </strong></td></tr>
 <tr><td>Category</td><td><strong>${question.category}</strong></td></tr>
+<tr><td>Excluded</td><td>
+<#if question.excludes??>
+<#list question.excludes as ex>
+${ex}&nbsp;
+</#list>
+<#else>
+<strong>NONE</strong>
+</#if>
+</td></tr>
 <tr><td valign="top">Question</td><td>${question.getQuestionAsHtml()}</td></tr>
 <tr><td valign="top">Discussion</td><td>${question.getDiscussionAsHtml()}</td></tr>
 <tr><td valign="top">References</td><td>${question.getReferencesAsHtml()}</td></tr>

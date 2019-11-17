@@ -573,6 +573,29 @@ public class QuizAPI {
 		return newQuestion;
 	}
 
+	@POST
+	@Path("createExclusion")
+	@Produces("text/html")
+	public Response createExclusion(@CookieParam("quiz.token") Cookie cookie,
+			@FormParam("exclusions") List<Integer> exclusions)
+			throws Exception, AuthenticationException {
+
+		Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
+		User user = User.getWithClaims(claims);
+
+		for (Integer id : exclusions) {
+			Long qid = Long.valueOf(id);
+			Question question = Question.getByQuestionId(qid);
+			if (question != null) {
+				LOG.info("Updating exclusions for : {}", qid);
+				question.setExclusions(exclusions);
+				question.save();
+			}
+		}
+
+		return new RedirectResponse(Pages.HOME_PAGE).build();
+	}
+
 	/**
 	 * Delete question
 	 * 
@@ -711,6 +734,18 @@ public class QuizAPI {
 			}
 		}
 		return Response.ok().entity(attributes).build();
+	}
+
+	@GET
+	@Path("question/{id}")
+	@Produces("application/json")
+	public Response question(@PathParam("id") Long id) {
+		Question question = Question.getByQuestionId(id);
+		if (question != null) {
+			return Response.ok().entity(question).build();
+		} else {
+			return Response.status(404).build();
+		}
 	}
 
 	@GET

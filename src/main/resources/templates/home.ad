@@ -56,6 +56,7 @@ function query(msg, redirect) {
 <li><a href="/updateRecipe">Edit a quiz recipe</a><br>
 <li><a href="/browseQuestions">Browse questions</a><br>
 <li><a href="/searchQuestions">Search questions</a><br>
+<li><a href="/createExclusion">Create exclusion group</a><br>
 <li><a id="backup" href="#" onclick="query('Really? Overwrite ALL currently saved Data?', '/api/backup');return false;">Create Recipe and Question Backup Files</a>
 <li><a id="restore" href="#" onclick="query('Really? Restore ALL the Data?', '/api/restore');return false;">Restore Recipe and Question Backup Files</a>
 <li><a href="/api/download">Download a ZIP file of all Recipes and Questions</a><br>

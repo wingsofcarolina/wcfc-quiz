@@ -20,6 +20,11 @@ public class Flash {
 		}
 	}
 	
+	public static String getEmptyDiv() {
+		return "<div id=\"flash\" class=\"flash\" style=\"display: none;\"></div>\n";
+
+	}
+
 	public static class Message {
 		Code code;
 		String message;
