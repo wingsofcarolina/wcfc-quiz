@@ -113,7 +113,7 @@ public class Quiz {
 	}
 
 	public Double pointsPerQuestion() {
-		return new Double(100.0 / questions.size());
+		return Math.floor(new Double(100.0 / questions.size()));
 	}
 	
 	/**
