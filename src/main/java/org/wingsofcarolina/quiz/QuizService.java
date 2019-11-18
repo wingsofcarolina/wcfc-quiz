@@ -48,7 +48,6 @@ public class QuizService extends Application<QuizConfiguration> {
         bootstrap.addBundle(new AssetsBundle("/assets/", "/static"));
         bootstrap.addBundle(new MultiPartBundle());
         bootstrap.addBundle(new SundialBundle<QuizConfiguration>() {
-
             @Override
             public SundialConfiguration getSundialConfiguration(QuizConfiguration configuration) {
               return configuration.getSundialConfiguration();

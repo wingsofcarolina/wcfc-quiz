@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.text.SimpleDateFormat;
@@ -82,6 +84,8 @@ public class QuizAPI {
 	private ObjectMapper objectMapper;
 	private String dataDir;
 	private String questionDir;
+	private String assetDir;
+	private String imageDir;
 	private Renderer renderer;
 	private SimpleDateFormat dateFormatGmt;
 
@@ -90,7 +94,9 @@ public class QuizAPI {
 		authUtils = new AuthUtils();
 		objectMapper = new ObjectMapper();
 		dataDir = config.getDataDirectory();
+		assetDir = config.getAssetDirectory();
 		questionDir = dataDir + "/questions";
+		imageDir = assetDir + "/images";
 		renderer = new Renderer(config);
 
 		// Get the startup date/time format in GMT
@@ -446,13 +452,50 @@ public class QuizAPI {
 	}
 
 	@POST
+	@Path("uploadImage")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response uploadImage(@CookieParam("quiz.token") Cookie cookie, 
+			@FormDataParam("qquuid") String uuid,
+			@FormDataParam("qqfilename") String filename,
+			@FormDataParam("qqfile") final InputStream fileInputStream,
+			@Context HttpHeaders headers) throws AuthenticationException  {
+
+		int status = 200;
+		Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
+		User user = User.getWithClaims(claims);
+
+		// Make the directory if it doesn't exist
+		new File(dataDir).mkdir();
+		new File(imageDir).mkdir();
+
+		// Create object for the return values
+		Map<String, Object> result = new HashMap<String,Object>();
+
+		try {
+			java.nio.file.Path outputPath = FileSystems.getDefault().getPath(imageDir, filename);
+			Files.copy(fileInputStream, outputPath);
+			result.put("success", true);
+			status = 200;
+		} catch (IOException ex) {
+			result.put("success", false);
+			result.put("error", ex.getClass().getSimpleName() + " : " + filename);
+			result.put("preventRetry", true);
+			status = 500;
+		}
+		
+		return Response.status(status).entity(result).build();
+	}
+	
+	@POST
 	@Path("addQuestion")
 	@Produces(MediaType.TEXT_HTML)
 	public Response addQuestion(@CookieParam("quiz.token") Cookie cookie, @FormParam("type") String typeName,
 			@FormParam("category") String categoryName, @FormParam("question") String question,
 			@FormParam("discussion") String discussion, @FormParam("references") String references,
 			@FormParam("difficulty") String difficulty, @FormParam("attributes") List<String> attributes,
-			@FormParam("answer") List<String> answers, @FormParam("correct") List<Integer> correct)
+			@FormParam("answer") List<String> answers, @FormParam("correct") List<Integer> correct,
+			@FormParam("attachment") String attachment)
 			throws Exception, AuthenticationException {
 
 		Question newQuestion;
@@ -468,14 +511,14 @@ public class QuizAPI {
 
 		if (typeName.contentEquals("fib")) {
 			newQuestion = createQuestion(cookie, typeName, categoryName, question, discussion, references, difficulty,
-					attributes, answers, null);
+					attributes, answers, null, attachment);
 		} else {
 			if (correct == null || correct.size() == 0) {
 				Flash.add(Flash.Code.ERROR, "A question may not be saved with no correct answer set.");
 				return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
 			}
 			newQuestion = createQuestion(cookie, typeName, categoryName, question, discussion, references, difficulty,
-					attributes, answers, correct.get(0));
+					attributes, answers, correct.get(0), attachment);
 		}
 
 		return new ViewQuestionResponse(newQuestion.getQuestionId()).cookie(authUtils.generateCookie(user)).build();
@@ -489,7 +532,8 @@ public class QuizAPI {
 			@FormParam("question") String question, @FormParam("discussion") String discussion,
 			@FormParam("references") String references, @FormParam("difficulty") String difficulty,
 			@FormParam("attributes") List<String> attributes, @FormParam("answer") List<String> answers,
-			@FormParam("correct") List<Integer> correct, @FormParam("overwrite") Boolean overwrite)
+			@FormParam("correct") List<Integer> correct, @FormParam("overwrite") Boolean overwrite,
+			@FormParam("attachment") String attachment)
 			throws Exception, AuthenticationException {
 		
 		Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
@@ -536,8 +580,13 @@ public class QuizAPI {
 					original.setAttributes(attributes);
 				}
 
+				// Only save attachments with real names.
+				if (attachment.isEmpty()) {
+					attachment = "NONE";
+				}
+				
 				// Update user-changeable details, detecting changes
-				QuestionDetails details = new QuestionDetails(question, discussion, references, answers, correctAnswer);
+				QuestionDetails details = new QuestionDetails(question, discussion, references, answers, correctAnswer, attachment);
 				if (details.compareTo(original.getDetails()) != 0) {
 					original.setDetails(details);
 					changed = true;
@@ -558,7 +607,7 @@ public class QuizAPI {
 				}
 			} else {
 				Question q = createQuestion(cookie, typeName, categoryName, question, discussion, references,
-						difficulty, attributes, answers, correctAnswer);
+						difficulty, attributes, answers, correctAnswer, attachment);
 				original.setSupersededBy(q.getQuestionId());
 				original.save();
 				LOG.info("Superseded question " + original.getQuestionId() + " with " + q.getQuestionId());
@@ -589,7 +638,7 @@ public class QuizAPI {
 	
 	private Question createQuestion(Cookie cookie, String typeName, String categoryName, String question,
 			String discussion, String references, String difficulty, List<String> attributes, List<String> answers,
-			Integer correct) throws Exception {
+			Integer correct, String attachment) throws Exception {
 
 		Question newQuestion;
 
@@ -599,6 +648,7 @@ public class QuizAPI {
 		LOG.info("Discussion --> {}", discussion);
 		LOG.info("References --> {}", references);
 		LOG.info("Attributes --> {}", attributes);
+		LOG.info("Attachment --> {}", attachment);
 
 		// Add the difficulty to the attributes
 		attributes.add(difficulty);
@@ -621,10 +671,10 @@ public class QuizAPI {
 
 		if (correct == null) {
 			newQuestion = new Question(type, category, attributes,
-					new QuestionDetails(question, discussion, references, answers));
+					new QuestionDetails(question, discussion, references, answers, attachment));
 		} else {
 			newQuestion = new Question(type, category, attributes,
-					new QuestionDetails(question, discussion, references, answers, correct));
+					new QuestionDetails(question, discussion, references, answers, correct, attachment));
 		}
 		Slack.instance().sendMessage("Created Question : " + newQuestion.getQuestionId());
 		LOG.info("Created Question : {}", newQuestion.getQuestionId());

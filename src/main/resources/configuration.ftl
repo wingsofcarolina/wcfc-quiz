@@ -8,7 +8,7 @@ mongodb: ${MONGODB!'mongodb'}
 # Location of the template directory
 templates: ${TEMPLATES!'./templates'}
 
-# Location of the data backup/restore directory
+# Location of the image directory and data backup/restore directory
 dataDirectory: ${DATADIR!'/data'}
 
 # Location of the asset directory

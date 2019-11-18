@@ -60,6 +60,7 @@ function query(msg, redirect) {
 <li><a href="/searchQuestions">Search questions</a>
 <li><a href="/createExclusion">Create exclusion group</a>
 <li><a href="/api/globalKey" target="_blank">Generate a whole-database key</a>
+<li><a href="/gallery">Show gallery of uploaded images</a>
 </ul>
 
 <b>System management :</b>

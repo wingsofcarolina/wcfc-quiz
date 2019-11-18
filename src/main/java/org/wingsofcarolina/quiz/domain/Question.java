@@ -56,12 +56,12 @@ public class Question {
 		this.questionId = Persistence.instance().getID(ID_KEY, 1000);
 	}
 	
-	public Question(Type type, Category category, List<String> attributes, String question, String references, List<Answer> answers, String discussion) {
+	public Question(Type type, Category category, List<String> attributes, String question, String references, List<Answer> answers, String discussion, String attachment) {
 		super();
 		this.type = type;
 		this.category = category;
 		this.attributes = attributes;
-		this.details = new QuestionDetails(question, references, answers, discussion);
+		this.details = new QuestionDetails(question, references, answers, discussion, attachment);
 		this.questionId = Persistence.instance().getID(ID_KEY, 1000);
 	}
 
@@ -253,6 +253,11 @@ public class Question {
 	@JsonIgnore
 	public void setDetails(QuestionDetails details) {
 		this.details = details;
+	}
+	
+	@JsonIgnore
+	public Object getAttachment() {
+		return details.getAttachment();
 	}
 	
 	/*

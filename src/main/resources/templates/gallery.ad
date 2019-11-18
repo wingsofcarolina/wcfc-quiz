@@ -1,0 +1,18 @@
+= Image Gallery
+
+<#setting number_format="#0">
+
+<#if user.isAdmin()>
+navbar:${user.userId}[buttons="HomeNavButton;ViewNavButton;AddNavButton;EditNavButton;ProfileNavButton"]
+<#else>
+navbar:${user.userId}[buttons="HomeNavButton;ProfileNavButton", active="ProfileNavButton"]
+</#if>
+
+++++
+<ul>
+<#list files as file>
+<li>Name : ${file.getName()}<br>
+<img src="/static/images/${file.getName()}"><br>
+</#list>
+</ul>
+++++

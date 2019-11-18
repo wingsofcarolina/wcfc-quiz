@@ -44,6 +44,13 @@ ${ex}&nbsp;
 <tr><td valign="top">Question</td><td>${question.getQuestionAsHtml()}</td></tr>
 <tr><td valign="top">Discussion</td><td>${question.getDiscussionAsHtml()}</td></tr>
 <tr><td valign="top">References</td><td>${question.getReferencesAsHtml()}</td></tr>
+<tr><td valign="top">Attachment</td>
+<#if question.getAttachment()??>
+<td>${question.getAttachment()}</td>
+<#else>
+<b>NONE</b>
+</#if>
+</tr>
 
 <tr><td valign="top">Attributes</td><td>
 

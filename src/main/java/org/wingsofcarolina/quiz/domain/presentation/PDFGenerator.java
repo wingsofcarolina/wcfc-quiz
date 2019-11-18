@@ -20,6 +20,7 @@ import org.wingsofcarolina.quiz.resources.Quiz;
 import org.wingsofcarolina.quiz.resources.QuizContext;
 
 import com.itextpdf.io.font.constants.StandardFonts;
+import com.itextpdf.io.image.ImageData;
 import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.events.Event;
 import com.itextpdf.kernel.events.IEventHandler;
@@ -153,7 +154,25 @@ public class PDFGenerator {
 		graph.add(new Text(" (" + questionId + ")"));
 		cell.add(graph);
 		table.addCell(cell);
-		
+
+		// Add an image attachment, if one is requested
+		if (question.getAttachment() != null && ! question.getAttachment().equals("NONE")) {
+			String imageDir = context.getConfiguration().getAssetDirectory() + "/images/";
+		    try {
+				Image image = new Image(ImageDataFactory.create(imageDir + question.getAttachment()));
+				cell = new Cell();
+				cell.setBorder(Border.NO_BORDER);
+				cell.add(new Paragraph("\n"));
+				table.addCell(cell);
+				cell = new Cell();
+				cell.setBorder(Border.NO_BORDER);
+				cell.add(image);
+				table.addCell(cell);
+			} catch (MalformedURLException e) {
+				LOG.error("Could not find requested image attachment : {}", question.getAttachment());
+			}
+		}
+
 		int aIndex = 0;
 		if (question.getAnswers() == null || question.getAnswers().size() == 0) {
 			cell = new Cell();

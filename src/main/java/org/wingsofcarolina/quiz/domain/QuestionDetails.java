@@ -12,26 +12,30 @@ public class QuestionDetails {
 	private String question;
 	private String discussion;
 	private String reference;
+    private String attachment = "NONE";
 	private List<Answer> answers;
 	
 	public QuestionDetails() {}
 	
-	public QuestionDetails(String question, String reference, List<Answer> answers, String discussion) {
+	public QuestionDetails(String question, String reference, List<Answer> answers, String discussion, String attachment) {
 		this.question = question;
 		this.reference = reference;
 		this.answers = answers;
 		this.discussion = discussion;
+		this.attachment = attachment;
 	}
 
-	public QuestionDetails(String question, String discussion, String references, List<String> answerText, Integer correct) {
+	public QuestionDetails(String question, String discussion, String references, List<String> answerText, Integer correct, String attachment) {
 
 		LOG.info("Question   --> {}", question);
 		LOG.info("Discussion --> {}", discussion);
 		LOG.info("References --> {}", references);
+		LOG.info("Attachment --> {}", attachment);
 
 		this.question = question;
 		this.discussion = discussion;
 		this.reference = references;
+		this.attachment = attachment;
 
 		int index = 0;
 		answers = new ArrayList<Answer>();
@@ -49,14 +53,15 @@ public class QuestionDetails {
 		}
 	}
 
-	public QuestionDetails(String question, String discussion, String references, List<String> answers) {
-		this(question, discussion, references, answers, null);
+	public QuestionDetails(String question, String discussion, String references, List<String> answers, String attachment) {
+		this(question, discussion, references, answers, null, attachment);
 	}
 
 	public int compareTo(QuestionDetails details) {
 		if ( ! question.equals(details.getQuestion())) return -1;
 		if ( ! discussion.equals(details.getDiscussion())) return -1;
 		if ( ! reference.equals(details.getReference())) return -1;
+		if ( ! attachment.equals(details.getAttachment())) return -1;
 
 		List<Answer> newAnswers = details.getAnswers();
 		if (answers.size() != newAnswers.size()) return -1;
@@ -67,45 +72,6 @@ public class QuestionDetails {
 		
 		return 0;
 	}
-	
-	/**
-	 * This method updates each detail field in the question and detects
-	 * whether any change has occurred. The change value is used to gate
-	 * updating the question in the database so we don't make gratuitous
-	 * changes.
-	 * 
-	 * @param original
-	 * @return
-	 */
-//	public boolean update(Question original) {
-//		boolean changed = false;
-//		
-//		if ( ! original.getQuestion().contentEquals(question)) {
-//			original.setQuestion(question);
-//			changed = true;
-//		}
-//		if ( ! original.getDiscussion().contentEquals(discussion)) {
-//			original.setDiscussion(discussion);
-//			changed = true;
-//		}
-//		if ( ! original.getReferences().contentEquals(reference)) {
-//			original.setReferences(reference);
-//			changed = true;
-//		}
-//		for (int i = 0; i < MAX_ANSWERS; i++) {
-//			Answer newAnswer = answers.get(i);
-//			Answer oldAnswer = original.getAnswers().get(i);
-//			if ( ! newAnswer.getAnswer().contentEquals(oldAnswer.getAnswer())) {
-//				oldAnswer.setAnswer(newAnswer.getAnswer());
-//				changed = true;
-//			}
-//			if (newAnswer.isCorrect() != oldAnswer.isCorrect() ) {
-//				oldAnswer.setCorrect(newAnswer.isCorrect());
-//				changed = true;
-//			}
-//		}
-//		return changed;
-//	}
 	
 	public String getQuestion() {
 		return question;
@@ -137,5 +103,13 @@ public class QuestionDetails {
 
 	public void setAnswers(List<Answer> answers) {
 		this.answers = answers;
+	}
+	
+	public String getAttachment() {
+		return attachment;
+	}
+
+	public void setAttachment(String attachment) {
+		this.attachment = attachment;
 	}
 }
