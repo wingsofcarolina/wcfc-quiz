@@ -74,6 +74,9 @@ server {
 		try_files $uri $uri/;
 	}
 
+	location ~* /images(.*) {
+		root /var/www/quiz.planez.co;
+	}
 
 	location ~* {
 		proxy_intercept_errors on;

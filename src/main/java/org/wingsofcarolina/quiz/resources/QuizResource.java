@@ -142,22 +142,22 @@ public class QuizResource {
 			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.USER);
 			User user = User.getWithClaims(claims);
 			
-			String assetDir = config.getAssetDirectory();
-			String imageDir = assetDir + "/images";
+			String imageDir = config.getImageDirectory();
 			
 			File folder = new File(imageDir);
 			File[] listOfFiles = folder.listFiles();
-			Arrays.sort(listOfFiles, Comparator.comparing(File::getName));
+			if (listOfFiles != null && listOfFiles.length > 0) {
+				Arrays.sort(listOfFiles, Comparator.comparing(File::getName));
+			}
 
-			String rendered = renderer.render("gallery.ad", new FileListWrapper(user, listOfFiles)).toString();
+			String rendered = renderer.render("gallery.ad",
+					new FileListWrapper(user, config.getImageRoot(), listOfFiles)).toString();
 			return Response.ok().entity(rendered).cookie(authUtils.generateCookie(user)).build();
 		} else {
 			Flash.add(Flash.Code.ERROR, "Something went wrong generating version data.");
 			return new RedirectResponse(Pages.HOME_PAGE).build();
 		}
 	}
-	
-
 	
 	@GET
 	@Produces("text/html")

@@ -100,7 +100,7 @@ button:/previewKey/${question.questionId}[method="get",label="Preview Key",targe
 ++++
 <#if ! question.isSuperseded()>
 ++++
-button:/updateQuestion/${question.questionId}[method="get",label="Edit/Update Question"]
+button:/updateQuestion/${question.questionId}[method="get",label="Edit Question"]
 ++++
 <script>function deleteQuestion() {
 	var questionId = prompt("Question ID");

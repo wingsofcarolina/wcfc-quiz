@@ -50,7 +50,6 @@ import org.wingsofcarolina.quiz.authentication.Privilege;
 import org.wingsofcarolina.quiz.common.Flash;
 import org.wingsofcarolina.quiz.common.Pages;
 import org.wingsofcarolina.quiz.common.Templates;
-import org.wingsofcarolina.quiz.domain.Answer;
 import org.wingsofcarolina.quiz.domain.Attribute;
 import org.wingsofcarolina.quiz.domain.Category;
 import org.wingsofcarolina.quiz.domain.Question;
@@ -78,13 +77,11 @@ import io.jsonwebtoken.Jws;
 @Path("/api")
 public class QuizAPI {
 	private static final Logger LOG = LoggerFactory.getLogger(QuizAPI.class);
-	@SuppressWarnings("unused")
 	private QuizConfiguration config;
 	private AuthUtils authUtils;
 	private ObjectMapper objectMapper;
 	private String dataDir;
 	private String questionDir;
-	private String assetDir;
 	private String imageDir;
 	private Renderer renderer;
 	private SimpleDateFormat dateFormatGmt;
@@ -94,9 +91,9 @@ public class QuizAPI {
 		authUtils = new AuthUtils();
 		objectMapper = new ObjectMapper();
 		dataDir = config.getDataDirectory();
-		assetDir = config.getAssetDirectory();
+		config.getAssetDirectory();
+		imageDir = config.getImageDirectory();
 		questionDir = dataDir + "/questions";
-		imageDir = assetDir + "/images";
 		renderer = new Renderer(config);
 
 		// Get the startup date/time format in GMT
@@ -583,6 +580,11 @@ public class QuizAPI {
 				// Only save attachments with real names.
 				if (attachment.isEmpty()) {
 					attachment = "NONE";
+				}
+
+				// Then see if the attachment has changed
+				if ( ! attachment.equals(original.getAttachment())) {
+					changed = true;
 				}
 				
 				// Update user-changeable details, detecting changes

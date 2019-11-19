@@ -157,7 +157,7 @@ public class PDFGenerator {
 
 		// Add an image attachment, if one is requested
 		if (question.getAttachment() != null && ! question.getAttachment().equals("NONE")) {
-			String imageDir = context.getConfiguration().getAssetDirectory() + "/images/";
+			String imageDir = context.getConfiguration().getImageDirectory() + "/";
 		    try {
 				Image image = new Image(ImageDataFactory.create(imageDir + question.getAttachment()));
 				cell = new Cell();

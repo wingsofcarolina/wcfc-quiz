@@ -13,6 +13,8 @@ public class QuizConfiguration extends Configuration {
 	@JsonProperty String mongodb;
 	@JsonProperty String templates;
 	@JsonProperty String dataDirectory;
+	@JsonProperty String imageDirectory;
+	@JsonProperty String imageRoot;
 	@JsonProperty String assetDirectory;
 	@JsonProperty String mode;
 	@JsonProperty String slackTarget;
@@ -47,10 +49,14 @@ public class QuizConfiguration extends Configuration {
 		return dataDirectory;
 	}
 
-	public void setDataDirectory(String dataDirectory) {
-		this.dataDirectory = dataDirectory;
+	public String getImageDirectory() {
+		return imageDirectory;
 	}
-
+	
+	public String getImageRoot() {
+		return imageRoot;
+	}
+	
 	public String getMode() {
 		return mode;
 	}
