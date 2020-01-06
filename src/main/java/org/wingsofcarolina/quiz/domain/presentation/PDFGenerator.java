@@ -131,7 +131,7 @@ public class PDFGenerator {
 	}
 	
 	private IBlockElement addQuestion(Integer index, Question question) {
-		char[] characters = { 'A', 'B', 'C', 'D', 'E' };
+		char[] characters = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L' };
 		Float CELL_WIDTH = 30.0f;
 
 		Table table = new Table(new float[] {1, 2});

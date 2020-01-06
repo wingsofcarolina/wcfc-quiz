@@ -1,6 +1,7 @@
 = Edit Question
 
 <#setting number_format="#0">
+<#assign seq = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L" ]>
 
 <#if user.isAdmin()>
 navbar:${user.userId}[buttons="HomeNavButton;ViewNavButton;AddNavButton;EditNavButton;ProfileNavButton", active="EditNavButton"]
@@ -100,6 +101,17 @@ function show_hide_checkboxes(value) {
         cols[0].style.display = do_show ? '' : 'none';
     }
 }
+
+function add_row() {
+        var alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        var table = document.getElementById('answerlist');
+        var count = table.rows.length;
+        console.log("Current number of rows ...." + count);
+        var row = table.insertRow(-1);
+        row.appendChild(document.createElement("td")).innerHTML = "<input type=\"checkbox\" value=" + count + " name=\"correct\" onclick=setCorrect(this)>";
+        row.appendChild(document.createElement("td")).innerHTML = alphabet.charAt(count);
+        row.appendChild(document.createElement("td")).innerHTML = "<textarea name=\"answer\" rows=\"2\" cols=\"70\"></textarea>";       
+}
 </script>
 
 <form name="question" action="/api/updateQuestion" method="post">
@@ -127,18 +139,14 @@ Fill in the Blank
 <tr><td></td><td><i>Control-click to select multiple attributes.</td></tr>
 
 <tr><td colspan=2><hr></td></tr>
-<tr><td valign="top" id="answerLabel">Answers</br>(Max 5)</br></br>Select</br>correct</br>answer.</td><td>
+<tr><td valign="top" id="answerLabel">Answers</br>(Max 5)</br></br>Select</br>correct</br>answer.</p><button type="button" onclick="add_row()">Add</button></td><td>
 	<table id="answerlist">
-	<tr><td><input type="checkbox" value=0 name="correct" onclick=setCorrect(this)<#if question.getAnswerAt(1).isCorrect()> checked value="true"<#else></#if>></td>
-	<td>A</td><td><textarea name="answer" rows="2" cols="70">${question.getAnswerAt(1).getAnswer()}</textarea></td></tr>
-	<tr><td><input type="checkbox" value=1 name="correct" onclick=setCorrect(this)<#if question.getAnswerAt(2).isCorrect()> checked value="true"<#else></#if>></td>
-	<td>B</td><td><textarea name="answer" rows="2" cols="70">${question.getAnswerAt(2).getAnswer()}</textarea></td></tr>
-	<tr><td><input type="checkbox" value=2 name="correct" onclick=setCorrect(this)<#if question.getAnswerAt(3).isCorrect()> checked value="true"<#else></#if>></td>
-	<td>C</td><td><textarea name="answer" rows="2" cols="70">${question.getAnswerAt(3).getAnswer()}</textarea></td></tr>
-	<tr><td><input type="checkbox" value=3 name="correct" onclick=setCorrect(this)<#if question.getAnswerAt(4).isCorrect()> checked value="true"<#else></#if>></td>
-	<td>D</td><td><textarea name="answer" rows="2" cols="70">${question.getAnswerAt(4).getAnswer()}</textarea></td></tr>
-	<tr><td><input type="checkbox" value=4 name="correct" onclick=setCorrect(this)<#if question.getAnswerAt(5).isCorrect()> checked value="true"<#else></#if>></td>
-	<td>E</td><td><textarea name="answer" rows="2" cols="70">${question.getAnswerAt(5).getAnswer()}</textarea></td></tr>
+	<#assign index = 0>
+	<#list question.getAnswers() as answer>
+	<tr><td><input type="checkbox" value=${index} name="correct" onclick=setCorrect(this)<#if answer.isCorrect()> checked value="true"<#else></#if>></td>
+	<td>${seq[index]}</td><td><textarea name="answer" rows="2" cols="70">${answer.getAnswer()}</textarea></td></tr>
+	<#assign index=index+1>
+	</#list>
 	</table>
 </td></tr>
 <#if question.getAttachment()??>

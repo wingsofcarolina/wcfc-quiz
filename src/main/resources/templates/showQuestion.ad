@@ -1,7 +1,7 @@
 = Show Question
 
 <#setting number_format="#0">
-<#assign seq = ["A", "B", "C", "D", "E"]>
+<#assign seq = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L" ]>
 
 <#if user.isAdmin()>
 navbar:${user.userId}[buttons="HomeNavButton;ViewNavButton;AddNavButton;EditNavButton;ProfileNavButton", active="ViewNavButton"]
@@ -66,16 +66,12 @@ ${att}
 
 <tr><td valign="top" id="answerLabel">Answers</td><td>
 	<table id="answerlist" width=100%>
-	<tr><td colspan=2 valign="top" width=5%>A</td>
-	<td>${question.getAnswerAt(1).getAnswerAsHtml()}</td></tr>
-	<tr><td colspan=2 valign="top">B</td>
-	<td>${question.getAnswerAt(2).getAnswerAsHtml()}</td></tr>
-	<tr><td colspan=2 valign="top">C</td>
-	<td>${question.getAnswerAt(3).getAnswerAsHtml()}</td></tr>
-	<tr><td colspan=2 valign="top">D</td>
-	<td>${question.getAnswerAt(4).getAnswerAsHtml()}</td></tr>
-	<tr><td colspan=2 valign="top">E</td>
-	<td>${question.getAnswerAt(5).getAnswerAsHtml()}</td></tr>
+	<#assign index = 0>
+	<#list question.getAnswers() as answer>
+	<tr><td colspan=2 valign="top" width=5%>${seq[index]}</td>
+	<td>${answer.getAnswerAsHtml()}</td></tr>
+	<#assign index=index+1>
+	</#list>
 	</table>
 </td></tr>
 

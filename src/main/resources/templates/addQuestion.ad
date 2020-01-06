@@ -94,6 +94,17 @@ function show_hide_checkboxes(value) {
         cols[0].style.display = do_show ? '' : 'none';
     }
 }
+
+function add_row() {
+        var alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        var table = document.getElementById('answerlist');
+        var count = table.rows.length;
+        console.log("Current number of rows ...." + count);
+        var row = table.insertRow(-1);
+        row.appendChild(document.createElement("td")).innerHTML = "<input type=\"checkbox\" value=" + count + " name=\"correct\" onclick=setCorrect(this)>";
+        row.appendChild(document.createElement("td")).innerHTML = alphabet.charAt(count);
+        row.appendChild(document.createElement("td")).innerHTML = "<textarea name=\"answer\" rows=\"2\" cols=\"70\"></textarea>";       
+}
 </script>
 
 <form name="question" action="/api/addQuestion" method="post">
@@ -120,7 +131,7 @@ function show_hide_checkboxes(value) {
 <tr><td valign="top">Difficulty</td><td><select id="difficulty" name="difficulty" multiple="" class="form-control select-checkbox" size="3"></select></td></tr>
 <tr><td valign="top">Attributes</td><td><select id="attributes" name="attributes" multiple="" class="form-control select-checkbox" size="10"></select></td></tr>
 <tr><td></td><td><i>Control-click above to select multiple attributes.</td></tr>
-<tr><td valign="top" id="answerLabel">Answers</br>(Max 5)</br></br>Select</br>correct</br>answer.</td><td>
+<tr><td valign="top" id="answerLabel">Answers</br>(Max 5)</br></br>Select</br>correct</br>answer.</p><button type="button" onclick="add_row()">Add</button></td><td>
 	<table id="answerlist">
 	<tr><td><input type="checkbox" value=0 name="correct" onclick=setCorrect(this)></td><td>A</td><td><textarea name="answer" rows="2" cols="70"></textarea></td></tr>
 	<tr><td><input type="checkbox" value=1 name="correct" onclick=setCorrect(this)></td><td>B</td><td><textarea name="answer" rows="2" cols="70"></textarea></td></tr>
