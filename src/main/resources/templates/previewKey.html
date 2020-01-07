@@ -21,20 +21,18 @@ ${attribute}&nbsp;
 </#list>
 }</i></p>
 
+<#if ! question.isFillInTheBlank()>
 <#assign index = 0>
 <#list question.answers as answer>
-<#if question.isFillInTheBlank()>
-${seq[index]} : ${answer.answer}</br>
-<#else>
 <#if answer.isCorrect()>
 <strong>${seq[index]}</strong> : ${answer.getAnswerAsHtml()}</br>
 <#else>
 ${seq[index]} : ${answer.answer}</br>
 </#if>
-</#if>
 <#assign index=index+1>
 </#list>
 </p>
+</#if>
 
 <#assign index = 0>
 <#list question.answers as answer>

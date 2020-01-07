@@ -175,11 +175,13 @@ Fill in the Blank
 <tr><td valign="top" id="answerLabel">Answers</br>(Max 5)</br></br>Select</br>correct</br>answer.</p><button type="button" onclick="add_row()">Add</button></td><td>
 	<table id="answerlist">
 	<#assign index = 0>
+	<#if question.getAnswers()??>
 	<#list question.getAnswers() as answer>
 	<tr><td><input type="checkbox" value=${index} name="correct" onclick=setCorrect(this)<#if answer.isCorrect()> checked value="true"<#else></#if>></td>
 	<td>${seq[index]}</td><td><textarea name="answer" rows="2" cols="70">${answer.getAnswer()}</textarea></td></tr>
 	<#assign index=index+1>
 	</#list>
+	</#if>
 	</table>
 </td></tr>
 <#if question.getAttachment()??>

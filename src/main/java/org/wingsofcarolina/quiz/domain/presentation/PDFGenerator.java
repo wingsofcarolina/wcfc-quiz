@@ -173,38 +173,40 @@ public class PDFGenerator {
 			}
 		}
 
-		int aIndex = 0;
-		if (question.getAnswers() == null || question.getAnswers().size() == 0) {
-			cell = new Cell();
-			cell.setBorder(Border.NO_BORDER);
-			cell.setTextAlignment(TextAlignment.RIGHT);
-			cell.add(new Paragraph("\n"));
-			cell.setWidth(CELL_WIDTH);
-			cell.setPaddingTop(0);
-			table.addCell(cell);
-			
-			cell = new Cell();
-			cell.setBorder(Border.NO_BORDER);
-			cell.setFontSize(12);
-			graph.add(new Text("This question has no answers at this time."));
-			cell.add(graph);
-			table.addCell(cell);
-		} else {
-			for (Answer answer : question.getAnswers()) {
+		if (question.isMultipleChoice()) {
+			int aIndex = 0;
+			if (question.getAnswers() == null || question.getAnswers().size() == 0) {
 				cell = new Cell();
 				cell.setBorder(Border.NO_BORDER);
 				cell.setTextAlignment(TextAlignment.RIGHT);
-				cell.add(new Paragraph(characters[aIndex] + " : "));
+				cell.add(new Paragraph("\n"));
 				cell.setWidth(CELL_WIDTH);
 				cell.setPaddingTop(0);
 				table.addCell(cell);
 				
 				cell = new Cell();
 				cell.setBorder(Border.NO_BORDER);
-				cell.add(answer.getAnswerAsIText());
-				cell.setPaddingTop(0);
+				cell.setFontSize(12);
+				graph.add(new Text("This question has no answers at this time."));
+				cell.add(graph);
 				table.addCell(cell);
-				aIndex++;
+			} else {
+				for (Answer answer : question.getAnswers()) {
+					cell = new Cell();
+					cell.setBorder(Border.NO_BORDER);
+					cell.setTextAlignment(TextAlignment.RIGHT);
+					cell.add(new Paragraph(characters[aIndex] + " : "));
+					cell.setWidth(CELL_WIDTH);
+					cell.setPaddingTop(0);
+					table.addCell(cell);
+					
+					cell = new Cell();
+					cell.setBorder(Border.NO_BORDER);
+					cell.add(answer.getAnswerAsIText());
+					cell.setPaddingTop(0);
+					table.addCell(cell);
+					aIndex++;
+				}
 			}
 		}
 		return table;

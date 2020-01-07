@@ -64,10 +64,13 @@ public class QuestionDetails {
 		if ( ! attachment.equals(details.getAttachment())) return -1;
 
 		List<Answer> newAnswers = details.getAnswers();
-		if (answers.size() != newAnswers.size()) return -1;
-		
-		for (int i = 0; i < answers.size(); i++) {
-			if (answers.get(i).compareTo(newAnswers.get(i)) != 0) return -1;
+		if (answers != null && newAnswers != null) {
+			if (answers.size() != newAnswers.size()) return -1;
+			for (int i = 0; i < answers.size(); i++) {
+				if (answers.get(i).compareTo(newAnswers.get(i)) != 0) return -1;
+			}
+		} else {
+			return -1;
 		}
 		
 		return 0;
