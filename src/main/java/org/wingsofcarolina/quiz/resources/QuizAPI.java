@@ -587,6 +587,11 @@ public class QuizAPI {
 					changed = true;
 				}
 				
+				if ( ! categoryName.equals(original.getCategory().toString())) {
+					original.setCategory(Category.valueOf(categoryName.toUpperCase()));
+					changed = true;
+				}
+				
 				// Update user-changeable details, detecting changes
 				QuestionDetails details = new QuestionDetails(question, discussion, references, answers, correctAnswer, attachment);
 				if (details.compareTo(original.getDetails()) != 0) {
@@ -882,7 +887,7 @@ public class QuizAPI {
 	@Path("attributes/{category}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response attributes(@PathParam("category") String category, @QueryParam("attribute") String attribute) {
-		List<String> attributes = Attribute.attributes(category);
+		List<String> attributes = Attribute.attributes(category.toUpperCase());
 		return Response.ok().entity(attributes).build();
 	}
 

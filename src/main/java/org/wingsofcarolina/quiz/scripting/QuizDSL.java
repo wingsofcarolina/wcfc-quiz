@@ -114,7 +114,7 @@ public abstract class QuizDSL extends Script {
 				
 				// Add the question to the section if it has not been used before and
 				// isn't conflicting with a mutually exclusive question already selected
-				if ( ! excluded(entity) && !alreadySelected(entity)) {
+				if ( ! excluded(entity) && ! alreadySelected(entity) && ! missingAnswers(entity)) {
 					// Add it and keep track of the count
 					section.add(entity);
 					sectionCount--;
@@ -219,15 +219,7 @@ public abstract class QuizDSL extends Script {
     	for (Integer id : questionIds) {
     		Question question = Question.getByQuestionId(new Long(id));
     		if (question != null) {
-    			if (question.getCategory().equals(context.getQuiz().getCategory())) {
-    				questions.add(question);
-    			} else {
-    				if (context.getTestRun()) {
-	            		System.out.println("<br>ERROR : Requested question " + id + " does not match quiz category " + context.getQuiz().getCategory());
-    				} else {
-    					LOG.info("Requested question {} does not match quiz category {}", id, context.getQuiz().getCategory());
-    				}
-    			}
+    			questions.add(question);
     		} else {
     			if (context.getTestRun()) {
             		System.out.println("<br>ERROR : Requested question " + id + " not found");
@@ -314,6 +306,17 @@ public abstract class QuizDSL extends Script {
 		}
 
     	return false;
+    }
+    
+    // Determine if the question being considered is absent any answers. It
+    // should have never made it into the database, but as a double-check
+    // lets at least insure one of those never makes it out the door.
+    private boolean missingAnswers(Question candidate) {
+    	if (candidate.getAnswers() == null || candidate.getAnswers().size() == 0) {
+    		return true;
+    	} else {
+    		return false;
+    	}
     }
     
     // Determine if the candidate question should be rejected due to a

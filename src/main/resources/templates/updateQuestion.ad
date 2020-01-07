@@ -63,6 +63,19 @@ function loadAttributes()
 	});
 }
 
+function clearAttributes(sel) {
+	var url = "/api/attributes/" + sel;
+    var $el = $("#attributes");
+	$el.empty(); // remove old options
+	$.getJSON( url , function( data ) {
+		$.each(data, function(key, value) {
+		  $el.append($("<option></option>")
+		     .attr("key", value).text(value));
+		});
+	});
+	clearDifficultyAttributes();
+}
+
 function loadDifficultyAttributes()
 {
 	var url = "/api/question/difficulty/${question.questionId}";
@@ -77,6 +90,19 @@ function loadDifficultyAttributes()
 		    $el.append($("<option></option>")
 		       .attr("key", value).text(value.label));
 		  }
+		});
+	});
+}
+
+function clearDifficultyAttributes()
+{
+	var url = "/api/difficulty";
+    var $el = $("#difficulty");
+	$el.empty(); // remove old options
+	$.getJSON( url , function( data ) {
+		$.each(data, function(key, value) {
+		  $el.append($("<option></option>")
+		     .attr("key", value).text(value));
 		});
 	});
 }
@@ -117,7 +143,6 @@ function add_row() {
 <form name="question" action="/api/updateQuestion" method="post">
 <input type="hidden" name="questionId" value="${question.questionId}" />
 <input type="hidden" name="type" value="${question.type}" />
-<input type="hidden" name="category" value="${question.category}" />
 
 <table>
 <tr><td>Question ID</td><td><strong>${question.questionId}</strong></td></tr>
@@ -128,7 +153,15 @@ Multiple Choice
 Fill in the Blank
 </#if>
 </strong></td></tr>
-<tr><td>Category</td><td><strong>${question.category}</strong></td></tr>
+<tr><td>Category</td><td>
+<select id="q-category" name="category" onchange=clearAttributes(this.value)>
+  <option value="far"<#if question.category == "FAR"> selected</#if>>FAR 61/91, Pre-Solo</option>
+  <option value="sop"<#if question.category == "SOP"> selected</#if>>SOP/FS</option>
+  <option value="c152"<#if question.category == "C152"> selected</#if>>C-152</option>
+  <option value="c172"<#if question.category == "C172"> selected</#if>>C-172 Skyhawk</option>
+  <option value="pa28"<#if question.category == "PA28"> selected</#if>>PA-28 Warrior</option>
+  <option value="m20j"<#if question.category == "M20J"> selected</#if>>M20J Mooney</option>
+</select></td></tr>
 <tr><td valign="top">Question</td><td><textarea name="question" rows="4" cols="70">${question.question}</textarea></td></tr>
 <tr><td valign="top">Discussion</td><td><textarea name="discussion" rows="4" cols="70">${question.discussion}</textarea></td></tr>
 <tr><td valign="top">References</td><td><textarea name="references" rows="2" cols="70">${question.references}</textarea></td></tr>

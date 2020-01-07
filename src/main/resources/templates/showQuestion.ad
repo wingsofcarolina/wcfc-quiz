@@ -64,6 +64,7 @@ ${att}
 
 </td></tr>
 
+<#if question.getAnswers()??>
 <tr><td valign="top" id="answerLabel">Answers</td><td>
 	<table id="answerlist" width=100%>
 	<#assign index = 0>
@@ -74,6 +75,9 @@ ${att}
 	</#list>
 	</table>
 </td></tr>
+<#else>
+<tr><td colspan=2><strong>This question has no answers, fix it.</strong></td></tr>
+</#if>
 
 <#if question.isMultipleChoice()>
 <tr><td colspan=2>

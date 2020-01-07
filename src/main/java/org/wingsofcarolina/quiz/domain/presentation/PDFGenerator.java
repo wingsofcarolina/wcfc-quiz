@@ -177,9 +177,16 @@ public class PDFGenerator {
 		if (question.getAnswers() == null || question.getAnswers().size() == 0) {
 			cell = new Cell();
 			cell.setBorder(Border.NO_BORDER);
+			cell.setTextAlignment(TextAlignment.RIGHT);
+			cell.add(new Paragraph("\n"));
+			cell.setWidth(CELL_WIDTH);
+			cell.setPaddingTop(0);
+			table.addCell(cell);
+			
+			cell = new Cell();
+			cell.setBorder(Border.NO_BORDER);
 			cell.setFontSize(12);
 			graph.add(new Text("This question has no answers at this time."));
-			graph.add(new Text("Until answers are added, this question can NOT be saved in the database."));
 			cell.add(graph);
 			table.addCell(cell);
 		} else {
