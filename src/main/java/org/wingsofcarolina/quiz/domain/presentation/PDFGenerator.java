@@ -8,6 +8,7 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
+import java.util.List;
 
 import org.eclipse.jetty.server.handler.ContextHandler.Context;
 import org.slf4j.Logger;
@@ -76,6 +77,15 @@ public class PDFGenerator {
 		}
 	}
 
+
+	public ByteArrayInputStream generate(List<Question> questions) throws QuizBuildException, URISyntaxException, MalformedURLException, IOException {
+		if (questions != null) {
+			return generateQuestion(questions);
+		} else {
+			throw new QuizBuildException("Null pointer for question entity");
+		}
+	}
+	
 	public ByteArrayInputStream generateQuestion(Question question) throws QuizBuildException, URISyntaxException, MalformedURLException, IOException {
 		// Create the document
 		ByteArrayOutputStream inMemoryStream = new ByteArrayOutputStream();
@@ -100,7 +110,34 @@ public class PDFGenerator {
 		return new ByteArrayInputStream(inMemoryStream.toByteArray());
 
 	}
-	
+
+	public ByteArrayInputStream generateQuestion(List<Question> questions) throws QuizBuildException, URISyntaxException, MalformedURLException, IOException {
+		// Create the document
+		ByteArrayOutputStream inMemoryStream = new ByteArrayOutputStream();
+		PdfWriter writer = new PdfWriter(inMemoryStream);
+		PdfDocument pdf = new PdfDocument(writer);
+		Document document = new Document(pdf);
+		document.setBottomMargin(110.0f);
+		document.setFont(normal).setFontSize(10);
+		
+		SolidLine line = new SolidLine(1f);
+		LineSeparator ls = new LineSeparator(line);
+		ls.setMargin(5);
+		document.add(ls);
+
+		int i = 1;
+		for (Question question : questions) {
+			document.add(addQuestion(i++, question));
+			document.add(ls);
+		}
+		
+		// Finalize the document
+		document.close();
+
+		return new ByteArrayInputStream(inMemoryStream.toByteArray());
+
+	}
+
 	public ByteArrayInputStream generateQuiz(Quiz quiz) throws QuizBuildException, URISyntaxException, MalformedURLException, IOException {		
 		// Create the document
 		ByteArrayOutputStream inMemoryStream = new ByteArrayOutputStream();

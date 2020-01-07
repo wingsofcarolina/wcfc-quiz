@@ -42,15 +42,21 @@ function query(msg, redirect) {
 		window.location.href = redirect;
 	}
 }
+function do_click(href) {
+	let a= document.createElement('a');
+	a.target= '_blank';
+	a.href= href;
+	a.click();
+}
 </script>
 <b>Quiz category reports:</b><br>
 <ul>
-<li><button onclick="window.location.href = 'chart/FAR';">Chart</button> &nbsp; <a href="report/FAR">FAR Questions</a> 
-<li><button onclick="window.location.href = 'chart/SOP';">Chart</button> &nbsp; <a href="report/SOP">SOP Questions</a>
-<li><button onclick="window.location.href = 'chart/C152';">Chart</button> &nbsp; <a href="report/C152">Cessna 152 Questions</a>
-<li><button onclick="window.location.href = 'chart/C172';">Chart</button> &nbsp; <a href="report/C172">Cessna 172 Questions</a>
-<li><button onclick="window.location.href = 'chart/PA28';">Chart</button> &nbsp; <a href="report/PA28">Warrior Questions</a>
-<li><button onclick="window.location.href = 'chart/M20J';">Chart</button> &nbsp; <a href="report/M20J">Mooney Questions</a>
+<li><button onclick="window.location.href = 'chart/FAR';">Chart</button> &nbsp; <button onclick="do_click('all/FAR');">All</button> &nbsp; <a href="report/FAR">FAR Questions</a> 
+<li><button onclick="window.location.href = 'chart/SOP';">Chart</button> &nbsp; <button onclick="do_click('all/SOP');">All</button> &nbsp; <a href="report/SOP">SOP Questions</a>
+<li><button onclick="window.location.href = 'chart/C152';">Chart</button> &nbsp; <button onclick="do_click('all/C152');">All</button> &nbsp; <a href="report/C152">Cessna 152 Questions</a>
+<li><button onclick="window.location.href = 'chart/C172';">Chart</button> &nbsp; <button onclick="do_click('all/C172');">All</button> &nbsp; <a href="report/C172">Cessna 172 Questions</a>
+<li><button onclick="window.location.href = 'chart/PA28';">Chart</button> &nbsp; <button onclick="do_click('all/PA28');">All</button> &nbsp; <a href="report/PA28">Warrior Questions</a>
+<li><button onclick="window.location.href = 'chart/M20J';">Chart</button> &nbsp; <button onclick="do_click('all/M20J');">All</button> &nbsp; <a href="report/M20J">Mooney Questions</a>
 </ul>
 
 <b>Question management :</b>

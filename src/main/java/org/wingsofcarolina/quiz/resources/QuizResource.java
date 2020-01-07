@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.text.SimpleDateFormat;
@@ -286,7 +287,7 @@ public class QuizResource {
 	
 	@GET
 	@Path("previewQuestion/{id}")
-	@Produces("text/html")
+	@Produces("application/pdf")
 	public Response previewQuestion(@CookieParam("quiz.token") Cookie cookie,
 			@PathParam("id") Long questionId) throws Exception, AuthenticationException {
 		// Render the preview of the question
@@ -305,7 +306,6 @@ public class QuizResource {
 			}
 		} else {
 			return new RedirectResponse(Pages.LOGIN_PAGE).build();
-
 		}
 	}
 	
@@ -426,7 +426,33 @@ public class QuizResource {
 			return new RedirectResponse(Pages.LOGIN_PAGE).build();
 		}
 	}
-	
+
+	@GET
+	@Path("all/{category}")
+	@Produces("application/pdf")
+	public Response allQuestionsInCategory(@CookieParam("quiz.token") Cookie cookie,
+			@PathParam("category") String category) throws AuthenticationException, IOException, QuizBuildException, URISyntaxException {
+
+		if (cookie != null) {
+			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.USER);
+			User user = User.getWithClaims(claims);
+			Category cat = Category.valueOf(category);
+			List<Question> questions = Question.getSelected(cat);
+			
+			if (questions != null) {
+				PDFGenerator generator = new PDFGenerator(new QuizContext(new Quiz(), config));
+		
+				ByteArrayInputStream inputStream = generator.generate(questions);
+				return Response.ok().type("application/pdf").entity(inputStream).build();
+			} else {
+				Flash.add(Flash.Code.ERROR, "Questions in requested category \"" + category + "\" not found.");
+				return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
+			}
+		} else {
+			return new RedirectResponse(Pages.LOGIN_PAGE).build();
+		}
+	}
+
 	@GET
 	@Path("recipe/{quiz}")
 	@Produces("text/html")
