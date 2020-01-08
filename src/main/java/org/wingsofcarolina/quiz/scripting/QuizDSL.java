@@ -114,7 +114,7 @@ public abstract class QuizDSL extends Script {
 				
 				// Add the question to the section if it has not been used before and
 				// isn't conflicting with a mutually exclusive question already selected
-				if ( ! excluded(entity) && ! alreadySelected(entity) && ! missingAnswers(entity)) {
+				if ( ! excluded(entity) && ! alreadySelected(entity) && ! missingAnswers(entity) && ! entity.isQuarantined()) {
 					// Add it and keep track of the count
 					section.add(entity);
 					sectionCount--;
@@ -126,6 +126,10 @@ public abstract class QuizDSL extends Script {
 							entity.save();
 						}
 					}
+				} else {
+		    		if (context.getTestRun()) {
+		    			System.out.println("<br>Rejected " + entity.getQuestionId() + "because it is excluded/empty/quarantined/already-selected.");
+		    		}
 				}
 			}
     	} else {

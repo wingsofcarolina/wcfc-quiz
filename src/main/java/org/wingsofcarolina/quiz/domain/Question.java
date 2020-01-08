@@ -173,6 +173,10 @@ public class Question {
 		return quarantined;
 	}
 
+	public boolean isQuarantined() {
+		return quarantined;
+	}
+
 	public void setQuarantined(Boolean quarantined) {
 		this.quarantined = quarantined;
 	}
