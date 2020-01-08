@@ -145,7 +145,10 @@ function add_row() {
 <input type="hidden" name="type" value="${question.type}" />
 
 <table>
-<tr><td>Question ID</td><td><strong>${question.questionId}</strong></td></tr>
+<tr><td width=10%>ID</td><td><strong>${question.questionId}
+<#if question.getQuarantined()>&nbsp;<font color="red">Quarantined!</font></#if>
+</strong>
+</td></tr>
 <tr><td>Type</td><td><strong>
 <#if question.type == "CHOICE">
 Multiple Choice
@@ -189,6 +192,11 @@ Fill in the Blank
 <#else>
 <tr><td valign="top">Attachment</td><td><input id="attachment" name="attachment" value="NONE" size=50></input></td></tr>
 </#if>
+<tr><td valign="top">Quarantined</td>
+<td>
+  <input type="radio" name="quarantined" value="true" <#if question.getQuarantined()>checked</#if>>True
+  <input type="radio" name="quarantined" value="false" <#if ! question.getQuarantined()>checked</#if>> False
+</td></tr>
 </table>
 </p>
 <input type="submit" value="Update Question"><p>

@@ -407,6 +407,23 @@ public class QuizResource {
 	}
 	
 	@GET
+	@Path("quarantinedReport")
+	@Produces("text/html")
+	public Response quarantinedReport(@CookieParam("quiz.token") Cookie cookie) throws AuthenticationException, IOException {
+
+		if (cookie != null) {
+			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.USER);
+			User user = User.getWithClaims(claims);
+			List<Question> questions = Question.getAllQuarantined();
+			QuestionListWrapper wrapper = new QuestionListWrapper(user, questions);
+			String output = renderer.render("quarantinedReport.ad", wrapper).toString();
+			return Response.ok().entity(output).cookie(authUtils.generateCookie(user)).build();
+		} else {
+			return new RedirectResponse(Pages.LOGIN_PAGE).build();
+		}
+	}
+
+	@GET
 	@Path("chart/{category}")
 	@Produces("text/html")
 	public Response chartCategory(@CookieParam("quiz.token") Cookie cookie,
@@ -428,7 +445,7 @@ public class QuizResource {
 	}
 
 	@GET
-	@Path("all/{category}")
+	@Path("allQuestions/{category}")
 	@Produces("application/pdf")
 	public Response allQuestionsInCategory(@CookieParam("quiz.token") Cookie cookie,
 			@PathParam("category") String category) throws AuthenticationException, IOException, QuizBuildException, URISyntaxException {

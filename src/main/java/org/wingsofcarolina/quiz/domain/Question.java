@@ -33,6 +33,7 @@ public class Question {
 	private Long questionId;
 	private Boolean deployed = false;
 	private Boolean deleted = false;
+	private Boolean quarantined = false;
 	private long supersededBy = -1;
 	private Date createdDate = new Date();
 	@JsonIgnore
@@ -168,6 +169,14 @@ public class Question {
 		this.deleted = deleted;
 	}
 
+	public Boolean getQuarantined() {
+		return quarantined;
+	}
+
+	public void setQuarantined(Boolean quarantined) {
+		this.quarantined = quarantined;
+	}
+
 	public long getSupersededBy() {
 		return supersededBy;
 	}
@@ -294,6 +303,11 @@ public class Question {
 		return questionDao.getByQuestionId(id);
 	}
 
+	public static List<Question> getAllQuarantined() {
+		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
+		return questionDao.getAllQuarantined();
+	}
+	
 	@SuppressWarnings("unchecked")
 	public void save() {
 		Persistence.instance().get(Question.class).save(this);

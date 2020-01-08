@@ -75,7 +75,13 @@ public class QuestionDAO extends BasicDAO<Question, ObjectId> {
 		return query.order("questionid").asList();
 	}
 
+	public List<Question> getAllQuarantined() {
+		List<Question> result = getDatastore().find(Question.class).filter("quarantined = ", true).asList();
+		return result;
+	}
+	
 	public void drop() {
 		getDatastore().getCollection(Question.class).drop();
 	}
+
 }

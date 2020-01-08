@@ -524,7 +524,8 @@ public class QuizAPI {
 	@POST
 	@Path("updateQuestion")
 	@Produces("text/html")
-	public Response updateQuestion(@CookieParam("quiz.token") Cookie cookie, @FormParam("questionId") Long questionId,
+	public Response updateQuestion(@CookieParam("quiz.token") Cookie cookie,
+			@FormParam("questionId") Long questionId, @FormParam("quarantined") Boolean quarantined, 
 			@FormParam("type") String typeName, @FormParam("category") String categoryName,
 			@FormParam("question") String question, @FormParam("discussion") String discussion,
 			@FormParam("references") String references, @FormParam("difficulty") String difficulty,
@@ -584,6 +585,12 @@ public class QuizAPI {
 
 				// Then see if the attachment has changed
 				if ( ! attachment.equals(original.getAttachment())) {
+					changed = true;
+				}
+				
+				// See if quarantined status has changed
+				if ( original.getQuarantined() != quarantined) {
+					original.setQuarantined(quarantined);
 					changed = true;
 				}
 				
