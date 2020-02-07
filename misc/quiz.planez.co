@@ -14,18 +14,18 @@
 # Default server configuration
 #
 server {
-	listen 80;
-	listen [::]:80;
+	### listen 80;
+	### listen [::]:80;
 
 	# SSL configuration
 	#
-	## listen 443 ssl default_server;
-	## listen [::]:443 ssl default_server;
+	listen 443 ssl;
+	listen [::]:443 ssl;
 
-	## ssl_certificate     /etc/letsencrypt/live/gagl.co/fullchain.pem;
-	## ssl_certificate_key /etc/letsencrypt/live/gagl.co/privkey.pem;
-	## ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;
-	## ssl_ciphers         HIGH:!aNULL:!MD5;
+	ssl_certificate     /etc/letsencrypt/live/quiz.planez.co/fullchain.pem;
+	ssl_certificate_key /etc/letsencrypt/live/quiz.planez.co/privkey.pem;
+	ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;
+	ssl_ciphers         HIGH:!aNULL:!MD5;
 
 	# Debugging 
 	rewrite_log on;
