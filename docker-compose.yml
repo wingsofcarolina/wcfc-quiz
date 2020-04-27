@@ -9,7 +9,7 @@ services:
     volumes:
      - ./data/mongo:/data/db
     networks:
-     - wcfc
+     - wcfc-net
 
 networks:
-  wcfc:
+  wcfc-net:

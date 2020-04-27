@@ -16,8 +16,6 @@ import org.wingsofcarolina.quiz.domain.presentation.CmRenderer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.itextpdf.layout.element.Paragraph;
 
-import jline.internal.Log;
-
 public class Question {
     @Id
 	@JsonIgnore
