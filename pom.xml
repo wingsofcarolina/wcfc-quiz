@@ -5,7 +5,7 @@
 
 	<groupId>org.wingsofcarolina</groupId>
 	<artifactId>wcfc-quiz</artifactId>
-	<version>1.0.13</version>
+	<version>1.1.0</version>
 	<packaging>jar</packaging>
 
 	<name>wcfc-quiz</name>
@@ -22,7 +22,7 @@
 		<docker.registry>planez.co:5000</docker.registry>
 		<dockerRegistry>${docker.registry}</dockerRegistry>
 		<dockerTag>${project.version}</dockerTag>
-		<dockerImage>${dockerRegistry}/${project.artifactId}</dockerImage>
+		<dockerImage>${dockerRegistry}/${project.artifactId}:${project.version}</dockerImage>
 		<containerName>wcfc-quiz</containerName>
 	</properties>
 
@@ -118,7 +118,7 @@
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt</artifactId>
-			<version>0.6.0</version>
+			<version>0.9.0</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.mongodb.morphia/morphia -->
 		<dependency>
@@ -425,15 +425,9 @@
 							<alias>${containerName}</alias>
 							<build>
 								<dockerFileDir>${project.basedir}/docker</dockerFileDir>
-								<tags>
-									<tag>${dockerTag}</tag>
-								</tags>
 							</build>
 							<run>
 								<namingStrategy>alias</namingStrategy>
-								<ports>
-									<port>9001</port>
-								</ports>
 							</run>
 						</image>
 					</images>

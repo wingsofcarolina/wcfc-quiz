@@ -391,13 +391,26 @@ public class QuizResource {
 	@Path("report/{category}")
 	@Produces("text/html")
 	public Response reportCategory(@CookieParam("quiz.token") Cookie cookie,
-			@PathParam("category") String category) throws AuthenticationException, IOException {
+			@PathParam("category") String category,
+			@QueryParam("alphabetical") Boolean alphabetical) throws AuthenticationException, IOException {
 
+		// We only check to see if ?alphabetical is in the URL, not the value
+		// of the parameter. IF it exists at all, we sort, otherwise we don't.
+		alphabetical = alphabetical == null ? false : true;
+		
 		if (cookie != null) {
 			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.USER);
 			User user = User.getWithClaims(claims);
 			Category cat = Category.valueOf(category);
 			List<Question> questions = Question.getSelected(cat);
+			
+			// Optionally, sort alphabetically by question
+			if (alphabetical) {
+				Question[] questionArray = (Question[]) questions.toArray(new Question[0]);
+				Arrays.sort(questionArray, Comparator.comparing(Question::getQuestion));
+				questions = Arrays.asList(questionArray);
+			}
+
 			CategoryReportWrapper wrapper = new CategoryReportWrapper(user, questions, cat);
 			String output = renderer.render("reportCategory.ad", wrapper).toString();
 			return Response.ok().entity(output).cookie(authUtils.generateCookie(user)).build();
