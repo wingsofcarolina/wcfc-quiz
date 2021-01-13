@@ -17,4 +17,9 @@ public class Wrapper {
 	public User getUser() {
 		return user;
 	}
+
+	@Override
+	public String toString() {
+		return "Wrapper [user=" + user + "]";
+	}
 }
