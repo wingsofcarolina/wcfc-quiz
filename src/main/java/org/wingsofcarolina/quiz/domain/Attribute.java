@@ -38,12 +38,14 @@ public class Attribute {
 	public static String SOP_V = "SOP_V";
 	public static String SOP_VI = "SOP_VI";
 	public static String SOP_VII = "SOP_VII";
+	public static String SOP_VIII = "SOP_VIII";
+	public static String SOP_IX = "SOP_IX";
 	public static String FS = "FS";
 	public static String STUDENT = "STUDENT";
 	public static String INSTRUCTOR = "INSTRUCTOR";
 	public static String PILOT = "PILOT";
 	public static String ANY = "ANY";
-	public static List<String> sop_attributes = Arrays.asList(FAR, SOP_I, SOP_II, SOP_III, SOP_IV, SOP_V, SOP_VI, SOP_VII, FS);
+	public static List<String> sop_attributes = Arrays.asList(FAR, SOP_I, SOP_II, SOP_III, SOP_IV, SOP_V, SOP_VI, SOP_VII, SOP_VIII, SOP_IX, FS);
 	public static List<String> level_attributes = Arrays.asList(STUDENT, INSTRUCTOR, PILOT);
 	
 	public static List<String> attributes(String category) {
