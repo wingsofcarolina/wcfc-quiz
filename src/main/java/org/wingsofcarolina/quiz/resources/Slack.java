@@ -19,6 +19,7 @@ public class Slack {
 	private static Slack instance = null;
 
 	// WCFC #quiz channel : https://hooks.slack.com/services/REDACTED
+	// WCFC #notification : https://hooks.slack.com/services/REDACTED
 	// Planez.co #notification channel : https://hooks.slack.com/services/REDACTED
 	private String URL = null;
 
@@ -26,7 +27,7 @@ public class Slack {
 	
 	public Slack(QuizConfiguration config) {
 		// TODO Eventually make this configurable, but for now always go to Planez.co
-		this.URL = "https://hooks.slack.com/services/REDACTED"; // "https://hooks.slack.com/services/" + config.getSlackTarget();
+		this.URL = "https://hooks.slack.com/services/REDACTED"; // WCFC #notification
 		Slack.instance = this;
 		this.config = config;
 	}
