@@ -240,21 +240,17 @@ public class QuizResource {
 	}
 
 	@GET
-	@Path("generate")
+	@Path("generate/{recipeId}")
 	@Produces("text/html")
 	public Response generate(
-			@QueryParam("quiz") String category,
-			@QueryParam("attribute") String attribute) throws Exception {
+			@PathParam("recipeId") Long recipeId) throws Exception {
 		Quiz quiz = null;
+		Recipe recipe = Recipe.getRecipeById(recipeId);
 		
 		String output = "";
 		try {
 			// Build the quiz itself
-			if (attribute == null) {
-				quiz = new Quiz(category);
-			} else {
-				quiz = new Quiz(category, attribute);
-			}
+			quiz = new Quiz(recipe);
 			QuizContext context = new QuizContext(quiz, config);
 			quiz.build(context);
 
@@ -269,7 +265,6 @@ public class QuizResource {
 			ByteArrayInputStream inputStream = generator.generate(quiz);
 			return Response.ok().type("application/pdf").entity(inputStream).build();
 		} catch (QuizBuildException e) {
-			Recipe recipe = Recipe.getRecipeByCategoryAndAttribute(quiz.getCategory(), attribute);
 			ObjectMapper mapper = new ObjectMapper();
 			mapper.enable(SerializationFeature.INDENT_OUTPUT);
 			output = mapper.writeValueAsString(recipe);
@@ -388,10 +383,10 @@ public class QuizResource {
 	}
 	
 	@GET
-	@Path("report/{category}")
+	@Path("report/{attribute}")
 	@Produces("text/html")
-	public Response reportCategory(@CookieParam("quiz.token") Cookie cookie,
-			@PathParam("category") String category,
+	public Response report(@CookieParam("quiz.token") Cookie cookie,
+			@PathParam("attribute") String attribute,
 			@QueryParam("alphabetical") Boolean alphabetical) throws AuthenticationException, IOException {
 
 		// We only check to see if ?alphabetical is in the URL, not the value
@@ -401,8 +396,7 @@ public class QuizResource {
 		if (cookie != null) {
 			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.USER);
 			User user = User.getWithClaims(claims);
-			Category cat = Category.valueOf(category);
-			List<Question> questions = Question.getSelected(cat);
+			List<Question> questions = Question.getByAttribute(attribute);
 			
 			// Optionally, sort alphabetically by question
 			if (alphabetical) {
@@ -411,7 +405,7 @@ public class QuizResource {
 				questions = Arrays.asList(questionArray);
 			}
 
-			CategoryReportWrapper wrapper = new CategoryReportWrapper(user, questions, cat);
+			CategoryReportWrapper wrapper = new CategoryReportWrapper(user, questions, attribute);
 			String output = renderer.render("reportCategory.ad", wrapper).toString();
 			return Response.ok().entity(output).cookie(authUtils.generateCookie(user)).build();
 		} else {
@@ -437,18 +431,17 @@ public class QuizResource {
 	}
 
 	@GET
-	@Path("chart/{category}")
+	@Path("chart/{attribute}")
 	@Produces("text/html")
 	public Response chartCategory(@CookieParam("quiz.token") Cookie cookie,
-			@PathParam("category") String category) throws AuthenticationException, IOException {
+			@PathParam("attribute") String attribute) throws AuthenticationException, IOException {
 
 		if (cookie != null) {
 			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.USER);
 			User user = User.getWithClaims(claims);
-			Category cat = Category.valueOf(category);
-			List<Question> questions = Question.getSelected(cat);
+			List<Question> questions = Question.getByAttribute(attribute);
 			
-			CategoryChartWrapper wrapper = new CategoryChartWrapper(user, questions, cat);
+			CategoryChartWrapper wrapper = new CategoryChartWrapper(user, questions, attribute);
 			
 			String output = renderer.render("chartCategory.ad", wrapper).toString();
 			return Response.ok().entity(output).cookie(authUtils.generateCookie(user)).build();
@@ -456,18 +449,17 @@ public class QuizResource {
 			return new RedirectResponse(Pages.LOGIN_PAGE).build();
 		}
 	}
-
+	
 	@GET
-	@Path("allQuestions/{category}")
+	@Path("allQuestions/{attribute}")
 	@Produces("application/pdf")
 	public Response allQuestionsInCategory(@CookieParam("quiz.token") Cookie cookie,
-			@PathParam("category") String category) throws AuthenticationException, IOException, QuizBuildException, URISyntaxException {
+			@PathParam("attribute") String attribute) throws AuthenticationException, IOException, QuizBuildException, URISyntaxException {
 
 		if (cookie != null) {
 			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.USER);
 			User user = User.getWithClaims(claims);
-			Category cat = Category.valueOf(category);
-			List<Question> questions = Question.getSelected(cat);
+			List<Question> questions = Question.getByAttribute(attribute);
 			
 			if (questions != null) {
 				PDFGenerator generator = new PDFGenerator(new QuizContext(new Quiz(), config));
@@ -475,7 +467,7 @@ public class QuizResource {
 				ByteArrayInputStream inputStream = generator.generate(questions);
 				return Response.ok().type("application/pdf").entity(inputStream).build();
 			} else {
-				Flash.add(Flash.Code.ERROR, "Questions in requested category \"" + category + "\" not found.");
+				Flash.add(Flash.Code.ERROR, "Questions in requested category \"" + attribute + "\" not found.");
 				return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
 			}
 		} else {
@@ -484,39 +476,18 @@ public class QuizResource {
 	}
 
 	@GET
-	@Path("recipe/{quiz}")
+	@Path("recipe/{name}")
 	@Produces("text/html")
 	public Response showRecipe(@CookieParam("quiz.token") Cookie cookie,
-			@PathParam("quiz") String quiz,
+			@PathParam("name") String name,
 			@QueryParam("attribute") String attribute) throws Exception, AuthenticationException {
-		Category category = null;
 
 		if (cookie != null) {
 			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.USER);
 			User user = User.getWithClaims(claims);
 			
 			String output = "";
-			switch (quiz.toLowerCase()) {
-			case "far":
-				category = Category.FAR;
-				break;
-			case "sop":
-				category = Category.SOP;
-				break;
-			case "c152":
-				category = Category.C152;
-				break;
-			case "c172":
-				category = Category.C172;
-				break;
-			case "pa28":
-				category = Category.PA28;
-				break;
-			case "m20j":
-				category = Category.M20J;
-				break;
-			}
-			Recipe recipe = Recipe.getRecipeByCategoryAndAttribute(category, attribute);
+			Recipe recipe = Recipe.getRecipe(name);
 			
 			if (recipe != null) {
 				ObjectMapper mapper = new ObjectMapper();
@@ -528,7 +499,7 @@ public class QuizResource {
 				String rendered = renderer.render("recipe.ad", new JsonWrapper(user, output)).toString();
 				return Response.ok().entity(rendered).cookie(authUtils.generateCookie(user)).build();
 			} else {
-				Flash.add(Flash.Code.ERROR, "Requested recipe for \"" + quiz + "\" not found.");
+				Flash.add(Flash.Code.ERROR, "Requested recipe for \"" + name + "\" not found.");
 				return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
 			}
 		} else {

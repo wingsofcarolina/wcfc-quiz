@@ -16,27 +16,42 @@ $(document).ready(function(){
 	    textarea.val(editor.getSession().getValue());
 	});
 	window.aceEditor.setOptions({ wrap: true });
-	load_recipe("far");
+	load_recipe_list();
 });
 
-function show_hide_attribute(value) {
-	var do_show = false;
-	if (value == 'sop') {
-		do_show = true;
-	} 
-	var element = document.getElementById('r-attribute');
-	element.style.display = do_show ? '' : 'none';
+function load_recipe_list() {
+	var first = true;
+    var $el = $("#recipeId");
+
+	$.getJSON( "api/recipes" , function( data ) {
+		let myMap = new Map(Object.entries(data));
+		var start = Array.from(myMap.keys())[0];
+		console.log(start);
+
+		for (const [key, value] of myMap.entries()) {
+			if (first) {
+			    $el.append($("<option selected>" + value + "</option>")
+			       .attr("value", key).text(value.label));
+		    } else {
+			    $el.append($("<option>" + value + "</option>")
+			       .attr("value", key).text(value.label));
+		    }
+		    first = false;
+		}
+		
+		load_recipe();
+	});
 }
 
 function load_recipe() {
-	var category = document.getElementById('category').value;
-	var attribute = document.getElementById('attribute').value;
-	show_hide_attribute(category);
+	var recipeId = $("#recipeId option:selected").val();
+	var recipeName = $("#recipeId option:selected").text();
+	
+	console.log('====> ', recipeId);
 
-	if (category != "sop")
-		var url = "api/recipe/" + category;
-	else
-		var url = "api/recipe/" + category + "?attribute=" + attribute;
+	$("#recipeName").val(recipeName);
+
+	var url = "api/recipe/" + recipeId;
 	
 	window.aceEditor.setValue("");
 	$.getJSON( url , function( data ) {
@@ -53,9 +68,9 @@ function load_recipe() {
 }
 
 function test_script() {
-	var category = document.getElementById('category').value;
+	var name = document.getElementById('recipeId').value;
 	var script = window.aceEditor.getSession().getValue();
-	var data = {category:category, script:script};
+	var data = {name:name, script:script};
     
 	$.ajax({
        url: '/api/script',
@@ -86,23 +101,10 @@ function test_script() {
 </script>
 
 <form name="question" action="/api/updateRecipe" method="post">
-
+<input id="recipeName" type="hidden" name="name" value="goober">
 <table>
-<tr><td width=10>Category</td><td>
-<select id="category" name="category" onchange=load_recipe()>
-  <option value="far">FAR 61/91, Pre-Solo</option>
-  <option value="sop">SOP/FS</option>
-  <option value="c152">C-152</option>
-  <option value="c172">C-172 Skyhawk</option>
-  <option value="pa28">PA-28 Warrior</option>
-  <option value="m20j">M20J Mooney</option>
-</select></td></tr>
-<tr id="r-attribute"><td>Attribute</td><td>
-<select id="attribute" name="attribute" onchange=load_recipe()>
-  <option value="STUDENT">Student</option>
-  <option value="PILOT">Pilot</option>
-  <option value="INSTRUCTOR">Instructor</option>
-</select></td></tr>
+<tr><td width=10>Name</td><td>
+<select id="recipeId" name="recipeId" onchange=load_recipe()></select></td></tr>
 <tr><td colspan=3>Enter the quiz script text used in the Recipe below.</td><tr>
 <tr><td colspan=3>
 <div id="editor" style="height: 500px; width: 0750px">Enter script text here .....</div>

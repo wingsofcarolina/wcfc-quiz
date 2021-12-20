@@ -50,13 +50,26 @@ public class QuestionDAO extends BasicDAO<Question, ObjectId> {
 		return result;
 	}
 	
-	public List<Question> getSelectedWithAll(Category category, List<String> attributes) {
+	public List<Question> getSelectedWith(String attribute) {
+		if (attribute != null) {
+			Query<Question> query = getDatastore().createQuery(Question.class).disableValidation();
+	
+			query.filter("attributes = ", attribute);
+			query.get();
+			
+			List<Question> result = query.order("questionid").asList();
+			return result;
+		} else {
+			return null;
+		}
+	}
+	
+	public List<Question> getSelectedWithAll(List<String> attributes) {
 		if (attributes == null || attributes.isEmpty()) {
-			return getSelected(category);
+			return null;
 		} else {
 			Query<Question> query = getDatastore().createQuery(Question.class).disableValidation();
 	
-			query.filter("category = ", category);
 			if (attributes.size() == 1) {
 				query.filter("attributes = ", attributes.get(0));
 			} else {
@@ -67,12 +80,6 @@ public class QuestionDAO extends BasicDAO<Question, ObjectId> {
 			List<Question> result = query.order("questionid").asList();
 			return result;
 		}
-	}
-
-	public List<Question> getSelected(Category category) {
-		Query<Question> query = getDatastore().createQuery(Question.class).disableValidation();
-		query.filter("category = ", category);
-		return query.order("questionid").asList();
 	}
 
 	public List<Question> getAllQuarantined() {

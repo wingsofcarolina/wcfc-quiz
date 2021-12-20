@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import org.mongodb.morphia.annotations.Transient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wingsofcarolina.quiz.common.QuizBuildException;
@@ -28,55 +27,20 @@ public class Quiz {
 	private String quizName;
 	private Category category;
 	private List<Question> questions = new ArrayList<Question>();
-	@Transient
 	private Date createdDate = new Date();
-	
 	private Recipe recipe = null;
 	private QuizContext context = null;
 
 	Execute execute;
 
-	// This attribute determines which Recipe to pick up
-	private String attribute = null;
-
 	public Quiz() {}
 	
-	public Quiz(String request) {
+	public Quiz(Recipe recipe) {
 		this.quizId = Persistence.instance().getID("quiz", 1000);
-		switch (request) {
-			case "far":
-				category = Category.FAR;
-				quizName = "FAR 61/91";
-				break;
-			case "sop":
-				category = Category.SOP;
-				quizName = "SOP";
-				break;
-			case "c152": category = Category.C152; quizName = "Cessna 152"; break;
-			case "c172": category = Category.C172; quizName = "Cessna 172 Skyhawk"; break;
-			case "pa28": category = Category.PA28; quizName = "Piper PA-28 Warrior"; break;
-			case "m20j": category = Category.M20J; quizName = "Mooney M20J"; break;
-		}
+		this.recipe = recipe;
+		this.quizName = recipe.getName();
 	}
-
-	public Quiz(String category, String attribute) {
-		this(category);
-		this.attribute = attribute;
-	}
-
-	public static Category getTypeFromName(String name) {
-		Category category = null; 
-		switch (name) {
-			case "far": category = Category.FAR; break;
-			case "sop": category = Category.SOP; break;
-			case "c152": category = Category.C152; break;
-			case "c172": category = Category.C172; break;
-			case "pa28": category = Category.PA28; break;
-			case "m20j": category = Category.M20J; break;
-		}
-		return category;
-	}
-
+	
 	public long getQuizId() {
 		return quizId;
 	}
@@ -125,12 +89,6 @@ public class Quiz {
 		this.context = context;
 		execute = new Execute(context);
 
-		// Pick up the recipe for the desired quiz
-		recipe = Recipe.getRecipeByCategoryAndAttribute(category, attribute);
-		if (recipe == null) {
-			throw new QuizBuildException("No Recipe found for selected category : " + category);
-		}
-		
 		if (recipe.getScript() != null) {
 			Map<String, String> args = null;
 			String result = execute.run(recipe.getScript(), args );

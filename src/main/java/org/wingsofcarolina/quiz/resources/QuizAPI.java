@@ -100,7 +100,115 @@ public class QuizAPI {
 		dateFormatGmt = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss");
 		dateFormatGmt.setTimeZone(TimeZone.getTimeZone("GMT"));
 	}
+	
+	@GET
+	@Path("allRecipes")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response allRecipes(@CookieParam("quiz.token") Cookie cookie) throws Exception, AuthenticationException {
+		List<Recipe> recipes = Recipe.getAllRecipes();
+		
+//		migrateRecipes(recipes);
+		
+		return Response.ok().entity(recipes).build();
+	}
+	
+	private void migrateRecipes(List<Recipe> recipes) {
+		for (Recipe r : recipes) {
+			r.init();
+			String attribute = r.getAttribute();
+			if (attribute == null || attribute.isEmpty()) {
+				if (r.getCategory().toString().equals("FAR")) {
+					r.setName("FAR,Pre-solo");
+				} else {
+					r.setName(r.getCategory().toString());
+				}
+			} else {
+				r.setName(r.getCategory() + "-" + attribute);
+			}
+			r.setAttribute(null);
+			r.setCategory(null);
+			r.setSections(null);
+			r.save();
+		}
+	}
+	
+	@GET
+	@Path("recipes")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response recipes(@CookieParam("quiz.token") Cookie cookie) {
+		Map<Long, String> recipeCatalog = new HashMap<Long, String>();
+		
+		List<Recipe> recipes = Recipe.getAllRecipes();
+		
+		for (Recipe r : recipes) {
+			recipeCatalog.put(r.getRecipeId(), r.getName());
+		}
+		
+		return Response.ok().entity(recipeCatalog).build();
+	}
 
+	@GET
+	@Path("allQuestions")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response allQuestions() {
+		List<Question> list = Question.getAllQuestions();
+
+//		migrateQuestions(list);
+
+		return Response.ok().entity(list).build();
+	}
+	
+	void migrateQuestions(List<Question> list) {
+		for (Question q : list) {
+			migrateQuestion(q);
+			q.save();
+		}
+	}
+	
+	private void migrateQuestion(Question q) {
+		List<String> attributes = q.getAttributes();
+		
+		boolean isSOP = false;
+		for (String att : attributes) {
+			if (att != null) {
+				if (att.startsWith("SOP_")) {
+				 isSOP = true;
+				 break;
+				}
+			} else {
+				LOG.info("Null attribute list for : " + q.getQuestionId());
+			}
+		}
+		
+		if (isSOP) {
+			q.addAttribute("SOP");
+			q.removeAttribute("FAR");
+		}
+		
+		Category category = q.getCategory();
+		if (category == Category.FAR) {
+			q.addAttribute(Attribute.FAR);
+			q.setCategory(Category.REGULATIONS);
+		} else if (category == Category.SOP) {
+			q.addAttribute(Attribute.SOP);
+			q.setCategory(Category.REGULATIONS);
+		} else if (category == Category.C152) {
+			q.addAttribute(Attribute.C152);
+			q.setCategory(Category.AIRCRAFT);
+		} else if (category == Category.PA28) {
+			q.addAttribute(Attribute.PA28);
+			q.setCategory(Category.AIRCRAFT);
+		} else if (category == Category.C172) {
+			q.addAttribute(Attribute.C172);
+			q.setCategory(Category.AIRCRAFT);
+		} else if (category == Category.M20J) {
+			q.addAttribute(Attribute.M20J);
+			q.setCategory(Category.AIRCRAFT);
+		}
+	}
+	
+	
+	
 	@POST
 	@Path("login")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -294,11 +402,7 @@ public class QuizAPI {
 		String name;
 		List<Recipe> recipes = Recipe.getAllRecipes();
 		for (Recipe recipe : recipes) {
-			if (recipe.getAttribute() == null) {
-				name = questionDir + "/r-" + recipe.getCategory() + ".json";
-			} else {
-				name = questionDir + "/r-" + recipe.getCategory() + "-" + recipe.getAttribute() + ".json";
-			}
+			name = questionDir + "/r-" + recipe.getName() + ".json";
 			try {
 				objectMapper.writeValue(new File(name), recipe);
 				r_count++;
@@ -765,8 +869,8 @@ public class QuizAPI {
 	@Path("updateRecipe")
 	@Produces(MediaType.TEXT_HTML)
 	public Response updateRecipe(@CookieParam("quiz.token") Cookie cookie,
-			@FormParam("category") String category,
-			@FormParam("attribute") String attribute,
+			@FormParam("name") String name,
+			@FormParam("recipeId") Long recipeId,
 			@FormParam("script") String script
 			) throws Exception, AuthenticationException {
 		
@@ -774,55 +878,35 @@ public class QuizAPI {
 		User user = User.getWithClaims(claims);
 
 		// Retrieve the recipe
-		Recipe recipe;
-		if (attribute == null) {
-			recipe = Recipe.getRecipeByCategory(Category.valueOf(category.toUpperCase()));
-		} else {
-			recipe = Recipe.getRecipeByCategoryAndAttribute(Category.valueOf(category.toUpperCase()),
-				attribute.toUpperCase());
-		}
+		Recipe recipe = Recipe.getRecipeById(recipeId);
 
 		// Create a new recipe, if needed
 		if (recipe == null) {
 			recipe = new Recipe();
-			recipe.setCategory(Category.valueOf(category.toUpperCase()));
-			if (attribute != null) {
-				recipe.setAttribute(attribute);
-			}
+			recipe.setName(name);
 		}
 		recipe.setScript(script);
 		
 		// Save the recipe
 		recipe.save();
 
-		if (attribute != null) {
-			Flash.add(Flash.Code.SUCCESS, "Recipe type " + recipe.getCategory() + " updated.");
-		} else {
-			Flash.add(Flash.Code.SUCCESS, "Recipe type " + recipe.getCategory() + "/" + attribute + " updated.");
-		}
+		Flash.add(Flash.Code.SUCCESS, "Recipe type " + recipe.getName() + " updated.");
 
 		return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
 	}
 
 	@GET
-	@Path("recipe/{category}")
+	@Path("recipe/{recipeId}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getRecipe(@CookieParam("quiz.token") Cookie cookie,
-			@PathParam("category") String category,
-			@QueryParam("attribute") String attribute)
+			@PathParam("recipeId") Long recipeId)
 			throws Exception, AuthenticationException {
 
 		Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
 		User user = User.getWithClaims(claims);
 
 		// Retrieve the recipe
-		Recipe recipe;
-		if (attribute == null) {
-			recipe = Recipe.getRecipeByCategory(Category.valueOf(category.toUpperCase()));
-		} else {
-			recipe = Recipe.getRecipeByCategoryAndAttribute(Category.valueOf(category.toUpperCase()),
-				attribute.toUpperCase());
-		}
+		Recipe recipe  = Recipe.getRecipeById(recipeId);
 		return Response.ok().entity(recipe).cookie(authUtils.generateCookie(user)).build();
 
 	}
@@ -893,7 +977,7 @@ public class QuizAPI {
 	@GET
 	@Path("attributes/{category}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response attributes(@PathParam("category") String category, @QueryParam("attribute") String attribute) {
+	public Response attributes(@PathParam("category") String category) {
 		List<String> attributes = Attribute.attributes(category.toUpperCase());
 		return Response.ok().entity(attributes).build();
 	}
@@ -902,14 +986,13 @@ public class QuizAPI {
 	@Path("script")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response runScript(Map<String, String> request) {
+	public Response script(Map<String, String> request) {
 		String result;
 		String status = "success";
-		String category = request.get("category");
 		String script = request.get("script");
 		Map<String, String> response = new HashMap<String, String>();
 		
-		QuizContext context= new QuizContext(new Quiz(category), config);
+		QuizContext context= new QuizContext(new Quiz(), config);
 		context.setTestRun(true);
 		Execute execute = new Execute(context);
 		try {
@@ -971,11 +1054,7 @@ public class QuizAPI {
 				// Iterate over all recipes creating the zip output file
 				List<Recipe> recipes = Recipe.getAllRecipes();
 				for (Recipe recipe : recipes) {
-					if (recipe.getAttribute() == null) {
-						name = "quizdata/r-" + recipe.getCategory() + ".json";
-					} else {
-						name = "quizdata/r-" + recipe.getCategory() + "-" + recipe.getAttribute() + ".json";
-					}
+					name = "quizdata/r-" + recipe.getName() + ".json";
 					ZipEntry zipEntry = new ZipEntry(name);
 					zipOut.putNextEntry(zipEntry);
 					try {

@@ -8,18 +8,18 @@ import org.wingsofcarolina.quiz.domain.User;
 
 public class CategoryReportWrapper extends QuestionListWrapper {
 
-	private Category category;
+	private String category;
 
-	public CategoryReportWrapper(User user, List<Question> questions, Category category) {
+	public CategoryReportWrapper(User user, List<Question> questions, String category) {
 		super(user, questions);
 		this.category = category;
 	}
 
-	public Category getCategory() {
+	public String getCategory() {
 		return category;
 	}
 
-	public void setCategory(Category category) {
+	public void setCategory(String category) {
 		this.category = category;
 	}
 

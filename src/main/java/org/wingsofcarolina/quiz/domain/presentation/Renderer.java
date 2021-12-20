@@ -38,7 +38,7 @@ public class Renderer {
 		this.config = config;
 		
 		Map<String, Object> userAttributes = new HashMap<String,Object>();
-		userAttributes.put("lesson-version","1.2.3");
+		userAttributes.put("quiz-version","1.2.0");
 
 		asciidoctor = create();
 		Map<String, Object> attributes = attributes()

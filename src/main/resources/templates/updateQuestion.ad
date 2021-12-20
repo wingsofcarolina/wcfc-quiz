@@ -43,12 +43,13 @@ $(document).ready(function(){
 <#if question.type != "CHOICE">
 	show_hide_checkboxes('fib');
 </#if>
+	$("#q-category").val('${question.category}'.toLowerCase());
 });
 
 function loadAttributes()
 {
 	var url = "/api/question/attributes/${question.questionId}";
-    var $el = $("#attributes");
+	var $el = $("#attributes");
 	$el.empty(); // remove old options
 	$.getJSON( url , function( data ) {
 		$.each(data, function(key, value) {
@@ -138,9 +139,63 @@ function add_row() {
         row.appendChild(document.createElement("td")).innerHTML = alphabet.charAt(count);
         row.appendChild(document.createElement("td")).innerHTML = "<textarea name=\"answer\" rows=\"2\" cols=\"70\"></textarea>";       
 }
+
+function doesInclude(attributes, orList)
+{
+	var good = false;
+	orList.forEach(function(item) {
+		var result = attributes.indexOf(item);
+		if (result != -1) {
+			good = true;
+		}
+	});
+	return good;
+}
+
+function checkform()
+{
+	var good = false;
+	var type = $("#q-type").val();
+	var cat = $("#q-category").val();
+	var options = $('#attributes option:selected');
+	var attributes = $.map(options ,function(option) {
+	    return option.value;
+	});
+	
+
+	if (cat == 'regulations' && doesInclude(attributes, ['FAR', 'SOP'])) {
+		good = true;
+	}
+	if (cat == 'aircraft' && doesInclude(attributes, ['C152', 'C172', 'PA28', 'M20J'])) {
+		good = true;
+	}
+	
+	if (good == false) {
+	 if (cat == 'regulations') {
+		alert('You MUST select one of FAR or SOP for this category');
+	 }
+	 if (cat == 'aircraft') {
+		alert('You MUST select one or more aircraft type(s) for this category');
+	 }
+	}
+	
+	if (good == true && type == 'multi') {
+		answered = false;
+		$('input[type=checkbox]').each(function() 
+		{ 
+			if (this.checked) answered = true; 
+		});
+		
+		if (answered == false) {
+			good = false;
+			alert('You must select at least one correct answer');
+		}
+	}
+	return good;
+}
 </script>
 
-<form name="question" action="/api/updateQuestion" method="post">
+<form name="question" action="/api/updateQuestion" method="post" onSubmit="return checkform()">
 <input type="hidden" name="questionId" value="${question.questionId}" />
 <input type="hidden" name="type" value="${question.type}" />
 
@@ -157,13 +212,9 @@ Fill in the Blank
 </#if>
 </strong></td></tr>
 <tr><td>Category</td><td>
-<select id="q-category" name="category" onchange=clearAttributes(this.value)>
-  <option value="far"<#if question.category == "FAR"> selected</#if>>FAR 61/91, Pre-Solo</option>
-  <option value="sop"<#if question.category == "SOP"> selected</#if>>SOP/FS</option>
-  <option value="c152"<#if question.category == "C152"> selected</#if>>C-152</option>
-  <option value="c172"<#if question.category == "C172"> selected</#if>>C-172 Skyhawk</option>
-  <option value="pa28"<#if question.category == "PA28"> selected</#if>>PA-28 Warrior</option>
-  <option value="m20j"<#if question.category == "M20J"> selected</#if>>M20J Mooney</option>
+<select id="q-category" name="category" onchange=loadAttributes(this.value)>
+  <option value="regulations">FAR 61/91, SOP/FS</option>
+  <option value="aircraft">Aircraft Type (C-152/C-172/PA28/M20J)</option>
 </select></td></tr>
 <tr><td valign="top">Question</td><td><textarea name="question" rows="4" cols="70">${question.question}</textarea></td></tr>
 <tr><td valign="top">Discussion</td><td><textarea name="discussion" rows="4" cols="70">${question.discussion}</textarea></td></tr>
@@ -204,7 +255,7 @@ Fill in the Blank
 <#if question.deployed == true>
 ++++
 </br>
-<input type="checkbox" value=true name="overwrite">Overwrite previously deployed question?
+<input type="checkbox" value=true name="overwrite">&nbsp;Overwrite previously deployed question?
 
 ++++
 </#if>

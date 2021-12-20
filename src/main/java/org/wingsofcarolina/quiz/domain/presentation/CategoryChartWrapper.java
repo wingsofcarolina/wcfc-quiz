@@ -5,19 +5,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.wingsofcarolina.quiz.domain.Category;
 import org.wingsofcarolina.quiz.domain.Question;
 import org.wingsofcarolina.quiz.domain.User;
 
 public class CategoryChartWrapper extends QuestionListWrapper {
 
-	private Category category;
+	private String category;
 	private CategoryStats stats;
+	private Integer count;
 
-	public CategoryChartWrapper(User user, List<Question> questions, Category category) {
+	public CategoryChartWrapper(User user, List<Question> questions, String category) {
 		super(user, questions);
 		this.category = category;
 		this.stats = new CategoryStats(questions);
+		this.count = questions.size();
 		
 		int count = 0;
 		int last = stats.attributes.size() - 1;
@@ -29,7 +30,7 @@ public class CategoryChartWrapper extends QuestionListWrapper {
 		}
 	}
 
-	public Category getCategory() {
+	public String getCategory() {
 		return category;
 	}
 

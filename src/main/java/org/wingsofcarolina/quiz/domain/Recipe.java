@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Id;
+import org.mongodb.morphia.annotations.Transient;
 import org.wingsofcarolina.quiz.domain.dao.RecipeDAO;
 import org.wingsofcarolina.quiz.domain.persistence.Persistence;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -14,15 +15,33 @@ public class Recipe {
 	@JsonIgnore
     private ObjectId id;
     
+    String name;
+    Long recipeId;
+    String script = null;
     Category category;
     String attribute;
+    @Transient
+	@JsonIgnore
     List<Section> sections;
-    String script = null;
     
-    public Recipe() {}
+	public static String ID_KEY = "recipe";
 
-	public Recipe(Category category) {
-		this.category = category;
+    public Recipe() {}
+    
+    public Recipe(String name) {
+		this.recipeId = Persistence.instance().getID(ID_KEY, 1000);
+    }
+
+    public void init() {
+		this.recipeId = Persistence.instance().getID(ID_KEY, 1000);
+    }
+    
+	public Long getRecipeId() {
+		return recipeId;
+	}
+
+	public void setRecipeId(Long recipeId) {
+		this.recipeId = recipeId;
 	}
 
 	public Category getCategory() {
@@ -39,6 +58,14 @@ public class Recipe {
 
 	public void setAttribute(String attribute) {
 		this.attribute = attribute;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name.toUpperCase();
 	}
 
 	public String getScript() {
@@ -66,11 +93,7 @@ public class Recipe {
 
 	@Override
 	public String toString() {
-		if (attribute != null) {
-			return "Recipe [category=" + category + ", attribute=" + attribute + ", sections=" + sections + "]";
-		} else {
-			return "Recipe [category=" + category + ", sections=" + sections + "]";
-		}
+		return "Recipe [name=" + name + ", recipeId=" + recipeId + ", script=" + script + "]";
 	}
 
 	/*
@@ -86,15 +109,14 @@ public class Recipe {
 		return recipeDao.getAllRecipes();
 	}
 
-
-	public static Recipe getRecipeByCategory(Category category) {
+	public static Recipe getRecipeById(Long recipeId) {
 		RecipeDAO recipeDao = (RecipeDAO) Persistence.instance().get(Recipe.class);
-		return recipeDao.getRecipeByCategory(category);
+		return recipeDao.getRecipeById(recipeId);
 	}
 	
-	public static Recipe getRecipeByCategoryAndAttribute(Category category, String attribute) {
+	public static Recipe getRecipe(String name) {
 		RecipeDAO recipeDao = (RecipeDAO) Persistence.instance().get(Recipe.class);
-		return recipeDao.getRecipeByCategoryAndAttribute(category, attribute);
+		return recipeDao.getRecipe(name);
 	}
 	
 	@SuppressWarnings("unchecked")

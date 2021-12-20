@@ -27,14 +27,14 @@ $.cookieMessage({
 Club members needing a quiz select from the following choices:</p>
 <div style="text-align: center;">
   <div style="display: inline-block; text-align:left;">
-   <a href="generate?quiz=far" target="_blank"> FAR 61/91, Pre-Solo</a><br>
-   <a href="generate?quiz=sop&attribute=student" target="_blank"> SOP/FS, Student Pilots</a><br>
-   <a href="generate?quiz=sop&attribute=pilot" target="_blank"> SOP/FS, Licensed Pilot</a><br>
-   <a href="generate?quiz=sop&attribute=instructor" target="_blank"> SOP/FS, Instructor</a><br>
-   <a href="generate?quiz=c152" target="_blank"> C-152</a><br>
-   <a href="generate?quiz=c172" target="_blank"> C-172 Skyhawk</a><br>
-   <a href="generate?quiz=pa28" target="_blank"> PA-28 Warrior</a><br>
-   <a href="generate?quiz=m20j" target="_blank"> M20J Mooney</a><br>
+   <a href="generate/1000" target="_blank"> FAR 61/91, Pre-Solo</a><br>
+   <a href="generate/1001" target="_blank"> SOP/FS, Student Pilots</a><br>
+   <a href="generate/1002" target="_blank"> SOP/FS, Licensed Pilot</a><br>
+   <a href="generate/1003" target="_blank"> SOP/FS, Instructor</a><br>
+   <a href="generate/1004" target="_blank"> C-152</a><br>
+   <a href="generate/1005" target="_blank"> C-172 Skyhawk</a><br>
+   <a href="generate/1006" target="_blank"> PA-28 Warrior</a><br>
+   <a href="generate/1007" target="_blank"> M20J Mooney</a><br>
   </div>
 </div>
 </p>

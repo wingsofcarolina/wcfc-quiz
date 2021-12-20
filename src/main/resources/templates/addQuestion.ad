@@ -37,7 +37,7 @@ select {
 </style>
 <script>
 $(document).ready(function(){
-	loadAttributes("far");
+	loadAttributes("regulations");
 	loadDifficultyAttributes();
 });
 
@@ -74,7 +74,6 @@ function loadDifficultyAttributes()
 }
 
 function setCorrect(item) {
-	console.log("Trigered on : " + item);
 	$('input[type=checkbox]').each(function() 
 	{ 
 	        this.checked = false; 
@@ -105,9 +104,63 @@ function add_row() {
         row.appendChild(document.createElement("td")).innerHTML = alphabet.charAt(count);
         row.appendChild(document.createElement("td")).innerHTML = "<textarea name=\"answer\" rows=\"2\" cols=\"70\"></textarea>";       
 }
+
+function doesInclude(attributes, orList)
+{
+	var good = false;
+	orList.forEach(function(item) {
+		var result = attributes.indexOf(item);
+		if (result != -1) {
+			good = true;
+		}
+	});
+	return good;
+}
+
+function checkform()
+{
+	var good = false;
+	var type = $("#q-type").val();
+	var cat = $("#q-category").val();
+	var options = $('#attributes option:selected');
+	var attributes = $.map(options ,function(option) {
+	    return option.value;
+	});
+	
+
+	if (cat == 'regulations' && doesInclude(attributes, ['FAR', 'SOP'])) {
+		good = true;
+	}
+	if (cat == 'aircraft' && doesInclude(attributes, ['C152', 'C172', 'PA28', 'M20J'])) {
+		good = true;
+	}
+	
+	if (good == false) {
+	 if (cat == 'regulations') {
+		alert('You MUST select one of FAR or SOP for this category');
+	 }
+	 if (cat == 'aircraft') {
+		alert('You MUST select one or more aircraft type(s) for this category');
+	 }
+	}
+	
+	if (good == true && type == 'multi') {
+		answered = false;
+		$('input[type=checkbox]').each(function() 
+		{ 
+			if (this.checked) answered = true; 
+		});
+		
+		if (answered == false) {
+			good = false;
+			alert('You must select at least one correct answer');
+		}
+	}
+	return good;
+}
 </script>
 
-<form name="question" action="/api/addQuestion" method="post">
+<form name="question" action="/api/addQuestion" method="post" onSubmit="return checkform()">
 
 <table>
 <tr><td>Type</td><td>
@@ -118,12 +171,8 @@ function add_row() {
 </td></tr>
 <tr><td>Category</td><td>
 <select id="q-category" name="category" onchange=loadAttributes(this.value)>
-  <option value="far">FAR 61/91, Pre-Solo</option>
-  <option value="sop">SOP/FS</option>
-  <option value="c152">C-152</option>
-  <option value="c172">C-172 Skyhawk</option>
-  <option value="pa28">PA-28 Warrior</option>
-  <option value="m20j">M20J Mooney</option>
+  <option value="regulations">FAR 61/91, SOP/FS</option>
+  <option value="aircraft">Aircraft Type (C-152/C-172/PA28/M20J)</option>
 </select></td></tr>
 <tr><td valign="top">Question</td><td><textarea name="question" rows="4" cols="70" placeholder=" Enter the question here."></textarea></td></tr>
 <tr><td valign="top">Discussion</td><td><textarea name="discussion" rows="4" cols="70" placeholder=" Enter the CFI discussion here."></textarea></td></tr>

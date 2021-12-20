@@ -39,5 +39,11 @@ navbar:${user.userId}[buttons="HomeNavButton;ProfileNavButton", active="HomeNavB
       chart.draw(view, options);
   }
   </script>
+<div id="totals">Total number of questions : ${count}</div>
 <div id="barchart_values" style="width: 1000px; height: 700px;"></div>
+
+<style>
+#totals {
+	font-size: 20px;
+}
 ++++

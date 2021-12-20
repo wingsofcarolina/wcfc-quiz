@@ -11,7 +11,6 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wingsofcarolina.quiz.domain.Attribute;
-import org.wingsofcarolina.quiz.domain.Category;
 import org.wingsofcarolina.quiz.domain.Question;
 import org.wingsofcarolina.quiz.resources.QuizContext;
 
@@ -39,7 +38,7 @@ public abstract class QuizDSL extends Script {
     }
     public Object methodMissing(String name, Object args) {
         List<Object> argsList = Arrays.asList((Object[]) args);
-        LOG.debug("methodMissing called for ---> {}", name);
+        LOG.info("methodMissing called for ---> {}", name);
         if (context.getTestRun()) {
         	System.out.println("<br>ERROR : methodMissing called for : " + name);
         }
@@ -51,11 +50,6 @@ public abstract class QuizDSL extends Script {
     ///////////////////////////////////////////////
     public void instructions(String value) {
     	context.setVariable("instructions", value);
-    }
-    
-    // Override the category
-    public void category(String name) {
-    	context.getQuiz().setCategory(Category.valueOf(name.toUpperCase()));
     }
   
     // Trim a string to the first newline, if one exists
@@ -71,7 +65,7 @@ public abstract class QuizDSL extends Script {
     // Start a "section" of the quiz
     public void start(Integer sectionCount, String sectionName) {
     	if (context.getTestRun()) {
-        	System.out.println("<br>INFO  : Starting new section : " + sectionName);
+        	System.out.println("<br>### Starting new section : " + sectionName);
     	} else {
         	LOG.info("Starting new section : {}", sectionName);
     	}
@@ -82,7 +76,7 @@ public abstract class QuizDSL extends Script {
     // Apply the collection set of questions to the quiz
     public void end(String name) {
     	if (context.getTestRun()) {
-        	System.out.println("<br>INFO  : Applying collected section : " + name);
+        	System.out.println("<br>### Applying collected section : " + name);
     	} else {
         	LOG.info("Applying collected section : {}", name);
     	}
@@ -117,6 +111,12 @@ public abstract class QuizDSL extends Script {
 				if ( ! excluded(entity) && ! alreadySelected(entity) && ! missingAnswers(entity) && ! entity.isQuarantined()) {
 					// Add it and keep track of the count
 					section.add(entity);
+		    		if (context.getTestRun()) {
+		    			System.out.println("<br>Added to quiz : " + entity.getQuestionId() + "\n");
+		    			if (entity.getSupersededBy() != -1) {
+		    				System.out.println("<br>This was a superseded question! Bad! Superseded by : " + entity.getSupersededBy());
+		    			}
+		    		}
 					sectionCount--;
 					
 					// Make note that the question has now been 'deployed'
@@ -128,7 +128,12 @@ public abstract class QuizDSL extends Script {
 					}
 				} else {
 		    		if (context.getTestRun()) {
-		    			System.out.println("<br>Rejected " + entity.getQuestionId() + "because it is excluded/empty/quarantined/already-selected.");
+		    			System.out.println("<br>Rejected " + entity.getQuestionId() + " because it is excluded/empty/quarantined/already-selected.");
+		    			System.out.println("<br>Excluded: " + excluded(entity) 
+		    				+ "  Quarantined: " + entity.isQuarantined() 
+		    				+ "  Selected: " + alreadySelected(entity)
+		    				+ "  Empty: " + missingAnswers(entity)
+		    				);
 		    		}
 				}
 			}
@@ -235,21 +240,13 @@ public abstract class QuizDSL extends Script {
     	return new ArrayList<Question>(questions);
     }
     
-    // Get a list of questions by category
-    public List<Question> questions() {
-    	Category category = context.getQuiz().getCategory();
-    	List<Question> result = Question.getSelected(category);
-		return result;
-    }
-    
     // Get a list of questions by category, filtered by attributes
     public List<Question> questionsWithAny(List<String> atts) {
-    	Category category = context.getQuiz().getCategory();
     	List<Question> result = new ArrayList<Question>();
 		if (atts.contains(Attribute.ANY)) {
-			result = Question.getSelected(category);
+			result = Question.getAllQuestions();
 		} else {
-	    	for (Question question : Question.getSelected(category)) {
+	    	for (Question question : Question.getAllQuestions()) {
 	    		for (String attribute : question.getAttributes()) {
 	    			if (atts.contains(attribute)) {
 	    				result.add(question);
@@ -290,21 +287,11 @@ public abstract class QuizDSL extends Script {
     // set for the quiz being generated, and reject it if so.
     private boolean alreadySelected(Question candidate) {
     	if (context.getQuiz().hasQuestion(candidate)) {
-			if (context.getTestRun()) {
-				System.out.println("<br>INFO : Found a duplicate in Quiz, skipping " + candidate.getQuestionId());
-			} else {
-				LOG.info("Found a duplicate, skipping {}", candidate.getQuestionId());
-			}
     		return true;
     	}
     	long id = candidate.getQuestionId();
 		for (Question question : section) {
 			if (question.getQuestionId() == id) {
-				if (context.getTestRun()) {
-					System.out.println("<br>INFO : Found a duplicate, skipping " + id);
-				} else {
-					LOG.info("Found a duplicate, skipping {}", id);
-				}
 				return true;
 			}
 		}
@@ -326,18 +313,13 @@ public abstract class QuizDSL extends Script {
     // Determine if the candidate question should be rejected due to a
     // mutually exclusive question already being in the selected set of
     // questions. 
-    private boolean excluded(Question candidate) {
-    	if (candidate.getExcludes() != null) {
+    private boolean excluded(Question question) {
+    	if (question != null && question.getExcludes() != null) {
 	    	Set<Question> questionSet = new HashSet<Question>();
 	    	questionSet.addAll(context.getQuiz().getQuestions());
 	    	questionSet.addAll(section);
-	    	for (Question question : questionSet) {
-	    		if (candidate.getExcludes().contains(question.getQuestionId())) {
-	    			if (context.getTestRun()) {
-	    				System.out.println("<br>INFO : Found a mutual exclusion in quiz, skipping " + candidate.getQuestionId());
-	    			} else {
-	    				LOG.info("Found a mutual exclusion in quiz, skipping {}", candidate.getQuestionId());
-	    			}
+	    	for (Question q : questionSet) {
+	    		if (question.getExcludes().contains(q.getQuestionId())) {
 	        		return true;
 	    		}
 	    	}
@@ -347,15 +329,23 @@ public abstract class QuizDSL extends Script {
 
     // Follow the superseded chain to the current version of the question
     // being processed. 
-    private Question resolve(Question question) {
-    	Question result = question;
-    	
-    	while (question.isSuperseded()) {
-    		long nextId = question.getSupersededBy();
-    		LOG.info("Question {} superseded by {}", question.getQuestionId(), nextId);
-    		result = Question.getByQuestionId(nextId);
-    	}
-    	
-    	return result;
-    }
+	private Question resolve(Question question) {
+		while (question != null && question.isSuperseded()) {
+			long nextId = question.getSupersededBy();
+			if ( ! context.getTestRun()) {
+				LOG.info("Question {} superseded by {}", question.getQuestionId(), nextId);
+			}
+			Question tmp = Question.getByQuestionId(nextId);
+			if (tmp == null) {
+				System.out.println("<br>Found a null entity from resolve(" + question.getQuestionId() + "), shouldn't happen! Fixing.");
+				question.setSupersededBy(-1); // This one is no longer superseded, for some reason.
+				question.save();
+				
+				return question; // Return the last good one found (now the last in the chain)
+			}
+			question = tmp;
+		}
+
+		return question;
+	}
 }

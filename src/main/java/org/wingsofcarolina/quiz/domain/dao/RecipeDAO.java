@@ -6,7 +6,6 @@ import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.dao.BasicDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wingsofcarolina.quiz.domain.Category;
 import org.wingsofcarolina.quiz.domain.Recipe;
 
 
@@ -22,35 +21,26 @@ public class RecipeDAO extends BasicDAO<Recipe, ObjectId> {
 		List<Recipe> result = getDatastore().find(Recipe.class).asList();
 		return result;
 	}
-	
-	public Recipe getRecipeByCategory(Category category) {
+
+	public Recipe getRecipe(String name) {
 		Recipe recipe = null;
-		List<Recipe> result = getDatastore().find(Recipe.class).filter("category = ", category).asList();
-		if (result != null) {
+		List<Recipe> result = getDatastore().find(Recipe.class).filter("name = ", name.toUpperCase()).asList();
+		if (result != null && result.size() > 0) {
 			recipe = result.get(0);
 		} 
 		return recipe;
 	}
-	
-	public Recipe getRecipeByCategoryAndAttribute(Category category, String attribute) {
+
+	public Recipe getRecipeById(Long recipeId) {
 		Recipe recipe = null;
-		List<Recipe> result = getDatastore().find(Recipe.class).filter("category = ", category).asList();
-		if (result.size() > 0) {
-			if (result.size() == 1 || attribute == null) {
-				recipe = result.get(0);
-			} else {
-				for (Recipe r : result) {
-					if (r.getAttribute().toString().contentEquals(attribute.toUpperCase())) {
-						recipe = r;
-					}
-				}
-			}
+		List<Recipe> result = getDatastore().find(Recipe.class).filter("recipeId = ", recipeId).asList();
+		if (result != null && result.size() > 0) {
+			recipe = result.get(0);
 		} 
 		return recipe;
 	}
-	
+
 	public void drop() {
 		getDatastore().getCollection(Recipe.class).drop();
 	}
-
 }

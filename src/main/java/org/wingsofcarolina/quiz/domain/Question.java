@@ -2,6 +2,7 @@ package org.wingsofcarolina.quiz.domain;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import org.bson.types.ObjectId;
@@ -137,9 +138,25 @@ public class Question {
 	}
 
 	public void addAttribute(String attribute) {
+		if (attribute == null) return;
+		for (String a : attributes) {
+			if (a != null && a.equals(attribute)) {
+				return;
+			}
+		}
 		attributes.add(attribute);
 	}
-
+	
+	public void removeAttribute(String attribute) {
+		Iterator<String> it = attributes.iterator();
+		while (it.hasNext()) {
+			String value = it.next();
+			if (attribute.equals(value)) {
+				it.remove();
+			}
+		}
+	}
+	
 	public boolean hasAttribute(String attribute) {
 		if (attribute != null) {
 			for (String att : attributes) {
@@ -284,20 +301,14 @@ public class Question {
 		return questionDao.getAllQuestions();
 	}
 
-
+	public static List<Question> getByAttribute(String attribute) {
+		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
+		return questionDao.getSelectedWith(attribute);
+	}
+	
 	public static List<Question> getQuestionsLimited(int skip, int count) {
 		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
 		return questionDao.getQuestionsLimited(skip, count);
-	}
-	
-	public static List<Question> getSelected(Category category) {
-		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
-		return questionDao.getSelected(category);
-	}
-
-	public static List<Question> getSelectedWithAll(Category category, List<String> attributes) {
-		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
-		return questionDao.getSelectedWithAll(category, attributes);
 	}
 
 	public static Question getByQuestionId(Long id) {
