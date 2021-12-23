@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -25,8 +26,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -49,6 +52,7 @@ import org.wingsofcarolina.quiz.domain.presentation.PDFGenerator;
 import org.wingsofcarolina.quiz.domain.presentation.QuestionListWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.QuestionWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.QuizBuildErrorWrapper;
+import org.wingsofcarolina.quiz.domain.presentation.RecipeWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.Renderer;
 import org.wingsofcarolina.quiz.domain.presentation.Version;
 import org.wingsofcarolina.quiz.domain.presentation.Wrapper;
@@ -70,7 +74,9 @@ public class QuizResource {
 
 	private static QuizResource instance;
 	
-	@SuppressWarnings("unused")
+	@Context
+	UriInfo uri;
+	
 	private QuizConfiguration config;	// Dropwizard configuration
 	private AuthUtils authUtils;
 
@@ -261,7 +267,7 @@ public class QuizResource {
 			Record record = quiz.getRecord();
 			record.save();
 
-			Slack.instance().sendMessage("Quiz " + quiz.getQuizName() + " requested at " + dateFormatGmt.format(new Date()));
+			Slack.instance().sendMessage("Quiz '" + quiz.getQuizName() + "' requested at " + dateFormatGmt.format(new Date()));
 			ByteArrayInputStream inputStream = generator.generate(quiz);
 			return Response.ok().type("application/pdf").entity(inputStream).build();
 		} catch (QuizBuildException e) {
@@ -651,7 +657,9 @@ public class QuizResource {
 			Jws<Claims> claims = authUtils.validateUser(cookie.getValue());
 			User user = User.getWithClaims(claims);
 			if (user != null) {
-				Wrapper wrapper = new Wrapper(user);
+			    URI myUri = uri.getBaseUri();
+
+				RecipeWrapper wrapper = new RecipeWrapper(user, myUri);
 				String output = renderer.render("updateRecipe.ad", wrapper).toString();
 				return Response.ok().entity(output).cookie(authUtils.generateCookie(user)).build();
 			} else {

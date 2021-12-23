@@ -37,11 +37,11 @@ public class Slack {
 	}
 	
 	public void sendMessage(String message) {
-		LOG.info("Sending : {}", message);
+		LOG.info("Sending : QUIZ: {}", message);
 		if (config.getMode().contentEquals("PROD")) {
 			CloseableHttpClient httpclient = HttpClients.createDefault();
 		    HttpPost httpPost = new HttpPost(URL);
-		    String json="{\"text\":\"" + message + "\"}";
+		    String json="{\"text\":\"QUIZ: " + message + "\"}";
 		    HttpEntity stringEntity = new StringEntity(json,ContentType.APPLICATION_JSON);
 		    httpPost.setEntity(stringEntity);
 		    try {

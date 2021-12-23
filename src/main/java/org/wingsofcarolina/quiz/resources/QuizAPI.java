@@ -29,7 +29,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.HttpHeaders;
@@ -713,7 +712,7 @@ public class QuizAPI {
 				if (changed) {
 					LOG.info("Updated Question : {}", original.getQuestionId());
 					original.save();
-					Slack.instance().sendMessage("Updated Question : " + original.toString());
+					Slack.instance().sendMessage("Updated Question : " + original.getQuestionId());
 				} else {
 					LOG.info("No changes detected for : {}", original.getQuestionId());
 				}

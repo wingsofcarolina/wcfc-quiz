@@ -26,7 +26,6 @@ function load_recipe_list() {
 	$.getJSON( "api/recipes" , function( data ) {
 		let myMap = new Map(Object.entries(data));
 		var start = Array.from(myMap.keys())[0];
-		console.log(start);
 
 		for (const [key, value] of myMap.entries()) {
 			if (first) {
@@ -47,8 +46,6 @@ function load_recipe() {
 	var recipeId = $("#recipeId option:selected").val();
 	var recipeName = $("#recipeId option:selected").text();
 	
-	console.log('====> ', recipeId);
-
 	$("#recipeName").val(recipeName);
 
 	var url = "api/recipe/" + recipeId;
@@ -65,6 +62,9 @@ function load_recipe() {
 		var textarea = $('textarea[name="script"]');
 		textarea.val(data.script);
 	});
+	
+	var recipeUrl = "${url}" + "generate/" + recipeId;
+	$("#url").html("<a href='" + recipeUrl + "' target=_blank>" + recipeUrl + "</a>");
 }
 
 function test_script() {
@@ -103,8 +103,8 @@ function test_script() {
 <form name="question" action="/api/updateRecipe" method="post">
 <input id="recipeName" type="hidden" name="name" value="goober">
 <table>
-<tr><td width=10>Name</td><td>
-<select id="recipeId" name="recipeId" onchange=load_recipe()></select></td></tr>
+<tr><td width=10>Name</td><td><select id="recipeId" name="recipeId" onchange=load_recipe()></select></td></tr>
+<tr><td width=10>URL</td><td><div id="url"></div></td></tr>
 <tr><td colspan=3>Enter the quiz script text used in the Recipe below.</td><tr>
 <tr><td colspan=3>
 <div id="editor" style="height: 500px; width: 0750px">Enter script text here .....</div>
@@ -119,5 +119,11 @@ function test_script() {
 </form>
 </p>
 <button onclick="test_script();">Test Recipe</button>
+
+<style>
+#url {
+	font-size: 1.2em;
+}
+</style>
 
 ++++
