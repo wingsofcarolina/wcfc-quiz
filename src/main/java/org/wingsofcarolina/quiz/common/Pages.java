@@ -5,4 +5,5 @@ public class Pages {
 	public static final String LOGIN_PAGE = "/login";
 	public static final String REGISTER_PAGE = "/register";
 	public static final String ADD_QUESTION_PAGE = "/addQuestion";
+	public static final String RECIPE_PAGE = "/updateRecipe";
 }

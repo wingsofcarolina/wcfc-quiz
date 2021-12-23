@@ -106,7 +106,7 @@ public class QuizAPI {
 	public Response allRecipes(@CookieParam("quiz.token") Cookie cookie) throws Exception, AuthenticationException {
 		List<Recipe> recipes = Recipe.getAllRecipes();
 		
-//		migrateRecipes(recipes);
+		migrateRecipes(recipes);
 		
 		return Response.ok().entity(recipes).build();
 	}
@@ -152,7 +152,7 @@ public class QuizAPI {
 	public Response allQuestions() {
 		List<Question> list = Question.getAllQuestions();
 
-//		migrateQuestions(list);
+		migrateQuestions(list);
 
 		return Response.ok().entity(list).build();
 	}
@@ -890,7 +890,7 @@ public class QuizAPI {
 
 		Flash.add(Flash.Code.SUCCESS, "Recipe type " + recipe.getName() + " updated.");
 
-		return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
+		return new RedirectResponse(Pages.RECIPE_PAGE).cookie(authUtils.generateCookie(user)).build();
 	}
 
 	@GET
