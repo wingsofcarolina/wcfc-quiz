@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Id;
+import org.wingsofcarolina.quiz.scripting.Pool;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -14,12 +15,14 @@ public class Section {
     private ObjectId id;
     
     String name;
-    List<Long> required;
-    List<Selection> selections;
+    Integer count;
+    List<Question> required;
+    List<Question> selections;
     
     public Section() {}
     
-    public Section(String name) {
+    public Section(Integer count, String name) {
+    	this.count = count;
     	this.name = name;
     }
 
@@ -31,38 +34,105 @@ public class Section {
 		this.name = name;
 	}
 	
-	public List<Long> getRequired() {
+	public Integer getCount() {
+		return count;
+	}
+
+	public void setCount(Integer count) {
+		this.count = count;
+	}
+
+	public List<Question> getRequired() {
 		return required;
 	}
 
-	public void setRequired(List<Long> required) {
+	public void setRequired(List<Question> required) {
 		this.required = required;
 	}
-
-	public void addRequired(Long required) {
+	
+	public void addRequired(Question question) {
 		if (required == null) {
-			this.required = new ArrayList<Long>();
+			required = new ArrayList<Question>();
 		}
-		this.required.add(required);
+		required.add(question);
 	}
-
-	public List<Selection> getSelections() {
+	
+	public List<Question> getSelections() {
 		return selections;
 	}
 
-	public void setSelections(List<Selection> selections) {
+	public void setSelections(List<Question> selections) {
 		this.selections = selections;
 	}
 
-	public void addSelection(Selection selection) {
+	public void addSelection(Question question) {
 		if (selections == null) {
-			this.selections = new ArrayList<Selection>();
+			selections = new ArrayList<Question>();
 		}
-		this.selections.add(selection);
+		selections.add(question);
+	}
+	
+	// Return a randomized list of questions ensuring that the
+	// required questions are included.
+	public List<Question> getQuestions() {
+		List<Question> result = new ArrayList<Question>();
+
+		if (required != null) {
+			result.addAll(required);
+		}
+
+		if (selections != null) {
+			int max = (count - result.size() > selections.size()) ? selections.size() : count - result.size();
+			for (int i = 0; i < max; i++) {
+				result.add(selections.get(i));
+			}
+		}
+
+		return randomize(result);
+	}
+	
+    public List<Question> randomize(List<Question> pool) {
+    	List<Question> result = new ArrayList<Question>();
+    	
+    	if (pool.size() > 0) {
+			do {
+				int size = pool.size();
+				if (size > 0) {
+					int pick = (int)(Math.random() * size);
+					result.add(pool.remove(pick));
+				}
+			} while (pool.size() > 0);
+    	}
+    	
+    	return result;
+    }
+
+	public boolean isFull() {
+		int r = required == null ? 0 : required.size();
+		int s = selections == null ? 0 : selections.size();
+
+		if (r + s > count) 
+			return true;
+		else
+			return false;
 	}
 
-	@Override
-	public String toString() {
-		return "Section [name=" + name + ", selections=" + selections + "]";
+	public boolean hasQuestion(Question candidate) {
+		long id = candidate.getQuestionId();
+		if (required != null) {
+			for (Question question : required) {
+				if (question.getQuestionId() == id) {
+					return true;
+				}
+			}
+		}
+		if (selections != null) {
+			for (Question question : selections) {
+				if (question.getQuestionId() == id) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 }

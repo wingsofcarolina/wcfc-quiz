@@ -10,8 +10,8 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wingsofcarolina.quiz.domain.Attribute;
 import org.wingsofcarolina.quiz.domain.Question;
+import org.wingsofcarolina.quiz.domain.Section;
 import org.wingsofcarolina.quiz.resources.QuizContext;
 
 import groovy.lang.Script;
@@ -20,8 +20,7 @@ public abstract class QuizDSL extends Script {
 	private static final Logger LOG = LoggerFactory.getLogger(QuizDSL.class);
 
     private QuizContext context;
-    private Integer sectionCount;
-	private Set<Question> section = null;
+	private Section section = null;
     private Map<String, List<Long>> exclusives = new HashMap<String, List<Long>>();
 
     public QuizContext getContext() {
@@ -63,14 +62,13 @@ public abstract class QuizDSL extends Script {
     }
     
     // Start a "section" of the quiz
-    public void start(Integer sectionCount, String sectionName) {
+    public void start(Integer questionCount, String sectionName) {
     	if (context.getTestRun()) {
         	System.out.println("<br>### Starting new section : " + sectionName);
     	} else {
         	LOG.info("Starting new section : {}", sectionName);
     	}
-    	this.sectionCount = sectionCount;
-    	section = new HashSet<Question>();
+    	this.section = new Section(questionCount, sectionName);
     }
     
     // Apply the collection set of questions to the quiz
@@ -82,7 +80,7 @@ public abstract class QuizDSL extends Script {
     	}
     	if (section != null) {
 	    	List<Question> questions = new ArrayList<Question>();
-	    	questions.addAll(section);
+	    	questions.addAll(section.getQuestions());
 	    	context.getQuiz().addAll(questions);
     	} else {
     		if (context.getTestRun()) {
@@ -94,14 +92,14 @@ public abstract class QuizDSL extends Script {
     }
     
     // Add questions to the selected set of questions in the quiz
-    // NOTE: The items are pulled out of the pool in a random order
+    // NOTE: The items are pulled out of the Pool pool in a random order
     // to increase the entropy of each generated quiz.
-    public void select(List<Question> pool) {
+    public void select(Pool pool) {
     	if (section != null) {
-    		List<Question> result = randomize(pool);
+    		List<Question> result = pool.randomize().getQuestionList();
 			for (Question entity : result) {
 				// Shortcut out if we've collected enough questions
-				if (sectionCount == 0) break;
+				if (section.isFull()) break;
 				
 				// Resolve the actual question (i.e. follow the superseded chain)
 				entity = resolve(entity);
@@ -110,14 +108,13 @@ public abstract class QuizDSL extends Script {
 				// isn't conflicting with a mutually exclusive question already selected
 				if ( ! excluded(entity) && ! alreadySelected(entity) && ! missingAnswers(entity) && ! entity.isQuarantined()) {
 					// Add it and keep track of the count
-					section.add(entity);
+					section.addSelection(entity);
 		    		if (context.getTestRun()) {
 		    			System.out.println("<br>Added to quiz : " + entity.getQuestionId() + "\n");
 		    			if (entity.getSupersededBy() != -1) {
 		    				System.out.println("<br>This was a superseded question! Bad! Superseded by : " + entity.getSupersededBy());
 		    			}
 		    		}
-					sectionCount--;
 					
 					// Make note that the question has now been 'deployed'
 					if (context.getConfiguration().getMode().contentEquals("PROD")) {
@@ -149,20 +146,19 @@ public abstract class QuizDSL extends Script {
     // Add a specified number of questions to the selected set of questions in the quiz
     // NOTE: The items are pulled out of the pool in a random order
     // to increase the entropy of each generated quiz.
-    public void select(Integer count, List<Question> pool) {
+    public void select(Integer count, Pool pool) {
     	if (section != null) {
 	    	if (count <= pool.size()) {
-	    		List<Question> result = randomize(pool);
+	    		List<Question> result = pool.randomize().getQuestionList();
 				for (Question entity : result) {
 					// Shortcut out if we've collected enough questions
-					if (sectionCount == 0) break;
+					if (section.isFull()) break;
 					
 					// Add the question to the section if it has not been used before and
 					// isn't conflicting with a mutually exclusive question already selected
 					if ( ! excluded(entity) && !alreadySelected(entity)) {
 						// Add it and keep track of the count
-						section.add(entity);
-						sectionCount--;
+						section.addSelection(entity);
 						
 						// Make note that the question has now been 'deployed'
 						if (context.getConfiguration().getMode().contentEquals("PROD")) {
@@ -210,25 +206,13 @@ public abstract class QuizDSL extends Script {
     	}
     }
     
-    // Filter the list returning only those questions which contain the 
-    // indicated attribute.
-    public List<Question> filterOnly(String attribute, List<Question> pool) {
-    	List<Question> result = new ArrayList<Question>();
-    	for (Question question: pool) {
-    		if (question.getAttributes().contains(attribute)) {
-    			result.add(question);
-    		}
-    	}
-    	return result;
-    }
-    
     // Get a list of questions by question IDs
-    public List<Question> include(List<Integer> questionIds) {
+    public Pool require(List<Integer> questionIds) {
     	Set<Question> questions = new HashSet<Question>();
     	for (Integer id : questionIds) {
     		Question question = Question.getByQuestionId(new Long(id));
     		if (question != null) {
-    			questions.add(question);
+    			section.addRequired(question);
     		} else {
     			if (context.getTestRun()) {
             		System.out.println("<br>ERROR : Requested question " + id + " not found");
@@ -237,51 +221,16 @@ public abstract class QuizDSL extends Script {
     			}
     		}
     	}
-    	return new ArrayList<Question>(questions);
+    	return new Pool(new ArrayList<Question>(questions));
     }
-    
-    // Get a list of questions by category, filtered by attributes
-    public List<Question> questionsWithAny(List<String> atts) {
-    	List<Question> result = new ArrayList<Question>();
-		if (atts.contains(Attribute.ANY)) {
-			result = Question.getAllQuestions();
-		} else {
-	    	for (Question question : Question.getAllQuestions()) {
-	    		for (String attribute : question.getAttributes()) {
-	    			if (atts.contains(attribute)) {
-	    				result.add(question);
-	    				break;
-	    			}
-	    		}
-	    	}
-		}
-		return result;
+   
+    public Pool questionsWithAny(List<String> atts) {
+    	return new Pool().questionsWithAny(atts);
     }
     
     ///////////////////////////////////////
     // Supporting methods
     ///////////////////////////////////////
-    private List<Question> randomize(List<Question> pool) {
-    	List<Question> result = new ArrayList<Question>();
-    	
-    	if (pool.size() > 0) {
-			do {
-				int size = pool.size();
-				if (size > 0) {
-					int pick = (int)(Math.random() * size);
-					result.add(pool.remove(pick));
-				} else {
-					if (context.getTestRun()) {
-						System.out.println("<br>ERROR : Why did the pool get to zero???");
-					} else {
-						LOG.info("Why did the pool get to zero???");
-					}
-				}
-			} while (pool.size() > 0);
-    	}
-    	
-    	return result;
-    }
     
     // Determine if the candidate has already been placed in the selected
     // set for the quiz being generated, and reject it if so.
@@ -289,12 +238,9 @@ public abstract class QuizDSL extends Script {
     	if (context.getQuiz().hasQuestion(candidate)) {
     		return true;
     	}
-    	long id = candidate.getQuestionId();
-		for (Question question : section) {
-			if (question.getQuestionId() == id) {
-				return true;
-			}
-		}
+    	if (section.hasQuestion(candidate)) {
+    		return true;
+    	}
 
     	return false;
     }
@@ -317,7 +263,7 @@ public abstract class QuizDSL extends Script {
     	if (question != null && question.getExcludes() != null) {
 	    	Set<Question> questionSet = new HashSet<Question>();
 	    	questionSet.addAll(context.getQuiz().getQuestions());
-	    	questionSet.addAll(section);
+	    	questionSet.addAll(section.getQuestions());
 	    	for (Question q : questionSet) {
 	    		if (question.getExcludes().contains(q.getQuestionId())) {
 	        		return true;

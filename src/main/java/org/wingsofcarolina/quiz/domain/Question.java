@@ -336,4 +336,13 @@ public class Question {
 		return "Question [questionId=" + questionId + ", index=" + index + ", details=" + details +
 				", deployed=" + deployed + ", supersededBy=" + supersededBy + ", createdDate=" + createdDate + "]";
 	}
+
+	public boolean containsAny(List<String> atts) {
+		for (String attribute : attributes) {
+			if (atts.contains(attribute)) {
+				return true;
+			}
+		}
+		return false;
+	}
 }
