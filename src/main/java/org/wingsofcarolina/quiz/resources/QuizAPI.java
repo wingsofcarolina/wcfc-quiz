@@ -556,9 +556,8 @@ public class QuizAPI {
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response uploadImage(@CookieParam("quiz.token") Cookie cookie, 
-			@FormDataParam("qquuid") String uuid,
-			@FormDataParam("qqfilename") String filename,
-			@FormDataParam("qqfile") final InputStream fileInputStream,
+			@FormDataParam("filename") String filename,
+			@FormDataParam("file") final InputStream fileInputStream,
 			@Context HttpHeaders headers) throws AuthenticationException  {
 
 		int status = 200;

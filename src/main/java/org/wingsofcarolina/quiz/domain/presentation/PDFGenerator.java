@@ -10,10 +10,8 @@ import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
-import org.eclipse.jetty.server.handler.ContextHandler.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wingsofcarolina.quiz.QuizConfiguration;
 import org.wingsofcarolina.quiz.common.QuizBuildException;
 import org.wingsofcarolina.quiz.domain.Answer;
 import org.wingsofcarolina.quiz.domain.Question;
@@ -21,7 +19,6 @@ import org.wingsofcarolina.quiz.resources.Quiz;
 import org.wingsofcarolina.quiz.resources.QuizContext;
 
 import com.itextpdf.io.font.constants.StandardFonts;
-import com.itextpdf.io.image.ImageData;
 import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.events.Event;
 import com.itextpdf.kernel.events.IEventHandler;
@@ -45,6 +42,7 @@ import com.itextpdf.layout.element.LineSeparator;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.element.Text;
+import com.itextpdf.layout.property.HorizontalAlignment;
 import com.itextpdf.layout.property.TextAlignment;
 import com.itextpdf.layout.property.UnitValue;
 import com.itextpdf.layout.property.VerticalAlignment;
@@ -197,12 +195,20 @@ public class PDFGenerator {
 			String imageDir = context.getConfiguration().getImageDirectory() + "/";
 		    try {
 				Image image = new Image(ImageDataFactory.create(imageDir + question.getAttachment()));
+				float imageWidth = image.getImageWidth();
+				if (imageWidth > 400f) {
+					float scale = imageWidth / 450.0f;
+					float imageHeight = image.getImageHeight() / scale;
+		            image.scaleAbsolute(450f, imageHeight);
+				}
 				cell = new Cell();
 				cell.setBorder(Border.NO_BORDER);
 				cell.add(new Paragraph("\n"));
 				table.addCell(cell);
 				cell = new Cell();
 				cell.setBorder(Border.NO_BORDER);
+				cell.setVerticalAlignment(VerticalAlignment.MIDDLE);
+				cell.setHorizontalAlignment(HorizontalAlignment.CENTER);
 				cell.add(image);
 				table.addCell(cell);
 			} catch (MalformedURLException e) {
@@ -248,7 +254,7 @@ public class PDFGenerator {
 		}
 		return table;
 	}
-	
+
 	private void addDocumentHeader(Quiz quiz, Document document) throws URISyntaxException, MalformedURLException, IOException {
 		// Generate header
 		byte[] bytes = Files.readAllBytes(new File(context.getConfiguration().getAssetDirectory() + "/WCFC-logo-transparent.jpg").toPath());
