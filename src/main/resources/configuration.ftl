@@ -39,8 +39,8 @@ server:
             threshold: ALL
             archive: true
             archivedLogFilenamePattern: log/quiz-%i-%d-http.log
-            maxFileSize: 500MB
-            archivedFileCount: 5
+            maxFileSize: 100MB
+            archivedFileCount: 3
             timeZone: UTC
 
 # Configure the Sundial job management system    
@@ -72,6 +72,6 @@ logging:
         threshold: ALL
         archive: true
         archivedLogFilenamePattern: ./log/quiz-%i-%d.log
-        maxFileSize: 500MB
-        archivedFileCount: 5
+        maxFileSize: 100MB
+        archivedFileCount: 3
         timeZone: UTC
