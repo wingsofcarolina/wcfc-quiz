@@ -2,7 +2,7 @@ package org.wingsofcarolina.quiz.domain;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Id;
-import org.wingsofcarolina.quiz.domain.presentation.CmRenderer;
+import org.wingsofcarolina.quiz.domain.presentation.CommonMarkRenderer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.itextpdf.layout.element.Paragraph;
@@ -35,12 +35,12 @@ public class Answer {
 
 	@JsonIgnore
 	public String getAnswerAsHtml() {
-		return CmRenderer.renderAsHtml(answer);
+		return CommonMarkRenderer.renderAsHtml(answer);
 	}
 
 	@JsonIgnore
 	public Paragraph getAnswerAsIText() {
-		return CmRenderer.renderToParagraph(answer);
+		return CommonMarkRenderer.renderToParagraph(answer);
 	}
 
 	public void setAnswer(String answer) {

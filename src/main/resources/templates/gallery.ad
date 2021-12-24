@@ -13,7 +13,6 @@ navbar:${user.userId}[buttons="HomeNavButton;ProfileNavButton", active="ProfileN
 	const handleImageUpload = event => {
 	  const formData = new FormData()
 	  const files = $('#fileUpload')[0].files;
-	  console.log(files[0]);
 	  formData.append('file', files[0]);
 	  formData.append('filename', files[0].name);
 	  
@@ -25,6 +24,7 @@ navbar:${user.userId}[buttons="HomeNavButton;ProfileNavButton", active="ProfileN
 	  .then(data => {
 	    console.log(data.path)
 	  })
+	  .then(location.replace("/"))
 	  .catch(error => {
 	    console.error(error)
 	  })

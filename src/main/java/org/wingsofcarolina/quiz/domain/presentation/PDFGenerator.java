@@ -211,7 +211,7 @@ public class PDFGenerator {
 				cell.setHorizontalAlignment(HorizontalAlignment.CENTER);
 				cell.add(image);
 				table.addCell(cell);
-			} catch (MalformedURLException e) {
+			} catch (com.itextpdf.io.IOException|MalformedURLException e) {
 				LOG.error("Could not find requested image attachment : {}", question.getAttachment());
 			}
 		}

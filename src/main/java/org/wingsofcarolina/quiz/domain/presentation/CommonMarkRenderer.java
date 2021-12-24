@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.element.Paragraph;
 
 import java.util.Arrays;
 import java.util.List;
@@ -26,8 +27,8 @@ import org.commonmark.ext.gfm.tables.TableHead;
 import org.commonmark.ext.gfm.tables.TableRow;
 import org.commonmark.ext.gfm.tables.TablesExtension;
 
-public class CmRenderer {
-	private static final Logger LOG = LoggerFactory.getLogger(CmRenderer.class);
+public class CommonMarkRenderer {
+	private static final Logger LOG = LoggerFactory.getLogger(CommonMarkRenderer.class);
 
 	private static List<Extension> extensions = Arrays.asList(TablesExtension.create());
 	private static Parser parser = Parser.builder()
@@ -38,9 +39,10 @@ public class CmRenderer {
 	        .build();
 	private static MyVisitor visitor = new MyVisitor();
 
-	private static com.itextpdf.layout.element.Paragraph graph;
+	private static Paragraph graph;
 	
 	public static String renderAsHtml(String input) {
+		input = input.replace("&", "&amp;");
 		Node document = parser.parse(input);
 		String output = htmlRenderer.render(document);
 		String result = removeAll(output, "<p>");
@@ -82,8 +84,8 @@ public class CmRenderer {
 		}
 	}
 
-	public static com.itextpdf.layout.element.Paragraph renderToParagraph(String input) {
-		graph = new com.itextpdf.layout.element.Paragraph();
+	public static Paragraph renderToParagraph(String input) {
+		graph = new Paragraph();
 
 		Node document = parser.parse(input);
 		document.accept(visitor);
@@ -113,7 +115,7 @@ public class CmRenderer {
 	        if (strong) text.setItalic().setBold();
 	        if (table == true) {
 	        	Cell cell = new Cell();
-	        	cell.add(new com.itextpdf.layout.element.Paragraph(text));
+	        	cell.add(new Paragraph(text));
 	        	if (imbeddedTable != null)
 	        		imbeddedTable.addCell(cell);
 	        } else if (list == true) {

@@ -576,11 +576,13 @@ public class QuizAPI {
 			Files.copy(fileInputStream, outputPath);
 			result.put("success", true);
 			status = 200;
+			Flash.add(Flash.Code.SUCCESS, "Image was uploaded successfully.");
 		} catch (IOException ex) {
 			result.put("success", false);
 			result.put("error", ex.getClass().getSimpleName() + " : " + filename);
 			result.put("preventRetry", true);
 			status = 500;
+			Flash.add(Flash.Code.ERROR, "Image failed to upload.");
 		}
 		
 		return Response.status(status).entity(result).build();
@@ -656,7 +658,7 @@ public class QuizAPI {
 			difficulty = "EASY";
 		}
 		attributes.add(difficulty);
-		LOG.info("Attributes --> {}", attributes);
+		LOG.debug("Attributes --> {}", attributes);
 
 		// Get the existing question, and see if it has been deployed
 		Question original = Question.getByQuestionId(questionId);
@@ -702,6 +704,7 @@ public class QuizAPI {
 				}
 				
 				// Update user-changeable details, detecting changes
+				question = question.replace("&amp;", "&");
 				QuestionDetails details = new QuestionDetails(question, discussion, references, answers, correctAnswer, attachment);
 				if (details.compareTo(original.getDetails()) != 0) {
 					original.setDetails(details);
@@ -883,6 +886,7 @@ public class QuizAPI {
 			recipe = new Recipe();
 			recipe.setName(name);
 		}
+		script = script.replace("&amp;", "&");
 		recipe.setScript(script);
 		
 		// Save the recipe

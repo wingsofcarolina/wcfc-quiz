@@ -27,10 +27,10 @@ public class QuestionDetails {
 
 	public QuestionDetails(String question, String discussion, String references, List<String> answerText, Integer correct, String attachment) {
 
-		LOG.info("Question   --> {}", question);
-		LOG.info("Discussion --> {}", discussion);
-		LOG.info("References --> {}", references);
-		LOG.info("Attachment --> {}", attachment);
+		LOG.debug("Question   --> {}", question);
+		LOG.debug("Discussion --> {}", discussion);
+		LOG.debug("References --> {}", references);
+		LOG.debug("Attachment --> {}", attachment);
 
 		this.question = question;
 		this.discussion = discussion;
@@ -42,10 +42,10 @@ public class QuestionDetails {
 		for (String answer : answerText) {
 			if ( ! answer.isEmpty() ) {
 				if (correct == null) {
-					LOG.info("Answer{}    --> {}, fill in the blank", index, answer);
+					LOG.debug("Answer{}    --> {}, fill in the blank", index, answer);
 					answers.add(new Answer(answer));
 				} else {
-					LOG.info("Answer{}    --> {}, {}", index, answer, correct == index ? true : false);
+					LOG.debug("Answer{}    --> {}, {}", index, answer, correct == index ? true : false);
 					answers.add(new Answer(answer, correct == index ? true : false));
 				}
 				index++;

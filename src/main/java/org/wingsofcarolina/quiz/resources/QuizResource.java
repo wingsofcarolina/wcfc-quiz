@@ -639,6 +639,7 @@ public class QuizResource {
 			if (user != null && question != null) {
 				QuestionWrapper wrapper = new QuestionWrapper(user, question);
 				String output = renderer.render("updateQuestion.ad", wrapper).toString();
+				output = output.replace("&", "&amp;");
 				return Response.ok().entity(output).cookie(authUtils.generateCookie(user, question.getQuestionId())).build();
 			} else {
 				Flash.add(Flash.Code.WARN, "Question with ID " + questionId + " not found.");			
@@ -657,8 +658,10 @@ public class QuizResource {
 			Jws<Claims> claims = authUtils.validateUser(cookie.getValue());
 			User user = User.getWithClaims(claims);
 			if (user != null) {
-			    URI myUri = uri.getBaseUri();
-
+				URI myUri = new URI("https://quiz.wingsofcarolina.org/");
+				if (config.getMode().equals("DEV")) {
+					myUri = new URI("http://localhost:9314/");
+				}
 				RecipeWrapper wrapper = new RecipeWrapper(user, myUri);
 				String output = renderer.render("updateRecipe.ad", wrapper).toString();
 				return Response.ok().entity(output).cookie(authUtils.generateCookie(user)).build();

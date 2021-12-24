@@ -12,7 +12,7 @@ import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Transient;
 import org.wingsofcarolina.quiz.domain.dao.QuestionDAO;
 import org.wingsofcarolina.quiz.domain.persistence.Persistence;
-import org.wingsofcarolina.quiz.domain.presentation.CmRenderer;
+import org.wingsofcarolina.quiz.domain.presentation.CommonMarkRenderer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.itextpdf.layout.element.Paragraph;
@@ -218,12 +218,12 @@ public class Question {
 
 	@JsonIgnore
 	public String getQuestionAsHtml() {
-		return CmRenderer.renderAsHtml(details.getQuestion());
+		return CommonMarkRenderer.renderAsHtml(details.getQuestion());
 	}
 
 	@JsonIgnore
 	public Paragraph getQuestionAsIText() {
-		return CmRenderer.renderToParagraph(details.getQuestion());
+		return CommonMarkRenderer.renderToParagraph(details.getQuestion());
 	}
 
 	public void setQuestion(String question) {
@@ -236,7 +236,7 @@ public class Question {
 
 	@JsonIgnore
 	public String getReferencesAsHtml() {
-		return CmRenderer.renderAsHtml(details.getReference());
+		return CommonMarkRenderer.renderAsHtml(details.getReference());
 	}
 	
 	public void setReferences(String references) {
@@ -266,7 +266,7 @@ public class Question {
 
 	@JsonIgnore
 	public String getDiscussionAsHtml() {
-		return CmRenderer.renderAsHtml(details.getDiscussion());
+		return CommonMarkRenderer.renderAsHtml(details.getDiscussion());
 	}
 
 	public void setDiscussion(String discussion) {
