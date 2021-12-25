@@ -255,7 +255,7 @@ Fill in the Blank
 <#if question.deployed == true>
 ++++
 </br>
-<input type="checkbox" value=true name="overwrite">&nbsp;Overwrite previously deployed question?
+<input type="checkbox" value=true name="overwrite"> Overwrite previously deployed question?
 
 ++++
 </#if>
