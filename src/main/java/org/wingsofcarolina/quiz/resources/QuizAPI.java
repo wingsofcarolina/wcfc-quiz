@@ -494,9 +494,8 @@ public class QuizAPI {
 		Long maxID = 0L;
 
 //		// Validate that the user is permitted to perform this operation
-//		Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
-//		User user = User.getWithClaims(claims);
-		User user = User.getByEmail("dfrye@planez.co");
+		Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
+		User user = User.getWithClaims(claims);
 
 		// First delete all questions and recipes (shudder)
 		Recipe.drop();
@@ -583,6 +582,37 @@ public class QuizAPI {
 			result.put("preventRetry", true);
 			status = 500;
 			Flash.add(Flash.Code.ERROR, "Image failed to upload.");
+		}
+		
+		return Response.status(status).entity(result).build();
+	}
+	
+	@POST
+	@Path("deleteImage")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response deleteImage(@CookieParam("quiz.token") Cookie cookie, 
+			@FormDataParam("filename") String filename) throws AuthenticationException  {
+
+		int status = 200;
+		Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
+		User user = User.getWithClaims(claims);
+
+		// Create object for the return values
+		Map<String, Object> result = new HashMap<String,Object>();
+		
+		try {
+			java.nio.file.Path outputPath = FileSystems.getDefault().getPath(imageDir, filename);
+			Files.deleteIfExists(outputPath);
+			result.put("success", true);
+			status = 200;
+			Flash.add(Flash.Code.SUCCESS, "Image was deleted successfully.");
+		} catch (IOException ex) {
+			result.put("success", false);
+			result.put("error", ex.getClass().getSimpleName() + " : " + filename);
+			result.put("preventRetry", true);
+			status = 500;
+			Flash.add(Flash.Code.ERROR, "Image failed to delete.");
 		}
 		
 		return Response.status(status).entity(result).build();
@@ -875,26 +905,30 @@ public class QuizAPI {
 			@FormParam("script") String script
 			) throws Exception, AuthenticationException {
 		
-		Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
-		User user = User.getWithClaims(claims);
-
-		// Retrieve the recipe
-		Recipe recipe = Recipe.getRecipeById(recipeId);
-
-		// Create a new recipe, if needed
-		if (recipe == null) {
-			recipe = new Recipe();
-			recipe.setName(name);
+		if (cookie != null) {
+			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
+			User user = User.getWithClaims(claims);
+	
+			// Retrieve the recipe
+			Recipe recipe = Recipe.getRecipeById(recipeId);
+	
+			// Create a new recipe, if needed
+			if (recipe == null) {
+				recipe = new Recipe();
+				recipe.setName(name);
+			}
+			script = script.replace("&amp;", "&");
+			recipe.setScript(script);
+			
+			// Save the recipe
+			recipe.save();
+	
+			Flash.add(Flash.Code.SUCCESS, "Recipe type " + recipe.getName() + " updated.");
+	
+			return new RedirectResponse(Pages.RECIPE_PAGE).cookie(authUtils.generateCookie(user)).build();
+		} else {
+			return Response.status(401).entity("Not authorized.").build();
 		}
-		script = script.replace("&amp;", "&");
-		recipe.setScript(script);
-		
-		// Save the recipe
-		recipe.save();
-
-		Flash.add(Flash.Code.SUCCESS, "Recipe type " + recipe.getName() + " updated.");
-
-		return new RedirectResponse(Pages.RECIPE_PAGE).cookie(authUtils.generateCookie(user)).build();
 	}
 
 	@GET
