@@ -24,7 +24,10 @@ function query(msg, redirect) {
 </td></tr>
 
 <#if question.isSuperseded()>
-<tr><td valign="top">Superseded</td><td><strong>${question.getSupersededBy()}</strong> -- Question ${question.questionId} locked</td></tr>
+<tr><td valign="top">Superseded</td><td>
+<strong>
+<a href="${question.getSupersededBy()}">${question.getSupersededBy()}</a>
+</strong> -- Question ${question.questionId} locked</td></tr>
 </#if>
 
 <tr><td>Type</td><td><strong>
