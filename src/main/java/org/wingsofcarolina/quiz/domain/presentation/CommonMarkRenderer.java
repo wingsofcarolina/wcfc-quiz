@@ -42,7 +42,6 @@ public class CommonMarkRenderer {
 	private static Paragraph graph;
 	
 	public static String renderAsHtml(String input) {
-		input = input.replace("&", "&amp;");
 		Node document = parser.parse(input);
 		String output = htmlRenderer.render(document);
 		String result = removeAll(output, "<p>");

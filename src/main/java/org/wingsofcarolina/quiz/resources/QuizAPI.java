@@ -734,7 +734,6 @@ public class QuizAPI {
 				}
 				
 				// Update user-changeable details, detecting changes
-				question = question.replace("&amp;", "&");
 				QuestionDetails details = new QuestionDetails(question, discussion, references, answers, correctAnswer, attachment);
 				if (details.compareTo(original.getDetails()) != 0) {
 					original.setDetails(details);
@@ -917,7 +916,6 @@ public class QuizAPI {
 				recipe = new Recipe();
 				recipe.setName(name);
 			}
-			script = script.replace("&amp;", "&");
 			recipe.setScript(script);
 			
 			// Save the recipe

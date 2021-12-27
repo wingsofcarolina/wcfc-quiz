@@ -639,7 +639,6 @@ public class QuizResource {
 			if (user != null && question != null) {
 				QuestionWrapper wrapper = new QuestionWrapper(user, question);
 				String output = renderer.render("updateQuestion.ad", wrapper).toString();
-				output = output.replace("&", "&amp;");
 				return Response.ok().entity(output).cookie(authUtils.generateCookie(user, question.getQuestionId())).build();
 			} else {
 				Flash.add(Flash.Code.WARN, "Question with ID " + questionId + " not found.");			
