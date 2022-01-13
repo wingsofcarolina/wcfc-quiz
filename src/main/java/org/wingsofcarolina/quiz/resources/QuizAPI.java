@@ -616,6 +616,10 @@ public class QuizAPI {
 		new File(dataDir).mkdir();
 		new File(imageDir).mkdir();
 
+		// Fix the file name so that it is Linux-friendly and does not
+		// exhibit the perversion of having spaces in the name.
+		filename = filename.replace(" ", "_");
+		
 		// Create object for the return values
 		Map<String, Object> result = new HashMap<String,Object>();
 		LOG.info("Uploading image file : {}", filename);
