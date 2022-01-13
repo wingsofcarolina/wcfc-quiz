@@ -61,36 +61,22 @@ public class Pool {
 		pool.addAll(allQuestions);
 		return this;
 	}
-	
-    // Get a list of questions by category, filtered by attributes
-    public Pool questionsWithAny(List<String> atts) {
-		if (atts.contains(Attribute.ANY)) {
-			pool = Question.getAllQuestions();
-		} else {
-	    	List<Question> result = new ArrayList<Question>();
-	    	for (Question question : Question.getAllQuestions()) {
-	    		if (question.containsAny(atts)) {
-	    			result.add(question);
-	    		}
-	    	}
-	    	pool.addAll(result);
-		}
-		return this;
-    }
-    
+
     // Filter the list returning only those questions which contain the 
     // indicated attributes.
-    public Pool includeOnly(List<String> attributes) {
-    	List<Question> result = new ArrayList<Question>();
-    	for (Question question: pool) {
-    		if (question.containsAny(attributes)) {
-    			result.add(question);
-    		}
-    	}
+    public Pool getWithAll(List<String> attributes) {
+    	List<Question> result = Question.getWithAll(attributes);
     	this.pool = result;
     	return this;
     }
     
+    // Filter the list returning only those questions which contain the 
+    // indicated attributes.
+    public Pool getWithAny(List<String> attributes) {
+    	List<Question> result = Question.getWithAny(attributes);
+    	this.pool = result;
+    	return this;
+    }
     
     // Filter the list removing all those questions which contain the 
     // indicated attributes.

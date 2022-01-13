@@ -92,7 +92,7 @@ public class Quiz {
 		if (recipe.getScript() != null) {
 			Map<String, String> args = null;
 			String result = execute.run(recipe.getScript(), args );
-			LOG.info("Script returned : {}", result);
+			LOG.info("Script returned .............\n{}", result);
 		}
 		
 		// Add index/sequence numbers to the questions

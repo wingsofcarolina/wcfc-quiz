@@ -10,53 +10,53 @@ navbar:${user.userId}[buttons="HomeNavButton;ProfileNavButton", active="ProfileN
 
 ++++
 <script>
-    $(document).ready(function() {
-      $('input[type="file"]').change(function(e) {
-        handleImageUpload(e);
-      });
-    });	
-    
-   	const handleImageUpload = event => {
+
+	const sleep = (milliseconds) => {
+	  return new Promise(resolve => setTimeout(resolve, milliseconds))
+	}
+
+   	const handleImageUpload = async () => {
 	  const formData = new FormData()
 	  const files = $('#fileUpload')[0].files;
 	  formData.append('file', files[0]);
 	  formData.append('filename', files[0].name);
 	  
-    fetch('/api/uploadImage', {
+      const response = fetch('/api/uploadImage', {
 	    method: 'POST',
 	    body: formData
-	  })
-	  .then(response => response.json())
-	  .then(data => {
-	    console.log(data.path)
-	  })
-	  .then(location.replace("/"))
-	  .catch(error => {
-	    console.error(error)
+	  });
+	  if ( ! response.ok ) {
+	    console.log("Request failed.");
+	  } else {
+	    var stuff = await response.json();
+	  }
+	  sleep(1000).then(() => {
+			  window.location.reload(true)
 	  })
 	}
 
-   	const deleteImage = name => {
+   	const deleteImage = async (name) => {
 	  const formData = new FormData()
 	  formData.append('filename', name);
 	  
-    fetch('/api/deleteImage', {
+    const response = fetch('/api/deleteImage', {
 	    method: 'POST',
 	    body: formData
-	  })
-	  .then(response => response.json())
-	  .then(data => {
-	    console.log(data.path)
-	  })
-	  .then(location.replace("/"))
-	  .catch(error => {
-	    console.error(error)
-	  })
+	  });
+	  if ( ! response.ok ) {
+	    console.log("Request failed.");
+	  } else {
+	    var stuff = await response.json();
+	  }
+	  sleep(1000).then(() => {
+			  window.location.reload(true)
+	  })	  
 	}    
 </script>
 <div class="container">
 	<center><div style="font-size:30px;">Select File to Upload</div></center>
 	<input type="file" id="fileUpload" accept="image/png, image/jpg">
+	<button onclick=handleImageUpload()>Upload</button>
 </div>
 <hr>
    

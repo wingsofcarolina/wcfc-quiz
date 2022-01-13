@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -393,16 +394,29 @@ public class QuizResource {
 	@Produces("text/html")
 	public Response report(@CookieParam("quiz.token") Cookie cookie,
 			@PathParam("attribute") String attribute,
-			@QueryParam("alphabetical") Boolean alphabetical) throws AuthenticationException, IOException {
+			@QueryParam("alphabetical") Boolean alphabetical,
+			@QueryParam("superseded") Boolean superseded) throws AuthenticationException, IOException {
 
 		// We only check to see if ?alphabetical is in the URL, not the value
 		// of the parameter. IF it exists at all, we sort, otherwise we don't.
 		alphabetical = alphabetical == null ? false : true;
+		superseded = superseded == null ? false : true;
 		
 		if (cookie != null) {
 			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.USER);
 			User user = User.getWithClaims(claims);
 			List<Question> questions = Question.getByAttribute(attribute);
+			
+			// Weed out any superseded questions.
+			if ( ! superseded) {
+				Iterator<Question> it = questions.iterator();
+				while (it.hasNext()) {
+					Question question = it.next();
+					if (question.isSuperseded()) {
+						it.remove();
+					}
+				}
+			}
 			
 			// Optionally, sort alphabetically by question
 			if (alphabetical) {

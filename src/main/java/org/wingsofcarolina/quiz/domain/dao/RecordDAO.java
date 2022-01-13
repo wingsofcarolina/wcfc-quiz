@@ -1,5 +1,7 @@
 package org.wingsofcarolina.quiz.domain.dao;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.Datastore;
@@ -24,5 +26,16 @@ public class RecordDAO extends BasicDAO<Record, ObjectId> {
 		} else {
 			return null;
 		}
+	}
+
+	public Set<Long> getDeployedIds() {
+		Set<Long> bucket = new HashSet<Long>();
+		List<Record> records = getDatastore().find(Record.class).asList();
+
+		for (Record record : records) {
+			bucket.addAll(record.getQuestionIds());
+		}
+		
+		return bucket;
 	}
 }

@@ -64,29 +64,43 @@ public class QuestionDAO extends BasicDAO<Question, ObjectId> {
 		}
 	}
 	
-	public List<Question> getSelectedWithAll(List<String> attributes) {
+	public List<Question> getWithAll(List<String> attributes) {
 		if (attributes == null || attributes.isEmpty()) {
 			return null;
 		} else {
 			Query<Question> query = getDatastore().createQuery(Question.class).disableValidation();
-	
-			if (attributes.size() == 1) {
-				query.filter("attributes = ", attributes.get(0));
-			} else {
-				query.filter("attributes = ", attributes);
-			}
-			query.get();
+			
+			query.field("attributes").hasAllOf(attributes).get();
 			
 			List<Question> result = query.order("questionid").asList();
 			return result;
 		}
 	}
 
+	public List<Question> getWithAny(List<String> attributes) {
+		if (attributes == null || attributes.isEmpty()) {
+			return null;
+		} else {
+			Query<Question> query = getDatastore().createQuery(Question.class).disableValidation();
+			
+			query.field("attributes").hasAnyOf(attributes).get();
+
+			
+			List<Question> result = query.order("questionid").asList();
+			return result;
+		}
+	}
+	
 	public List<Question> getAllQuarantined() {
 		List<Question> result = getDatastore().find(Question.class).filter("quarantined = ", true).asList();
 		return result;
 	}
 	
+	public List<Question> getSuperseded() {
+		List<Question> result = getDatastore().find(Question.class).filter("supersededBy != ", -1).asList();
+		return result;
+	}
+		
 	public void drop() {
 		getDatastore().getCollection(Question.class).drop();
 	}

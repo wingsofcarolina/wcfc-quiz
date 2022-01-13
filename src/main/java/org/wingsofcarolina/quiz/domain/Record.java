@@ -3,6 +3,7 @@ package org.wingsofcarolina.quiz.domain;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Id;
@@ -78,6 +79,11 @@ public class Record {
 		return recordDAO.getByQuizId(id);
 	}
 
+	public static Set<Long> getActiveIds() {
+		RecordDAO recordDAO = (RecordDAO) Persistence.instance().get(Record.class);
+		return recordDAO.getDeployedIds();
+	}
+	
 	@SuppressWarnings("unchecked")
 	public void save() {
 		Persistence.instance().get(Question.class).save(this);

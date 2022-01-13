@@ -54,27 +54,33 @@ function do_click(href) {
 <li><button onclick="window.location.href = 'chart/FAR';">Chart</button> &nbsp;
 	<button onclick="do_click('allQuestions/FAR');">All Questions</button> &nbsp;
 	<a href="report/FAR">FAR Questions</a> 
-	<a href="report/FAR?alphabetical">(Question Sort)</a>
+	<a href="report/FAR?alphabetical">(Alphabetical Order)</a>
+	<a href="report/FAR?superseded">(With Superseded)</a>
 <li><button onclick="window.location.href = 'chart/SOP';">Chart</button> &nbsp;
 	<button onclick="do_click('allQuestions/SOP');">All Questions</button> &nbsp;
 	<a href="report/SOP">SOP Questions</a>
-	<a href="report/SOP?alphabetical">(Question Sort)</a>
+	<a href="report/SOP?alphabetical">(Alphabetical Order)</a>
+	<a href="report/SOP?superseded">(With Superseded)</a>
 <li><button onclick="window.location.href = 'chart/C152';">Chart</button> &nbsp;
 	<button onclick="do_click('allQuestions/C152');">All Questions</button> &nbsp;
 	<a href="report/C152">Cessna 152 Questions</a>
-	<a href="report/C152?alphabetical">(Question Sort)</a>
+	<a href="report/C152?alphabetical">(Alphabetical Order)</a>
+	<a href="report/C152?superseded">(With Superseded)</a>
 <li><button onclick="window.location.href = 'chart/C172';">Chart</button> &nbsp;
 	<button onclick="do_click('allQuestions/C172');">All Questions</button> &nbsp;
 	<a href="report/C172">Cessna 172 Questions</a>
-	<a href="report/C172?alphabetical">(Question Sort)</a>
+	<a href="report/C172?alphabetical">(Alphabetical Order)</a>
+	<a href="report/C172?superseded">(With Superseded)</a>
 <li><button onclick="window.location.href = 'chart/PA28';">Chart</button> &nbsp;
 	<button onclick="do_click('allQuestions/PA28');">All Questions</button> &nbsp;
 	<a href="report/PA28">Warrior Questions</a>
-	<a href="report/PA28?alphabetical">(Question Sort)</a>
+	<a href="report/PA28?alphabetical">(Alphabetical Order)</a>
+	<a href="report/PA28?superseded">(With Superseded)</a>
 <li><button onclick="window.location.href = 'chart/M20J';">Chart</button> &nbsp;
 	<button onclick="do_click('allQuestions/M20J');">All Questions</button> &nbsp;
 	<a href="report/M20J">Mooney Questions</a>
-	<a href="report/M20J?alphabetical">(Question Sort)</a>
+	<a href="report/M20J?alphabetical">(Alphabetical Order)</a>
+	<a href="report/M20J?superseded">(With Superseded)</a>
 </ul>
 
 <b>Question management :</b>

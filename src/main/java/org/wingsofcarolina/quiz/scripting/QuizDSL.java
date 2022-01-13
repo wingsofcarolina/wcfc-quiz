@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wingsofcarolina.quiz.domain.Question;
 import org.wingsofcarolina.quiz.domain.Section;
+import org.wingsofcarolina.quiz.resources.Quiz;
 import org.wingsofcarolina.quiz.resources.QuizContext;
 
 import groovy.lang.Script;
@@ -79,9 +80,16 @@ public abstract class QuizDSL extends Script {
         	LOG.info("Applying collected section : {}", name);
     	}
     	if (section != null) {
-	    	List<Question> questions = new ArrayList<Question>();
-	    	questions.addAll(section.getQuestions());
-	    	context.getQuiz().addAll(questions);
+	    	Quiz quiz = context.getQuiz();
+	    	for (Question question : section.getQuestions()) {
+	    		quiz.addQuestion(question);
+			
+				// Make note that the question has now been 'deployed'
+				if ( ! context.getTestRun() && ! question.getDeployed()) {
+					question.setDeployed(true);
+					question.save();
+				}
+	    	}
     	} else {
     		if (context.getTestRun()) {
             	System.out.println("<br>ERROR : Attempted to add an empty/null section to the quiz. Why?");
@@ -115,14 +123,6 @@ public abstract class QuizDSL extends Script {
 		    				System.out.println("<br>This was a superseded question! Bad! Superseded by : " + entity.getSupersededBy());
 		    			}
 		    		}
-					
-					// Make note that the question has now been 'deployed'
-					if (context.getConfiguration().getMode().contentEquals("PROD")) {
-						if ( ! entity.getDeployed()) {
-							entity.setDeployed(true);
-							entity.save();
-						}
-					}
 				} else {
 		    		if (context.getTestRun()) {
 		    			System.out.println("<br>Rejected " + entity.getQuestionId() + " because it is excluded/empty/quarantined/already-selected.");
@@ -159,7 +159,10 @@ public abstract class QuizDSL extends Script {
 					if ( ! excluded(entity) && !alreadySelected(entity)) {
 						// Add it and keep track of the count
 						section.addSelection(entity);
-						
+			    		if (context.getTestRun()) {
+			    			System.out.println("<br>Added to quiz : " + entity.getQuestionId() + "\n");
+			    		}
+
 						// Make note that the question has now been 'deployed'
 						if (context.getConfiguration().getMode().contentEquals("PROD")) {
 							if ( ! entity.getDeployed()) {
@@ -206,13 +209,17 @@ public abstract class QuizDSL extends Script {
     	}
     }
     
-    // Get a list of questions by question IDs
-    public Pool require(List<Integer> questionIds) {
-    	Set<Question> questions = new HashSet<Question>();
+    // Add to the section (not pool) all (resolved) questions listed
+    // in the question ID list provided.
+    public void require(List<Integer> questionIds) {
     	for (Integer id : questionIds) {
     		Question question = Question.getByQuestionId(new Long(id));
+    		question = resolve(question);
     		if (question != null) {
     			section.addRequired(question);
+	    		if (context.getTestRun()) {
+	    			System.out.println("<br>Added to quiz : " + question.getQuestionId() + "\n");
+	    		}
     		} else {
     			if (context.getTestRun()) {
             		System.out.println("<br>ERROR : Requested question " + id + " not found");
@@ -221,11 +228,19 @@ public abstract class QuizDSL extends Script {
     			}
     		}
     	}
-    	return new Pool(new ArrayList<Question>(questions));
     }
    
-    public Pool questionsWithAny(List<String> atts) {
-    	return new Pool().questionsWithAny(atts);
+    // Return a pool of questions which match any of the supplied attributes. This
+    // can result in a very large question pool potentially spanning multiple aircraft
+    // types. This is essentially an inclusive OR operation on the attributes.Be ware.
+    public Pool getWithAny(List<String> attributes) {
+    	return new Pool().getWithAll(attributes);
+    }
+    
+    // Return a pool of questions which match ALL of the supplied attributes. This
+    // is essentially an inclusive AND operation on the attributes.
+    public Pool getWithAll(List<String> attributes) {
+    	return new Pool().getWithAny(attributes);
     }
     
     ///////////////////////////////////////
@@ -278,9 +293,6 @@ public abstract class QuizDSL extends Script {
 	private Question resolve(Question question) {
 		while (question != null && question.isSuperseded()) {
 			long nextId = question.getSupersededBy();
-			if ( ! context.getTestRun()) {
-				LOG.info("Question {} superseded by {}", question.getQuestionId(), nextId);
-			}
 			Question tmp = Question.getByQuestionId(nextId);
 			if (tmp == null) {
 				System.out.println("<br>Found a null entity from resolve(" + question.getQuestionId() + "), shouldn't happen! Fixing.");

@@ -12,10 +12,13 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -100,6 +103,52 @@ public class QuizAPI {
 		dateFormatGmt.setTimeZone(TimeZone.getTimeZone("GMT"));
 	}
 	
+	@GET
+	@Path("explore")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response explore(@CookieParam("quiz.token") Cookie cookie) throws Exception, AuthenticationException {
+		Set<Question> remove = new HashSet<Question>();
+
+//		List<Question> result = Question.getWithAny(Arrays.asList("C152", "SYSTEMS", "STUDENT"));
+		Set<Long> active = Record.getActiveIds();
+		List<Question> superseded = Question.getSuperseded();
+		for (Question question : superseded) {
+			System.out.print("Question " + question.getQuestionId());
+			remove.addAll(followChain(question, active));
+		}
+		
+		for (Question question : remove) {
+			System.out.println("Removing : " + question.getQuestionId());
+			question.delete();
+		}
+		
+		return Response.ok().entity(superseded).build();
+	}
+	
+	private Set<Question> followChain(Question question, Set<Long> active) {
+		// Question 2002 active, superseded by 2360 superseded by 2361 active, superseded by 2362
+		Set<Question> remove = new HashSet<Question>();
+		Question previous = question;
+		do {
+			if (active.contains(question.getQuestionId())) {
+				previous = question;
+				System.out.print(" (active), superseded by " + question.getSupersededBy());
+			} else {
+//				System.out.print(" superseded by " + question.getSupersededBy());
+				System.out.println("");
+				System.out.print("    " + previous.getQuestionId() + " now superseded by " + question.getSupersededBy());
+				
+				previous.setSupersededBy(question.getSupersededBy());
+				previous.save();
+				remove.add(question);
+			}
+			question = Question.getByQuestionId(question.getSupersededBy());
+			if (question == null) break;
+		} while (question.getSupersededBy() != -1);
+		System.out.println();
+		return remove;
+	}
+
 	@GET
 	@Path("allRecipes")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -569,19 +618,34 @@ public class QuizAPI {
 
 		// Create object for the return values
 		Map<String, Object> result = new HashMap<String,Object>();
-
-		try {
-			java.nio.file.Path outputPath = FileSystems.getDefault().getPath(imageDir, filename);
-			Files.copy(fileInputStream, outputPath);
-			result.put("success", true);
-			status = 200;
-			Flash.add(Flash.Code.SUCCESS, "Image was uploaded successfully.");
-		} catch (IOException ex) {
+		LOG.info("Uploading image file : {}", filename);
+		
+		File file = new File(imageDir + "/" + filename);
+		LOG.info("Checking to see if '{}' exists", imageDir + "/" + filename);
+		
+		if ( ! file.exists()) {
+			try {
+				java.nio.file.Path outputPath = FileSystems.getDefault().getPath(imageDir, filename);
+				Files.copy(fileInputStream, outputPath);
+				result.put("success", true);
+				status = 200;
+				LOG.info("Image file upload succeeded.");
+				Flash.add(Flash.Code.SUCCESS, "Image was uploaded successfully.");
+			} catch (IOException ex) {
+				result.put("success", false);
+				result.put("error", ex.getClass().getSimpleName() + " : " + filename);
+				result.put("preventRetry", true);
+				status = 500;
+				LOG.info("Image file upload failed.");
+				Flash.add(Flash.Code.ERROR, "Image failed to upload.");
+			}
+		} else {
 			result.put("success", false);
-			result.put("error", ex.getClass().getSimpleName() + " : " + filename);
+			result.put("error", "Image by that name already exists.");
 			result.put("preventRetry", true);
 			status = 500;
-			Flash.add(Flash.Code.ERROR, "Image failed to upload.");
+			LOG.info("Image by that name already exists.");
+			Flash.add(Flash.Code.ERROR, "Image by that name already exists.");	
 		}
 		
 		return Response.status(status).entity(result).build();
@@ -790,17 +854,17 @@ public class QuizAPI {
 
 		Question newQuestion;
 
-		LOG.info("Type       --> {}", typeName);
-		LOG.info("Category   --> {}", categoryName);
-		LOG.info("Question   --> {}", question);
-		LOG.info("Discussion --> {}", discussion);
-		LOG.info("References --> {}", references);
-		LOG.info("Attributes --> {}", attributes);
-		LOG.info("Attachment --> {}", attachment);
+		LOG.debug("Type       --> {}", typeName);
+		LOG.debug("Category   --> {}", categoryName);
+		LOG.debug("Question   --> {}", question);
+		LOG.debug("Discussion --> {}", discussion);
+		LOG.debug("References --> {}", references);
+		LOG.debug("Attributes --> {}", attributes);
+		LOG.debug("Attachment --> {}", attachment);
 
 		// Add the difficulty to the attributes
 		attributes.add(difficulty);
-		LOG.info("Attributes --> {}", attributes);
+		LOG.debug("Attributes --> {}", attributes);
 
 		Type type = null;
 		Category category = null;

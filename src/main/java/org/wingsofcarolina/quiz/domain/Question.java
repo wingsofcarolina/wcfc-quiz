@@ -321,6 +321,21 @@ public class Question {
 		return questionDao.getAllQuarantined();
 	}
 	
+	public static List<Question> getWithAll(List<String> attributes) {
+		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
+		return questionDao.getWithAll(attributes);
+	}
+
+	public static List<Question> getWithAny(List<String> attributes) {
+		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
+		return questionDao.getWithAny(attributes);
+	}
+
+	public static List<Question> getSuperseded() {
+		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
+		return questionDao.getSuperseded();
+	}
+
 	@SuppressWarnings("unchecked")
 	public void save() {
 		Persistence.instance().get(Question.class).save(this);
