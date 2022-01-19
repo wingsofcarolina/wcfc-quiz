@@ -10,7 +10,9 @@ import javax.ws.rs.core.UriBuilder;
 public class RedirectResponse extends AbstractResponse {
 	private String uriString;
 	private NewCookie cookies = null;
-
+	private String headerName = null;
+	private String headerValue = null;
+	
 	public RedirectResponse() {
 		super();
 	}
@@ -31,6 +33,15 @@ public class RedirectResponse extends AbstractResponse {
 		if (cookies != null) {
 			resp.cookie(cookies);
 		}
+		if (headerName != null && headerValue != null) {
+			resp.header(headerName, headerValue);
+		}
 		return resp.build();
+	}
+
+	public RedirectResponse header(String headerName, String headerValue) {
+		this.headerName = headerName;
+		this.headerValue = headerValue;
+		return this;
 	}
 }

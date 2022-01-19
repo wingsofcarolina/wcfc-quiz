@@ -29,6 +29,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Cookie;
+import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
@@ -136,7 +137,8 @@ public class QuizResource {
 			output = output.replaceAll("\\s", "&nbsp;&nbsp;");
 					
 			String rendered = renderer.render("version.ad", new JsonWrapper(user, output)).toString();
-			return Response.ok().entity(rendered).cookie(authUtils.generateCookie(user)).build();
+			NewCookie newCookie = authUtils.generateCookie(user);
+			return Response.ok().entity(rendered).header("Set-Cookie", AuthUtils.sameSite(newCookie)).build();
 		} else {
 			Flash.add(Flash.Code.ERROR, "Something went wrong generating version data.");
 			return new RedirectResponse(Pages.HOME_PAGE).build();
@@ -160,7 +162,8 @@ public class QuizResource {
 
 			String rendered = renderer.render("gallery.ad",
 					new FileListWrapper(user, config.getImageRoot(), listOfFiles)).toString();
-			return Response.ok().entity(rendered).cookie(authUtils.generateCookie(user)).build();
+			NewCookie newCookie = authUtils.generateCookie(user);
+			return Response.ok().entity(rendered).header("Set-Cookie", AuthUtils.sameSite(newCookie)).build();
 		} else {
 			Flash.add(Flash.Code.ERROR, "Something went wrong generating version data.");
 			return new RedirectResponse(Pages.HOME_PAGE).build();
@@ -175,7 +178,8 @@ public class QuizResource {
 			User user = User.getWithClaims(claims);
 			if (user != null) {
 				String output = renderer.render("home.ad", new Wrapper(user));
-				return Response.ok().entity(output).cookie(authUtils.generateCookie(user)).build();
+				NewCookie newCookie = authUtils.generateCookie(user);
+				return Response.ok().entity(output).header("Set-Cookie", AuthUtils.sameSite(newCookie)).build();
 			} else {
 				return Response.status(404).build();
 			}
@@ -193,7 +197,8 @@ public class QuizResource {
 			User user = User.getWithClaims(claims);
 			if (user != null) {
 				String output = renderer.render("createExclusion.ad", new Wrapper(user));
-				return Response.ok().entity(output).cookie(authUtils.generateCookie(user)).build();
+				NewCookie newCookie = authUtils.generateCookie(user);
+				return Response.ok().entity(output).header("Set-Cookie", AuthUtils.sameSite(newCookie)).build();
 			} else {
 				return Response.status(404).build();
 			}
@@ -237,7 +242,8 @@ public class QuizResource {
 			User user = User.getWithClaims(claims);
 			if (user != null) {
 				String output = renderer.render("profile.ad", new Wrapper(user)).toString();
-				return Response.ok().entity(output).cookie(authUtils.generateCookie(user)).build();
+				NewCookie newCookie = authUtils.generateCookie(user);
+				return Response.ok().entity(output).header("Set-Cookie", AuthUtils.sameSite(newCookie)).build();
 			} else {
 				return Response.status(404).build();
 			}
@@ -304,7 +310,8 @@ public class QuizResource {
 				return Response.ok().type("application/pdf").entity(inputStream).build();
 			} else {
 				Flash.add(Flash.Code.ERROR, "Requested question \"" + questionId + "\" not found.");
-				return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
+				NewCookie newCookie = authUtils.generateCookie(user);
+				return new RedirectResponse(Pages.HOME_PAGE).header("Set-Cookie", AuthUtils.sameSite(newCookie)).build();
 			}
 		} else {
 			return new RedirectResponse(Pages.LOGIN_PAGE).build();
@@ -335,14 +342,17 @@ public class QuizResource {
 
 					QuestionWrapper wrapper = new QuestionWrapper(user, question);
 					String output = renderer.render(Templates.PREVIEW_KEY, wrapper).toString();
-					return Response.ok().entity(output).cookie(authUtils.generateCookie(user)).build();
+					NewCookie newCookie = authUtils.generateCookie(user);
+					return Response.ok().entity(output).header("Set-Cookie", AuthUtils.sameSite(newCookie)).build();
 				} else {
 					Flash.add(Flash.Code.ERROR, "Requested question \"" + questionId + "\" not found.");
-					return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
+					NewCookie newCookie = authUtils.generateCookie(user);
+					return new RedirectResponse(Pages.HOME_PAGE).header("Set-Cookie", AuthUtils.sameSite(newCookie)).build();
 				}
 			} catch (NumberFormatException ex) {
 				Flash.add(Flash.Code.ERROR, "Invalid question ID \"" + questionId + "\" entered.");
-				return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
+				NewCookie newCookie = authUtils.generateCookie(user);
+				return new RedirectResponse(Pages.HOME_PAGE).header("Set-Cookie", AuthUtils.sameSite(newCookie)).build();
 			}
 		} else {
 			return new RedirectResponse(Pages.LOGIN_PAGE).build();
@@ -375,14 +385,17 @@ public class QuizResource {
 
 					QuestionWrapper wrapper = new QuestionWrapper(user, question);
 					String output = renderer.render("showQuestion.ad", wrapper).toString();
-					return Response.ok().entity(output).cookie(authUtils.generateCookie(user)).build();
+					NewCookie newCookie = authUtils.generateCookie(user);
+					return Response.ok().entity(output).header("Set-Cookie", AuthUtils.sameSite(newCookie)).build();
 				} else {
 					Flash.add(Flash.Code.ERROR, "Requested question \"" + id + "\" not found.");
-					return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
+					NewCookie newCookie = authUtils.generateCookie(user);
+					return new RedirectResponse(Pages.HOME_PAGE).header("Set-Cookie", AuthUtils.sameSite(newCookie)).build();
 				}
 			} catch (NumberFormatException ex) {
 				Flash.add(Flash.Code.ERROR, "Invalid question ID \"" + id + "\" entered.");
-				return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
+				NewCookie newCookie = authUtils.generateCookie(user);
+				return new RedirectResponse(Pages.HOME_PAGE).header("Set-Cookie", AuthUtils.sameSite(newCookie)).build();
 			}
 		} else {
 			return new RedirectResponse(Pages.LOGIN_PAGE).build();
@@ -427,7 +440,8 @@ public class QuizResource {
 
 			CategoryReportWrapper wrapper = new CategoryReportWrapper(user, questions, attribute);
 			String output = renderer.render("reportCategory.ad", wrapper).toString();
-			return Response.ok().entity(output).cookie(authUtils.generateCookie(user)).build();
+			NewCookie newCookie = authUtils.generateCookie(user);
+			return Response.ok().entity(output).header("Set-Cookie", AuthUtils.sameSite(newCookie)).build();
 		} else {
 			return new RedirectResponse(Pages.LOGIN_PAGE).build();
 		}
@@ -444,7 +458,8 @@ public class QuizResource {
 			List<Question> questions = Question.getAllQuarantined();
 			QuestionListWrapper wrapper = new QuestionListWrapper(user, questions);
 			String output = renderer.render("quarantinedReport.ad", wrapper).toString();
-			return Response.ok().entity(output).cookie(authUtils.generateCookie(user)).build();
+			NewCookie newCookie = authUtils.generateCookie(user);
+			return Response.ok().entity(output).header("Set-Cookie", AuthUtils.sameSite(newCookie)).build();
 		} else {
 			return new RedirectResponse(Pages.LOGIN_PAGE).build();
 		}
@@ -464,7 +479,8 @@ public class QuizResource {
 			CategoryChartWrapper wrapper = new CategoryChartWrapper(user, questions, attribute);
 			
 			String output = renderer.render("chartCategory.ad", wrapper).toString();
-			return Response.ok().entity(output).cookie(authUtils.generateCookie(user)).build();
+			NewCookie newCookie = authUtils.generateCookie(user);
+			return Response.ok().entity(output).header("Set-Cookie", AuthUtils.sameSite(newCookie)).build();
 		} else {
 			return new RedirectResponse(Pages.LOGIN_PAGE).build();
 		}
@@ -488,7 +504,8 @@ public class QuizResource {
 				return Response.ok().type("application/pdf").entity(inputStream).build();
 			} else {
 				Flash.add(Flash.Code.ERROR, "Questions in requested category \"" + attribute + "\" not found.");
-				return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
+				NewCookie newCookie = authUtils.generateCookie(user);
+				return new RedirectResponse(Pages.HOME_PAGE).header("Set-Cookie", AuthUtils.sameSite(newCookie)).build();
 			}
 		} else {
 			return new RedirectResponse(Pages.LOGIN_PAGE).build();
@@ -517,10 +534,12 @@ public class QuizResource {
 				output = output.replaceAll("\\s", "&nbsp;&nbsp;");
 						
 				String rendered = renderer.render("recipe.ad", new JsonWrapper(user, output)).toString();
-				return Response.ok().entity(rendered).cookie(authUtils.generateCookie(user)).build();
+				NewCookie newCookie = authUtils.generateCookie(user);
+				return Response.ok().entity(rendered).header("Set-Cookie", AuthUtils.sameSite(newCookie)).build();
 			} else {
 				Flash.add(Flash.Code.ERROR, "Requested recipe for \"" + name + "\" not found.");
-				return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
+				NewCookie newCookie = authUtils.generateCookie(user);
+				return new RedirectResponse(Pages.HOME_PAGE).header("Set-Cookie", AuthUtils.sameSite(newCookie)).build();
 			}
 		} else {
 			return new RedirectResponse(Pages.LOGIN_PAGE).build();
@@ -537,7 +556,8 @@ public class QuizResource {
 			if (user != null) {
 				QuestionWrapper wrapper = new QuestionWrapper(user);
 				String output = renderer.render("addQuestion.ad", wrapper).toString();
-				return Response.ok().entity(output).cookie(authUtils.generateCookie(user)).build();
+				NewCookie newCookie = authUtils.generateCookie(user);
+				return Response.ok().entity(output).header("Set-Cookie", AuthUtils.sameSite(newCookie)).build();
 			} else {
 				return Response.status(404).build();
 			}
@@ -579,7 +599,8 @@ public class QuizResource {
 				List<Question> questions = Question.getQuestionsLimited(skip, pageCount);
 				QuestionListWrapper wrapper = new QuestionListWrapper(user, questions, skip, pageCount);
 				String output = renderer.render("browseQuestions.ad", wrapper).toString();
-				return Response.ok().entity(output).cookie(authUtils.generateCookie(user)).build();
+				NewCookie newCookie = authUtils.generateCookie(user);
+				return Response.ok().entity(output).header("Set-Cookie", AuthUtils.sameSite(newCookie)).build();
 			} else {
 				return Response.status(404).build();
 			}
@@ -621,7 +642,8 @@ public class QuizResource {
 				}
 				QuestionListWrapper wrapper = new QuestionListWrapper(user, questions);
 				String output = renderer.render("searchQuestions.ad", wrapper).toString();
-				return Response.ok().entity(output).cookie(authUtils.generateCookie(user)).build();
+				NewCookie newCookie = authUtils.generateCookie(user);
+				return Response.ok().entity(output).header("Set-Cookie", AuthUtils.sameSite(newCookie)).build();
 			} else {
 				return Response.status(404).build();
 			}
@@ -677,7 +699,8 @@ public class QuizResource {
 				}
 				RecipeWrapper wrapper = new RecipeWrapper(user, myUri);
 				String output = renderer.render("updateRecipe.ad", wrapper).toString();
-				return Response.ok().entity(output).cookie(authUtils.generateCookie(user)).build();
+				NewCookie newCookie = authUtils.generateCookie(user);
+				return Response.ok().entity(output).header("Set-Cookie", AuthUtils.sameSite(newCookie)).build();
 			} else {
 				return new RedirectResponse(Pages.LOGIN_PAGE).build();
 			}

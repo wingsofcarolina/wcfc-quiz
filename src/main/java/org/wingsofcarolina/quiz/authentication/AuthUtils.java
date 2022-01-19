@@ -40,6 +40,15 @@ public class AuthUtils {
 		parser = Jwts.parser().setSigningKey(key);
 	}
 	
+	// The following header hack is due to (a) Chrome demanding SameSite be set
+	// and (b) NewCookie having no way to freaking do that. WTF people? So instead
+	// of using the .cookie() call on the Response the cookie gets turned into a
+	// String, and the SameSite setting gets added to the end, and the .header()
+	// function is used instead. What a hack.
+	public static String sameSite(NewCookie cookie) {
+		return cookie.toString() + ";SameSite=none";
+	}
+	
 	public SecretKeySpec getKey() {
 		return key;
 	}
