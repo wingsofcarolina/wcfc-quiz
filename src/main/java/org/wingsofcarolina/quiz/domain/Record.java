@@ -71,6 +71,12 @@ public class Record {
 		questionIds.add(index);
 	}
 	
+	@Override
+	public String toString() {
+		return "Record [quizId=" + quizId + ", quizName=" + quizName + ", category=" + category + ", createdDate="
+				+ createdDate + ", questionIds=" + questionIds + "]";
+	}
+
 	/*
 	 * Database Management Functionality
 	 */

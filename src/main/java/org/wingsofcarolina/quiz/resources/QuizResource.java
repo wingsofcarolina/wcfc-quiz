@@ -273,6 +273,7 @@ public class QuizResource {
 			// Store the quiz question set for later retrieval
 			Record record = quiz.getRecord();
 			record.save();
+			LOG.info(record.toString());
 
 			Slack.instance().sendMessage("Quiz '" + quiz.getQuizName() + "' requested at " + dateFormatGmt.format(new Date()));
 			ByteArrayInputStream inputStream = generator.generate(quiz);
