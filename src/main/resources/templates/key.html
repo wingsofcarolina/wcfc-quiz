@@ -22,15 +22,7 @@
 <#list questions as question>
 <b>${question.index}</b> : ${question.getQuestionAsHtml()} 
 	<i>(${question.questionId})</i></br>
-&nbsp;&nbsp;&nbsp;
-<i>{ ${question.category}&nbsp;/&nbsp;
-<#list question.attributes as attribute>
-<#if attribute??>
-${attribute}&nbsp;
-</#if>
-</#list>
-}</i></p>
-
+<p>
 <#assign index = 0>
 <#if question.answers??>
 <#list question.answers as answer>
@@ -68,6 +60,14 @@ Correct Answer is : <strong>${seq[index]}</strong></br>
 <b>References :</b> ${question.getReferencesAsHtml()}</p>
 <b>CFI Discussion :</b> </br>
 ${question.getDiscussionAsHtml()}</p>
+
+<i>{ ${question.category}&nbsp;/&nbsp;
+<#list question.attributes as attribute>
+<#if attribute??>
+${attribute}&nbsp;
+</#if>
+</#list>
+}</i></p>
 <hr>
 </#list>
 </div>
