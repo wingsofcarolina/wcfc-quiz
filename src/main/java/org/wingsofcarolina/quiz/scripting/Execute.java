@@ -56,6 +56,8 @@ public class Execute {
         PrintStream origOut = System.out;
         PrintStream origErr = System.err;
         PrintStream newStream = new PrintStream(baos);
+        binding.setProperty("out", newStream);
+        binding.setProperty("err", newStream);
         System.setOut(newStream);
         System.setErr(newStream);
         try {

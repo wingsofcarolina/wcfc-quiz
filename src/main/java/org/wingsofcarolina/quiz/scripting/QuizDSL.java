@@ -32,14 +32,19 @@ public abstract class QuizDSL extends Script {
 
     // Implement classic Groovy method/property missing behavior
     public Object propertyMissing(String name) {
-        LOG.info("propertyMissing called with ---> {}", name);
+        if (context.getTestRun()) {
+            System.out.println("propertyMissing called with ---> " + name + "<br>");
+        } else {
+            LOG.info("propertyMissing called with ---> {}", name);
+        }
         return null;
     }
     public Object methodMissing(String name, Object args) {
         List<Object> argsList = Arrays.asList((Object[]) args);
-        LOG.info("methodMissing called for ---> {}", name);
         if (context.getTestRun()) {
         	System.out.println("ERROR : methodMissing called for : " + name + "</br>");
+        } else {
+        	LOG.info("methodMissing called for ---> {}", name);
         }
         return "methodMissing called with name '" + name + "' and args = " + argsList;
     }
@@ -99,7 +104,7 @@ public abstract class QuizDSL extends Script {
 				}
 				
 				// Stop when the quiz is full
-				if (quiz.getMaxCount() != null && quiz.getQuestions().size() >= quiz.getMaxCount() - 1) {
+				if (quiz.getMaxCount() != null && quiz.getQuestions().size() >= quiz.getMaxCount()) {
 					break;
 				}
 	    	}
@@ -277,6 +282,20 @@ public abstract class QuizDSL extends Script {
     	    }
     	}
     	return new Pool(list);
+    }
+    
+    // Combine two pools such that the resulting pool is treated as a set,
+    // in that if a question exists in both pools it is reflected only once
+    // in the resulting combined pool.
+    public Pool combine( Pool pool1, Pool pool2) {
+    	Set<Question> set = new HashSet<Question>();
+
+    	set.addAll(pool1.getQuestionList());
+    	set.addAll(pool2.getQuestionList());
+    	List<Question> questions = new ArrayList<Question>();
+    	questions.addAll(set);
+        
+    	return new Pool(questions);
     }
     
     ///////////////////////////////////////
