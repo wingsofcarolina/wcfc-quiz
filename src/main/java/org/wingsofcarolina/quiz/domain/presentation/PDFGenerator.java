@@ -273,7 +273,7 @@ public class PDFGenerator {
 		// Add quiz details
 		Cell cell1 = new Cell();
 		cell1.setBorder(Border.NO_BORDER);
-		Paragraph p = new Paragraph("WCFC " + quiz.getQuizName() + " Quiz").setFontSize(24.0f);
+		Paragraph p = new Paragraph(quiz.getQuizName()).setFontSize(24.0f);
 		p.setTextAlignment(TextAlignment.RIGHT);
 		cell1.add(p);
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
