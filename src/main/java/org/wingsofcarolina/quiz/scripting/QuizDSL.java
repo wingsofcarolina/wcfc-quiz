@@ -116,7 +116,7 @@ public abstract class QuizDSL extends Script {
     // NOTE: The items are pulled out of the Pool pool in a random order
     // to increase the entropy of each generated quiz.
     public void select(Pool pool) {
-    	select(section.getCount(), pool);
+    	select(null, pool);
     }
     
     // Add a specified number of questions to the selected set of questions in the quiz
@@ -124,6 +124,15 @@ public abstract class QuizDSL extends Script {
     // to increase the entropy of each generated quiz.
     public void select(Integer count, Pool pool) {
     	int numSelected = 0;
+    	
+    	// If we asked for no specific count, then the pool is 
+    	// assumed to be the "right size".
+    	if (count == null) {
+    		count = pool.size();
+    	}
+		if (context.getTestRun()) {
+			System.out.println("New selection of count == " + count + "<br>");
+		}
     	if (section != null && pool != null) {
 	    	if (count <= pool.size()) {
 	    		List<Question> result = pool.randomize().getQuestionList();
