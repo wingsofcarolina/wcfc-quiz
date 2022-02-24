@@ -20,7 +20,6 @@ public class Record {
     
 	private Long quizId;
 	private String quizName;
-	private Category category;
 	private Date createdDate = new Date();
     private List<Long> questionIds = new ArrayList<Long>();
 
@@ -29,7 +28,6 @@ public class Record {
 	public Record(Quiz quiz) {
 		this.quizId = quiz.getQuizId();
 		this.quizName = quiz.getQuizName();
-		this.category = quiz.getCategory();
 		for (Question question : quiz.getQuestions()) {
 			questionIds.add(question.getQuestionId());
 		}
@@ -55,14 +53,6 @@ public class Record {
 		this.quizName = quizName;
 	}
 
-	public Category getCategory() {
-		return category;
-	}
-
-	public void setCategory(Category category) {
-		this.category = category;
-	}
-
 	public List<Long> getQuestionIds() {
 		return questionIds;
 	}
@@ -73,7 +63,7 @@ public class Record {
 	
 	@Override
 	public String toString() {
-		return "Record [quizId=" + quizId + ", quizName=" + quizName + ", category=" + category + ", createdDate="
+		return "Record [quizId=" + quizId + ", quizName=" + quizName + ", createdDate="
 				+ createdDate + ", questionIds=" + questionIds + "]";
 	}
 

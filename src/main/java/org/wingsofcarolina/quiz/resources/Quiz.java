@@ -26,6 +26,7 @@ public class Quiz {
 	private long quizId;
 	private String quizName;
 	private Category category;
+	private Integer maxCount = null;
 	private List<Question> questions = new ArrayList<Question>();
 	private Date createdDate = new Date();
 	private Recipe recipe = null;
@@ -53,6 +54,14 @@ public class Quiz {
 		return category;
 	}
 	
+	public Integer getMaxCount() {
+		return maxCount;
+	}
+
+	public void setMaxCount(Integer maxCount) {
+		this.maxCount = maxCount;
+	}
+
 	public List<Question>getQuestions() {
 		return questions;
 	}
@@ -135,7 +144,6 @@ public class Quiz {
 		Quiz quiz = new Quiz();
 		quiz.setQuizId(record.getQuizId());
 		quiz.setQuizName(record.getQuizName());
-		quiz.setCategory(record.getCategory());
 		int i = 1;
 		for (Long id : record.getQuestionIds()) {
 			Question question = Question.getByQuestionId(id);
@@ -149,7 +157,7 @@ public class Quiz {
 		this.quizId = quizId;
 	}
 
-	protected void setQuizName(String quizName) {
+	public void setQuizName(String quizName) {
 		this.quizName = quizName;
 	}
 

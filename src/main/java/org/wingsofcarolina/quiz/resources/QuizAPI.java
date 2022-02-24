@@ -12,7 +12,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1094,7 +1093,9 @@ public class QuizAPI {
 		String script = request.get("script");
 		Map<String, String> response = new HashMap<String, String>();
 		
-		QuizContext context= new QuizContext(new Quiz(), config);
+		Quiz quiz = new Quiz();
+		quiz.setQuizName("TEST");
+		QuizContext context= new QuizContext(quiz, config);
 		context.setTestRun(true);
 		Execute execute = new Execute(context);
 		try {

@@ -275,8 +275,10 @@ public class QuizResource {
 			record.save();
 			LOG.info(record.toString());
 
+			// Actually perform the PDF quiz generation
 			Slack.instance().sendMessage("Quiz '" + quiz.getQuizName() + "' requested at " + dateFormatGmt.format(new Date()));
 			ByteArrayInputStream inputStream = generator.generate(quiz);
+			
 			return Response.ok().type("application/pdf").entity(inputStream).build();
 		} catch (QuizBuildException e) {
 			ObjectMapper mapper = new ObjectMapper();

@@ -2,10 +2,9 @@ package org.wingsofcarolina.quiz.scripting;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.ListIterator;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -22,7 +21,6 @@ public abstract class QuizDSL extends Script {
 
     private QuizContext context;
 	private Section section = null;
-    private Map<String, List<Long>> exclusives = new HashMap<String, List<Long>>();
 
     public QuizContext getContext() {
         return context;
@@ -34,13 +32,14 @@ public abstract class QuizDSL extends Script {
 
     // Implement classic Groovy method/property missing behavior
     public Object propertyMissing(String name) {
-        return "Missing property " + name;
+        LOG.info("propertyMissing called with ---> {}", name);
+        return null;
     }
     public Object methodMissing(String name, Object args) {
         List<Object> argsList = Arrays.asList((Object[]) args);
         LOG.info("methodMissing called for ---> {}", name);
         if (context.getTestRun()) {
-        	System.out.println("<br>ERROR : methodMissing called for : " + name);
+        	System.out.println("ERROR : methodMissing called for : " + name + "</br>");
         }
         return "methodMissing called with name '" + name + "' and args = " + argsList;
     }
@@ -62,10 +61,20 @@ public abstract class QuizDSL extends Script {
     	return result;
     }
     
+    // Set quiz global values
+    public void quiz(Integer count) {
+    	Quiz quiz = context.getQuiz();
+    	quiz.setMaxCount(count);
+    }
+    public void quiz(Integer count, String title) {
+    	quiz(count);
+    	context.getQuiz().setQuizName(title);
+    }
+   
     // Start a "section" of the quiz
     public void start(Integer questionCount, String sectionName) {
     	if (context.getTestRun()) {
-        	System.out.println("<br>### Starting new section : " + sectionName);
+        	System.out.println("### Starting new section : " + sectionName + "<br>");
     	} else {
         	LOG.info("Starting new section : {}", sectionName);
     	}
@@ -74,14 +83,13 @@ public abstract class QuizDSL extends Script {
     
     // Apply the collection set of questions to the quiz
     public void end(String name) {
+    	List<Question> questions = section.getQuestions();
     	if (context.getTestRun()) {
-        	System.out.println("<br>### Applying collected section : " + name);
-    	} else {
-        	LOG.info("Applying collected section : {}", name);
+        	System.out.println("### Applying collected selections : " + name + "(" + questions.size() + ")<br>");
     	}
     	if (section != null) {
 	    	Quiz quiz = context.getQuiz();
-	    	for (Question question : section.getQuestions()) {
+	    	for (Question question : questions) {
 	    		quiz.addQuestion(question);
 			
 				// Make note that the question has now been 'deployed'
@@ -89,10 +97,15 @@ public abstract class QuizDSL extends Script {
 					question.setDeployed(true);
 					question.save();
 				}
+				
+				// Stop when the quiz is full
+				if (quiz.getMaxCount() != null && quiz.getQuestions().size() >= quiz.getMaxCount() - 1) {
+					break;
+				}
 	    	}
     	} else {
     		if (context.getTestRun()) {
-            	System.out.println("<br>ERROR : Attempted to add an empty/null section to the quiz. Why?");
+            	System.out.println("ERROR : Attempted to add an empty/null section to the quiz. Why?<br>");
     		} else {
         		LOG.info("Attempted to add an empty/null section to the quiz. Why?");
     		}
@@ -103,114 +116,71 @@ public abstract class QuizDSL extends Script {
     // NOTE: The items are pulled out of the Pool pool in a random order
     // to increase the entropy of each generated quiz.
     public void select(Pool pool) {
-    	if (section != null) {
-    		List<Question> result = pool.randomize().getQuestionList();
-			for (Question entity : result) {
-				// Shortcut out if we've collected enough questions
-				if (section.isFull()) break;
-				
-				// Resolve the actual question (i.e. follow the superseded chain)
-				entity = resolve(entity);
-				
-				// Add the question to the section if it has not been used before and
-				// isn't conflicting with a mutually exclusive question already selected
-				if ( ! excluded(entity) && ! alreadySelected(entity) && ! missingAnswers(entity) && ! entity.isQuarantined()) {
-					// Add it and keep track of the count
-					section.addSelection(entity);
-		    		if (context.getTestRun()) {
-		    			System.out.println("<br>Added to quiz : " + entity.getQuestionId() + "\n");
-		    			if (entity.getSupersededBy() != -1) {
-		    				System.out.println("<br>This was a superseded question! Bad! Superseded by : " + entity.getSupersededBy());
-		    			}
-		    		}
-				} else {
-		    		if (context.getTestRun()) {
-		    			System.out.println("<br>Rejected " + entity.getQuestionId() + " because it is excluded/empty/quarantined/already-selected.");
-		    			System.out.println("<br>Excluded: " + excluded(entity) 
-		    				+ "  Quarantined: " + entity.isQuarantined() 
-		    				+ "  Selected: " + alreadySelected(entity)
-		    				+ "  Empty: " + missingAnswers(entity)
-		    				);
-		    		}
-				}
-			}
-    	} else {
-    		if (context.getTestRun()) {
-            	System.out.println("<br>ERROR : Attempted to add an empty/null section to the quiz. Why?");
-    		} else {
-        		LOG.info("Attempted to add an empty/null section to the quiz. Why?");
-    		}
-    	}
+    	select(section.getCount(), pool);
     }
     
     // Add a specified number of questions to the selected set of questions in the quiz
     // NOTE: The items are pulled out of the pool in a random order
     // to increase the entropy of each generated quiz.
     public void select(Integer count, Pool pool) {
-    	if (section != null) {
+    	int numSelected = 0;
+    	if (section != null && pool != null) {
 	    	if (count <= pool.size()) {
 	    		List<Question> result = pool.randomize().getQuestionList();
 				for (Question entity : result) {
 					// Shortcut out if we've collected enough questions
-					if (section.isFull()) break;
+					if (section.isFull() || numSelected == count) break;
+					
+					// Resolve the actual question (i.e. follow the superseded chain)
+					entity = resolve(entity);
 					
 					// Add the question to the section if it has not been used before and
 					// isn't conflicting with a mutually exclusive question already selected
 					if ( ! excluded(entity) && !alreadySelected(entity)) {
 						// Add it and keep track of the count
 						section.addSelection(entity);
+						numSelected++;
 			    		if (context.getTestRun()) {
-			    			System.out.println("<br>Added to quiz : " + entity.getQuestionId() + "\n");
+			    			System.out.println("Added to selections : " + entity.getQuestionId() + "<br>");
 			    		}
-
-						// Make note that the question has now been 'deployed'
-						if (context.getConfiguration().getMode().contentEquals("PROD")) {
-							if ( ! entity.getDeployed()) {
-								entity.setDeployed(true);
-								entity.save();
-							}
-						}
+					}  else {
+			    		if (context.getTestRun()) {
+			    			System.out.println("Rejected " + entity.getQuestionId() + " because it is excluded/empty/quarantined/already-selected.<br>");
+			    			System.out.println("Excluded: " + excluded(entity) 
+			    				+ "  Quarantined: " + entity.isQuarantined() 
+			    				+ "  Selected: " + alreadySelected(entity)
+			    				+ "  Empty: " + missingAnswers(entity)
+			    				+ "<br>");
+			    		}
 					}
 				}
 	    	} else {
 	    		if (context.getTestRun()) {
-	    			System.out.println("<br>ERROR : Selection attempted with an undersize pool, wanted " + count + " and only had " + pool.size());
+	    			System.out.println("ERROR : Selection attempted with an undersize pool, wanted " + count
+	    					+ " and only had " + pool.size()
+	    					+ " in section " + section.getName()
+	    					+ "<br>");
 	    		} else {
-		    		LOG.info("Selection attempted with an undersize pool, wanted {} and only had {}", count, pool.size());
+		    		LOG.info("Selection attempted with an undersize pool, wanted {} and only had {} in section {}",
+		    				count, pool.size(), section.getName());
 	    		}
 	    	}
     	} else {
     		if (context.getTestRun()) {
-        		System.out.println("<br>ERROR : Attempted to add questions outside of a section");
+        		System.out.println("ERROR : Attempted to add questions outside of a section.<br>");
     		} else {
         		LOG.info("Attempted to add questions outside of a section");
     		}
     	}
     }
-        
-    // Create a mutually exclusive pool
-    public void exclusive(String name, List<Integer>questionIds) {
-    	if (name != null && questionIds != null && questionIds.size() > 1) {
-    		List<Long> group = new ArrayList<Long>();
-	      	for (Integer id : questionIds) {
-	      		Long qid = new Long(id);
-	    		Question question = resolve(Question.getByQuestionId(qid));
-	    		if (question != null) {
-	    			group.add(qid);
-	    		} else {
-	    			if (context.getTestRun()) {
-	            		System.out.println("<br>ERROR : Requested question " + id + " not found");
-	    			} else {
-	    				LOG.info("Requested question {} not found", id);
-	    			}
-	    		}
-	    	}
-	      	exclusives.put(name, group);
-    	}
-    }
     
     // Add to the section (not pool) all (resolved) questions listed
     // in the question ID list provided.
+    public void require(Integer questionId) {
+    	List<Integer> list = new ArrayList<Integer>();
+    	list.add(questionId);
+    	require(list);
+    }
     public void require(List<Integer> questionIds) {
     	for (Integer id : questionIds) {
     		Question question = Question.getByQuestionId(new Long(id));
@@ -218,11 +188,11 @@ public abstract class QuizDSL extends Script {
     		if (question != null) {
     			section.addRequired(question);
 	    		if (context.getTestRun()) {
-	    			System.out.println("<br>Added to quiz : " + question.getQuestionId() + "\n");
+	    			System.out.println("Added to quiz : " + question.getQuestionId() + "<br>");
 	    		}
     		} else {
     			if (context.getTestRun()) {
-            		System.out.println("<br>ERROR : Requested question " + id + " not found");
+            		System.out.println("ERROR : Requested question " + id + " not found<br>");
     			} else {
     				LOG.info("Requested question {} not found", id);
     			}
@@ -233,14 +203,71 @@ public abstract class QuizDSL extends Script {
     // Return a pool of questions which match any of the supplied attributes. This
     // can result in a very large question pool potentially spanning multiple aircraft
     // types. This is essentially an inclusive OR operation on the attributes.Be ware.
+    public Pool getWithAny(String attribute) {
+    	List<String> list = new ArrayList<String>();
+    	list.add(attribute);
+    	return getWithAny(list);
+    }
     public Pool getWithAny(List<String> attributes) {
-    	return new Pool().getWithAll(attributes);
+    	return new Pool().getWithAny(attributes);
     }
     
     // Return a pool of questions which match ALL of the supplied attributes. This
     // is essentially an inclusive AND operation on the attributes.
+    public Pool getWithAll(String attribute) {
+    	List<String> list = new ArrayList<String>();
+    	list.add(attribute);
+    	return getWithAll(list);
+    }
     public Pool getWithAll(List<String> attributes) {
-    	return new Pool().getWithAny(attributes);
+    	return new Pool().getWithAll(attributes);
+    }
+    
+    // Filter a pool such that all questions with the listed attributes are 
+    // included in the resulting pool.
+    public Pool filterIn(Pool pool, String attribute) {
+    	List<String> list = new ArrayList<String>();
+    	list.add(attribute);
+    	return filterIn(pool, list);
+    }
+    public Pool filterIn(Pool pool, List<String> attributes) {
+    	List<Question> list = new ArrayList<Question>();
+    	
+    	for (ListIterator<Question> iter = pool.getQuestionList().listIterator(); iter.hasNext(); ) {
+    	    Question question = iter.next();
+    	    for (String attribute : attributes) {
+    	    	if (question.hasAttribute(attribute)) {
+    	    		list.add(question);
+    	    		break;
+    	    	}
+    	    }
+    	}
+    	return new Pool(list);
+    }
+    
+    // Filter a pool such that all questions with the listed attributes are 
+    // excluded in the resulting pool.
+    public Pool filterOut(Pool pool, String attribute) {
+    	List<String> list = new ArrayList<String>();
+    	list.add(attribute);
+    	return filterOut(pool, list);
+    }
+    public Pool filterOut(Pool pool, List<String> attributes) {
+    	List<Question> list = new ArrayList<Question>();
+    	
+    	for (ListIterator<Question> iter = pool.getQuestionList().listIterator(); iter.hasNext(); ) {
+    	    Question question = iter.next();
+    	    boolean found = false;
+    	    for (String attribute : attributes) {
+    	    	if (question.hasAttribute(attribute)) {
+    	    		found = true;
+    	    	}
+    	    }
+    	    if ( ! found ) {
+	    		list.add(question);
+    	    }
+    	}
+    	return new Pool(list);
     }
     
     ///////////////////////////////////////
