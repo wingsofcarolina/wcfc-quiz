@@ -1,6 +1,5 @@
 package org.wingsofcarolina.quiz.domain;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -26,9 +25,9 @@ public class Question {
     private Integer index;
     private Type type;
     private Category category;
+    private Long exclusionId;
     private QuestionDetails details;
 	private List<String> attributes;
-	private List<Long> excludes;
 	private Long questionId;
 	private Boolean deployed = false;
 	private Boolean deleted = false;
@@ -87,22 +86,14 @@ public class Question {
 	public void setQuestionId(long questionId) {
 		this.questionId = questionId;
 	}
-	
-	public List<Long> getExcludes() {
-		return excludes;
+
+	public Long getExclusionId() {
+		if (exclusionId == null) return 0L;
+		return exclusionId;
 	}
 
-	public void setExclusions(List<Integer> exclusions) {
-		// Always replace the existing list
-		excludes = new ArrayList<Long>();
-		
-		// Ensure that we don't add ourselves to the list
-		for (Integer id : exclusions) {
-			Long qid = Long.valueOf(id);
-			if ( ! qid.equals(questionId)) {
-				excludes.add(qid);
-			}
-		}
+	public void setExclusionId(Long exclusionId) {
+		this.exclusionId = exclusionId;
 	}
 
 	public Integer getIndex() {

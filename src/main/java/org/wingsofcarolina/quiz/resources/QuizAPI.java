@@ -53,6 +53,7 @@ import org.wingsofcarolina.quiz.common.Pages;
 import org.wingsofcarolina.quiz.common.Templates;
 import org.wingsofcarolina.quiz.domain.Attribute;
 import org.wingsofcarolina.quiz.domain.Category;
+import org.wingsofcarolina.quiz.domain.ExclusionGroup;
 import org.wingsofcarolina.quiz.domain.Question;
 import org.wingsofcarolina.quiz.domain.QuestionDetails;
 import org.wingsofcarolina.quiz.domain.Recipe;
@@ -689,6 +690,7 @@ public class QuizAPI {
 	@Path("addQuestion")
 	@Produces(MediaType.TEXT_HTML)
 	public Response addQuestion(@CookieParam("quiz.token") Cookie cookie, @FormParam("type") String typeName,
+			@FormParam("exclusion") Long exclusionId,
 			@FormParam("category") String categoryName, @FormParam("question") String question,
 			@FormParam("discussion") String discussion, @FormParam("references") String references,
 			@FormParam("difficulty") String difficulty, @FormParam("attributes") List<String> attributes,
@@ -708,14 +710,14 @@ public class QuizAPI {
 		}
 
 		if (typeName.contentEquals("fib")) {
-			newQuestion = createQuestion(cookie, typeName, categoryName, question, discussion, references, difficulty,
+			newQuestion = createQuestion(cookie, typeName, categoryName, exclusionId, question, discussion, references, difficulty,
 					attributes, answers, null, attachment);
 		} else {
 			if (correct == null || correct.size() == 0) {
 				Flash.add(Flash.Code.ERROR, "A question may not be saved with no correct answer set.");
 				return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
 			}
-			newQuestion = createQuestion(cookie, typeName, categoryName, question, discussion, references, difficulty,
+			newQuestion = createQuestion(cookie, typeName, categoryName, exclusionId, question, discussion, references, difficulty,
 					attributes, answers, correct.get(0), attachment);
 		}
 
@@ -726,6 +728,7 @@ public class QuizAPI {
 	@Path("updateQuestion")
 	@Produces("text/html")
 	public Response updateQuestion(@CookieParam("quiz.token") Cookie cookie,
+			@FormParam("exclusion") Long exclusionId,
 			@FormParam("questionId") Long questionId, @FormParam("quarantined") Boolean quarantined, 
 			@FormParam("type") String typeName, @FormParam("category") String categoryName,
 			@FormParam("question") String question, @FormParam("discussion") String discussion,
@@ -807,6 +810,26 @@ public class QuizAPI {
 					changed = true;
 				}
 
+				// See if our exclusion group has changed
+				if (original.getExclusionId() != exclusionId) {
+					// See if we need to remove the question from the old exclusion group
+					if (original.getExclusionId() != 0 && original.getExclusionId() != null) {
+						ExclusionGroup oldGroup = ExclusionGroup.getByGroupId(original.getExclusionId());
+						oldGroup.removeGroupId(questionId);
+						oldGroup.save();
+					}
+					// Now add the question to the new exclusion group, if one is selected
+					if (exclusionId != 0) {
+						ExclusionGroup exclusionGroup = ExclusionGroup.getByGroupId(exclusionId);
+						exclusionGroup.addQuestionId(questionId);
+						exclusionGroup.save();
+					}
+					
+					// Now set the new Exclusion ID
+					original.setExclusionId(exclusionId);
+					changed = true;
+				}
+				
 				if (changed) {
 					LOG.info("Updated Question : {}", original.getQuestionId());
 					original.save();
@@ -821,7 +844,7 @@ public class QuizAPI {
 					Flash.add(Flash.Code.SUCCESS, "No changes made to question with ID : " + original.getQuestionId());
 				}
 			} else {
-				Question q = createQuestion(cookie, typeName, categoryName, question, discussion, references,
+				Question q = createQuestion(cookie, typeName, categoryName, exclusionId, question, discussion, references,
 						difficulty, attributes, answers, correctAnswer, attachment);
 				original.setSupersededBy(q.getQuestionId());
 				original.save();
@@ -851,7 +874,7 @@ public class QuizAPI {
 		return true;
 	}
 	
-	private Question createQuestion(Cookie cookie, String typeName, String categoryName, String question,
+	private Question createQuestion(Cookie cookie, String typeName, String categoryName, Long exclusionId, String question,
 			String discussion, String references, String difficulty, List<String> attributes, List<String> answers,
 			Integer correct, String attachment) throws Exception {
 
@@ -859,6 +882,7 @@ public class QuizAPI {
 
 		LOG.debug("Type       --> {}", typeName);
 		LOG.debug("Category   --> {}", categoryName);
+		LOG.debug("Exclusion  --> {}", exclusionId);
 		LOG.debug("Question   --> {}", question);
 		LOG.debug("Discussion --> {}", discussion);
 		LOG.debug("References --> {}", references);
@@ -891,6 +915,15 @@ public class QuizAPI {
 			newQuestion = new Question(type, category, attributes,
 					new QuestionDetails(question, discussion, references, answers, correct, attachment));
 		}
+		
+		// Handle adding to an exclusion group
+		if (exclusionId != 0) {
+			newQuestion.setExclusionId(exclusionId);
+			ExclusionGroup exclusionGroup = ExclusionGroup.getByGroupId(exclusionId);
+			exclusionGroup.addQuestionId(newQuestion.getQuestionId());
+			exclusionGroup.save();
+		}
+		
 		Slack.instance().sendMessage("Created Question : " + newQuestion.getQuestionId());
 		LOG.info("Created Question : {}", newQuestion.getQuestionId());
 		newQuestion.save();
@@ -900,28 +933,34 @@ public class QuizAPI {
 	}
 
 	@POST
-	@Path("createExclusion")
+	@Path("exclusion")
 	@Produces("text/html")
 	public Response createExclusion(@CookieParam("quiz.token") Cookie cookie,
-			@FormParam("exclusions") List<Integer> exclusions)
+			@FormParam("name") String name,
+			@FormParam("description") String description)
 			throws Exception, AuthenticationException {
 
 		Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
-		User user = User.getWithClaims(claims);
+		User.getWithClaims(claims);
 
-		for (Integer id : exclusions) {
-			Long qid = Long.valueOf(id);
-			Question question = Question.getByQuestionId(qid);
-			if (question != null) {
-				LOG.info("Updating exclusions for : {}", qid);
-				question.setExclusions(exclusions);
-				question.save();
-			}
+		if (ExclusionGroup.getByName(name) == null) {
+			ExclusionGroup group = new ExclusionGroup(name, description);
+			group.save();
+		} else {
+			return Response.status(401).entity("Group already exists").build();
 		}
 
 		return new RedirectResponse(Pages.HOME_PAGE).build();
 	}
 
+	@GET
+	@Path("exclusion")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getExclusion() {
+		List<ExclusionGroup> groups = ExclusionGroup.getAllGroups();
+		return Response.ok().entity(groups).build();
+	}
+	
 	/**
 	 * Delete question
 	 * 
@@ -950,6 +989,12 @@ public class QuizAPI {
 					"Question " + question.getQuestionId() + " is either superseded or deployed and can't be deleted.");
 			return new RedirectResponse(referer).cookie(authUtils.generateCookie(user)).build();
 		} else {
+			// Remove it from any exclusion groups
+			if (question.getExclusionId() != null && question.getExclusionId() != 0) {
+				ExclusionGroup exclusionGroup = ExclusionGroup.getByGroupId(question.getExclusionId());
+				exclusionGroup.removeGroupId(questionId);
+				exclusionGroup.save();
+			}
 			// Actually perform the deletion
 			question.delete();
 

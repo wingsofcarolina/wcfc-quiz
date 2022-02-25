@@ -1,4 +1,4 @@
-= Create Mutual Exclusion Group
+= Manage Mutual Exclusion Groups
 
 <#setting number_format="#0">
 
@@ -10,31 +10,50 @@ navbar:${user.userId}[buttons="HomeNavButton;ProfileNavButton", active="HomeNavB
 
 ++++
 <script>
-function excludeQuestion() {
-	var qid = $('#questionId').prop('value');
-	var url = "api/question/" + qid;
-	$.getJSON(url, function(data) {
-		var tbody = $('#questionList').find('tbody');
-		tbody.append("<tr><td><input type=\"hidden\" name=\"exclusions\" value=\"" + qid + "\">" + qid + "</td><td>" + data.question + "</td></tr>" );
-	})
-	.fail(function() {
-		$('#flash').addClass('flash-error');
-		$('#flash').html("Question with ID " + qid + " not found.");
-		$('#flash').removeAttr("style");
-	});
-}
+	// Retrieve the list of exclusion groups from the server.
+	const getGroups = async () => {
+		let url = '/api/exclusion';
+		const response = await fetch( url, {
+			withCredentials: true
+		});
+		const groups = await response.json();
+		
+		var table = document.getElementById("groups");
+		groups.forEach(group => {
+			var row = table.insertRow(-1);
+			
+			var cell1 = row.insertCell(0);
+			var cell2 = row.insertCell(1);
+			var cell3 = row.insertCell(2);
+			
+			cell1.innerHTML = group['name'];
+			cell2.innerHTML = group['count'];
+			cell3.innerHTML = group['description'];
+		});
+	}
+	
+	window.onload = function() {
+		getGroups();
+	};
 </script>
 
-<input id="questionId" type="text">&nbsp;<button onclick="excludeQuestion()">Question ID</button>
+<h2>Create Exclusion Group</h2>
+
+<form name="exlusion" action="/api/exclusion" method="post">
+Exclusion Group Name : <input name="name" type="text">
 </p>
-<form name="question" action="/api/createExclusion" method="post">
-<table id="questionList" width="95%">
-<thead><tr><td width="10%">ID</td><td width="90%">Question</td></tr></thead>
-<tbody>
-</tbody>
-</table>
+Description :
+<textarea id="description" name="description" rows="4" cols="50"></textarea>
 </p>
 <input type="submit" value="Create Exclusion Group"></form>
 </p>
 ++++
-button:/[method="get",label="Cancel"] 
+button:/[method="get",label="Cancel"]
+++++
+<hr>
+
+<h2>Existing Exclusion Groups</h2>
+<table id="groups" width="90%">
+<tr><th width="20%">Name</th><th width="5%">Count</th><th width="75%">Description</th></tr>
+</table>
+++++

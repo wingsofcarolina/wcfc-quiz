@@ -11,10 +11,27 @@ navbar:${user.userId}[buttons="HomeNavButton;ProfileNavButton", active="HomeNavB
 
 ++++
 <script>
+$(document).ready(function(){
+	loadExclusionGroups();
+});
+
 function query(msg, redirect) {
 	if (confirm(msg)) {
 		window.location.href = redirect;
 	}
+}
+
+function loadExclusionGroups()
+{
+	var url = "/api/exclusion";
+	var exId = ${question.getExclusionId()};
+	$.getJSON( url , function( data ) {
+		$.each(data, function(key, value) {
+		  if (value.groupId == exId) {
+		  	document.getElementById('exclusion').innerHTML =  "<strong>" + value.name + "</strong>";
+		  }
+		});
+	});
 }
 </script>
 <table width=100%>
@@ -38,15 +55,7 @@ Fill in the Blank
 </#if>
 </strong></td></tr>
 <tr><td>Category</td><td><strong>${question.category}</strong></td></tr>
-<tr><td>Excluded</td><td>
-<#if question.excludes??>
-<#list question.excludes as ex>
-${ex}&nbsp;
-</#list>
-<#else>
-<strong>NONE</strong>
-</#if>
-</td></tr>
+<tr><td>Exclusion</td><td id="exclusion"><strong>NONE</strong></td></tr>
 <tr><td valign="top">Question</td><td>${question.getQuestionAsHtml()}</td></tr>
 <tr><td valign="top">Discussion</td><td>${question.getDiscussionAsHtml()}</td></tr>
 <tr><td valign="top">References</td><td>${question.getReferencesAsHtml()}</td></tr>

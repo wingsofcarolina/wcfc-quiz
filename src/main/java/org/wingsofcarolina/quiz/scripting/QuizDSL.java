@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wingsofcarolina.quiz.domain.ExclusionGroup;
 import org.wingsofcarolina.quiz.domain.Question;
 import org.wingsofcarolina.quiz.domain.Section;
 import org.wingsofcarolina.quiz.resources.Quiz;
@@ -329,16 +330,18 @@ public abstract class QuizDSL extends Script {
     // Determine if the candidate question should be rejected due to a
     // mutually exclusive question already being in the selected set of
     // questions. 
+    // TODO: Figure out the right logic to determine if a question is in conflict with an already selected question
     private boolean excluded(Question question) {
-    	if (question != null && question.getExcludes() != null) {
+    	if (question != null && question.getExclusionId() != null) {
 	    	Set<Question> questionSet = new HashSet<Question>();
 	    	questionSet.addAll(context.getQuiz().getQuestions());
 	    	questionSet.addAll(section.getQuestions());
-	    	for (Question q : questionSet) {
-	    		if (question.getExcludes().contains(q.getQuestionId())) {
-	        		return true;
-	    		}
-	    	}
+	    	ExclusionGroup group = ExclusionGroup.getByGroupId(question.getExclusionId());
+//	    	for (Question q : questionSet) {
+//	    		if (group.getGroupIds().contains(question.getQuestionId())) {
+//	        		return true;
+//	    		}
+//	    	}
     	}
     	return false;
     }

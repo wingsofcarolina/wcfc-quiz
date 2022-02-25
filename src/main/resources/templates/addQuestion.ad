@@ -39,6 +39,7 @@ select {
 $(document).ready(function(){
 	loadAttributes("regulations");
 	loadDifficultyAttributes();
+	loadExclusionGroups();
 });
 
 $(document).on("keydown", ":input:not(textarea)", function(event) {
@@ -69,6 +70,21 @@ function loadDifficultyAttributes()
 		$.each(data, function(key, value) {
 		  $el.append($("<option></option>")
 		     .attr("key", value).text(value));
+		});
+	});
+}
+
+function loadExclusionGroups()
+{
+	var url = "api/exclusion";
+    var $el = $("#q-exclusion");
+	$el.empty(); // remove old options
+	$el.append($("<option></option>")
+		.attr("key", "NONE").text("NONE").val(0));
+	$.getJSON( url , function( data ) {
+		$.each(data, function(key, value) {
+		  $el.append($("<option></option>")
+		     .attr("key", value.name).text(value.name).val(value.groupId));
 		});
 	});
 }
@@ -137,7 +153,7 @@ function checkform()
 	
 	if (good == false) {
 	 if (cat == 'regulations') {
-		alert('You MUST select one of FAR or SOP for this category');
+		alert('You MUST select one of FAR or SOP attribute items for this category');
 	 }
 	 if (cat == 'aircraft') {
 		alert('You MUST select one or more aircraft type(s) for this category');
@@ -173,6 +189,10 @@ function checkform()
 <select id="q-category" name="category" onchange=loadAttributes(this.value)>
   <option value="regulations">FAR 61/91, SOP/FS</option>
   <option value="aircraft">Aircraft Type (C-152/C-172/PA28/M20J)</option>
+</select></td></tr>
+<tr><td>Exclusion</td><td>
+<select id="q-exclusion" name="exclusion">
+  <option>NONE</option>
 </select></td></tr>
 <tr><td valign="top">Question</td><td><textarea name="question" rows="4" cols="70" placeholder=" Enter the question here."></textarea></td></tr>
 <tr><td valign="top">Discussion</td><td><textarea name="discussion" rows="4" cols="70" placeholder=" Enter the CFI discussion here."></textarea></td></tr>

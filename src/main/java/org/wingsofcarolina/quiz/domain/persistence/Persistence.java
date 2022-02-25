@@ -44,6 +44,7 @@ public class Persistence {
 			daoStore.put(Question.class, new QuestionDAO(datastore));
 			daoStore.put(Recipe.class, new RecipeDAO(datastore));
 			daoStore.put(Record.class, new RecordDAO(datastore));
+			daoStore.put(ExclusionGroup.class, new ExclusionGroupDAO(datastore));
 
 			// Make this a singleton
 			instance = this;
