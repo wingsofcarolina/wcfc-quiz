@@ -103,82 +103,82 @@ public class QuizAPI {
 		dateFormatGmt.setTimeZone(TimeZone.getTimeZone("GMT"));
 	}
 	
-	@GET
-	@Path("explore")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response explore(@CookieParam("quiz.token") Cookie cookie) throws Exception, AuthenticationException {
-		Set<Question> remove = new HashSet<Question>();
-
+//	@GET
+//	@Path("explore")
+//	@Produces(MediaType.APPLICATION_JSON)
+//	public Response explore(@CookieParam("quiz.token") Cookie cookie) throws Exception, AuthenticationException {
+//		Set<Question> remove = new HashSet<Question>();
+//
 //		List<Question> result = Question.getWithAny(Arrays.asList("C152", "SYSTEMS", "STUDENT"));
-		Set<Long> active = Record.getActiveIds();
-		List<Question> superseded = Question.getSuperseded();
-		for (Question question : superseded) {
-			System.out.print("Question " + question.getQuestionId());
-			remove.addAll(followChain(question, active));
-		}
-		
-		for (Question question : remove) {
-			System.out.println("Removing : " + question.getQuestionId());
-			question.delete();
-		}
-		
-		return Response.ok().entity(superseded).build();
-	}
-	
-	private Set<Question> followChain(Question question, Set<Long> active) {
-		// Question 2002 active, superseded by 2360 superseded by 2361 active, superseded by 2362
-		Set<Question> remove = new HashSet<Question>();
-		Question previous = question;
-		do {
-			if (active.contains(question.getQuestionId())) {
-				previous = question;
-				System.out.print(" (active), superseded by " + question.getSupersededBy());
-			} else {
+//		Set<Long> active = Record.getActiveIds();
+//		List<Question> superseded = Question.getSuperseded();
+//		for (Question question : superseded) {
+//			System.out.print("Question " + question.getQuestionId());
+//			remove.addAll(followChain(question, active));
+//		}
+//		
+//		for (Question question : remove) {
+//			System.out.println("Removing : " + question.getQuestionId());
+//			question.delete();
+//		}
+//		
+//		return Response.ok().entity(superseded).build();
+//	}
+//	
+//	private Set<Question> followChain(Question question, Set<Long> active) {
+//		// Question 2002 active, superseded by 2360 superseded by 2361 active, superseded by 2362
+//		Set<Question> remove = new HashSet<Question>();
+//		Question previous = question;
+//		do {
+//			if (active.contains(question.getQuestionId())) {
+//				previous = question;
+//				System.out.print(" (active), superseded by " + question.getSupersededBy());
+//			} else {
 //				System.out.print(" superseded by " + question.getSupersededBy());
-				System.out.println("");
-				System.out.print("    " + previous.getQuestionId() + " now superseded by " + question.getSupersededBy());
-				
-				previous.setSupersededBy(question.getSupersededBy());
-				previous.save();
-				remove.add(question);
-			}
-			question = Question.getByQuestionId(question.getSupersededBy());
-			if (question == null) break;
-		} while (question.getSupersededBy() != -1);
-		System.out.println();
-		return remove;
-	}
+//				System.out.println("");
+//				System.out.print("    " + previous.getQuestionId() + " now superseded by " + question.getSupersededBy());
+//				
+//				previous.setSupersededBy(question.getSupersededBy());
+//				previous.save();
+//				remove.add(question);
+//			}
+//			question = Question.getByQuestionId(question.getSupersededBy());
+//			if (question == null) break;
+//		} while (question.getSupersededBy() != -1);
+//		System.out.println();
+//		return remove;
+//	}
 
-	@GET
-	@Path("allRecipes")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response allRecipes(@CookieParam("quiz.token") Cookie cookie) throws Exception, AuthenticationException {
-		List<Recipe> recipes = Recipe.getAllRecipes();
-		
-		migrateRecipes(recipes);
-		
-		return Response.ok().entity(recipes).build();
-	}
-	
-	private void migrateRecipes(List<Recipe> recipes) {
-		for (Recipe r : recipes) {
-			r.init();
-			String attribute = r.getAttribute();
-			if (attribute == null || attribute.isEmpty()) {
-				if (r.getCategory().toString().equals("FAR")) {
-					r.setName("FAR,Pre-solo");
-				} else {
-					r.setName(r.getCategory().toString());
-				}
-			} else {
-				r.setName(r.getCategory() + "-" + attribute);
-			}
-			r.setAttribute(null);
-			r.setCategory(null);
-			r.setSections(null);
-			r.save();
-		}
-	}
+//	@GET
+//	@Path("migrateRecipes")
+//	@Produces(MediaType.APPLICATION_JSON)
+//	public Response allRecipes(@CookieParam("quiz.token") Cookie cookie) throws Exception, AuthenticationException {
+//		List<Recipe> recipes = Recipe.getAllRecipes();
+//		
+//		migrateRecipes(recipes);
+//		
+//		return Response.ok().entity(recipes).build();
+//	}
+//	
+//	private void migrateRecipes(List<Recipe> recipes) {
+//		for (Recipe r : recipes) {
+//			r.init();
+//			String attribute = r.getAttribute();
+//			if (attribute == null || attribute.isEmpty()) {
+//				if (r.getCategory().toString().equals("FAR")) {
+//					r.setName("FAR,Pre-solo");
+//				} else {
+//					r.setName(r.getCategory().toString());
+//				}
+//			} else {
+//				r.setName(r.getCategory() + "-" + attribute);
+//			}
+//			r.setAttribute(null);
+//			r.setCategory(null);
+//			r.setSections(null);
+//			r.save();
+//		}
+//	}
 	
 	@GET
 	@Path("recipes")
@@ -195,67 +195,65 @@ public class QuizAPI {
 		return Response.ok().entity(recipeCatalog).build();
 	}
 
-	@GET
-	@Path("allQuestions")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response allQuestions() {
-		List<Question> list = Question.getAllQuestions();
-
-		migrateQuestions(list);
-
-		return Response.ok().entity(list).build();
-	}
-	
-	void migrateQuestions(List<Question> list) {
-		for (Question q : list) {
-			migrateQuestion(q);
-			q.save();
-		}
-	}
-	
-	private void migrateQuestion(Question q) {
-		List<String> attributes = q.getAttributes();
-		
-		boolean isSOP = false;
-		for (String att : attributes) {
-			if (att != null) {
-				if (att.startsWith("SOP_")) {
-				 isSOP = true;
-				 break;
-				}
-			} else {
-				LOG.info("Null attribute list for : " + q.getQuestionId());
-			}
-		}
-		
-		if (isSOP) {
-			q.addAttribute("SOP");
-			q.removeAttribute("FAR");
-		}
-		
-		Category category = q.getCategory();
-		if (category == Category.FAR) {
-			q.addAttribute(Attribute.FAR);
-			q.setCategory(Category.REGULATIONS);
-		} else if (category == Category.SOP) {
-			q.addAttribute(Attribute.SOP);
-			q.setCategory(Category.REGULATIONS);
-		} else if (category == Category.C152) {
-			q.addAttribute(Attribute.C152);
-			q.setCategory(Category.AIRCRAFT);
-		} else if (category == Category.PA28) {
-			q.addAttribute(Attribute.PA28);
-			q.setCategory(Category.AIRCRAFT);
-		} else if (category == Category.C172) {
-			q.addAttribute(Attribute.C172);
-			q.setCategory(Category.AIRCRAFT);
-		} else if (category == Category.M20J) {
-			q.addAttribute(Attribute.M20J);
-			q.setCategory(Category.AIRCRAFT);
-		}
-	}
-	
-	
+//	@GET
+//	@Path("migrateQuestions")
+//	@Produces(MediaType.APPLICATION_JSON)
+//	public Response allQuestions() {
+//		List<Question> list = Question.getAllQuestions();
+//
+//		migrateQuestions(list);
+//
+//		return Response.ok().entity(list).build();
+//	}
+//	
+//	void migrateQuestions(List<Question> list) {
+//		for (Question q : list) {
+//			migrateQuestion(q);
+//			q.save();
+//		}
+//	}
+//	
+//	private void migrateQuestion(Question q) {
+//		List<String> attributes = q.getAttributes();
+//		
+//		boolean isSOP = false;
+//		for (String att : attributes) {
+//			if (att != null) {
+//				if (att.startsWith("SOP_")) {
+//				 isSOP = true;
+//				 break;
+//				}
+//			} else {
+//				LOG.info("Null attribute list for : " + q.getQuestionId());
+//			}
+//		}
+//		
+//		if (isSOP) {
+//			q.addAttribute("SOP");
+//			q.removeAttribute("FAR");
+//		}
+//		
+//		Category category = q.getCategory();
+//		if (category == Category.FAR) {
+//			q.addAttribute(Attribute.FAR);
+//			q.setCategory(Category.REGULATIONS);
+//		} else if (category == Category.SOP) {
+//			q.addAttribute(Attribute.SOP);
+//			q.setCategory(Category.REGULATIONS);
+//		} else if (category == Category.C152) {
+//			q.addAttribute(Attribute.C152);
+//			q.setCategory(Category.AIRCRAFT);
+//		} else if (category == Category.PA28) {
+//			q.addAttribute(Attribute.PA28);
+//			q.setCategory(Category.AIRCRAFT);
+//		} else if (category == Category.C172) {
+//			q.addAttribute(Attribute.C172);
+//			q.setCategory(Category.AIRCRAFT);
+//		} else if (category == Category.M20J) {
+//			q.addAttribute(Attribute.M20J);
+//			q.setCategory(Category.AIRCRAFT);
+//		}
+//	}
 	
 	@POST
 	@Path("login")
