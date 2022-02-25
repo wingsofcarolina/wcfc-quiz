@@ -67,6 +67,7 @@ import org.wingsofcarolina.quiz.responses.RedirectResponse;
 import org.wingsofcarolina.quiz.responses.ViewQuestionResponse;
 import org.wingsofcarolina.quiz.scripting.Execute;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jsonwebtoken.Claims;
@@ -194,6 +195,36 @@ public class QuizAPI {
 		
 		return Response.ok().entity(recipeCatalog).build();
 	}
+
+	@GET
+	@Path("recipe/catalog")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response recipeCatalog(@CookieParam("quiz.token") Cookie cookie) {
+		Map<Long, String> recipeCatalog = new HashMap<Long, String>();
+		
+		migrateRecipe(Recipe.getRecipeById(1000L), "FAR 61/91, Pre-Solo");
+		migrateRecipe(Recipe.getRecipeById(1001L), "SOP/FS, Student Pilots");
+		migrateRecipe(Recipe.getRecipeById(1002L), "SOP/FS, Licensed Pilot");
+		migrateRecipe(Recipe.getRecipeById(1003L), "SOP/FS, Instructor");
+		migrateRecipe(Recipe.getRecipeById(1004L), "C-152");
+		migrateRecipe(Recipe.getRecipeById(1005L), "C-172 Skyhawk");
+		migrateRecipe(Recipe.getRecipeById(1006L), "PA-28 Warrior");
+		migrateRecipe(Recipe.getRecipeById(1007L), "M20J Mooney");
+		
+		List<Recipe> recipes = Recipe.getAllRecipes();
+		
+		for (Recipe r : recipes) {
+			recipeCatalog.put(r.getRecipeId(), r.getName());
+		}
+		
+		return Response.ok().entity(recipeCatalog).build();
+	}
+
+	private void migrateRecipe(Recipe recipe, String name) {
+		recipe.setName(name);
+		recipe.save();
+	}
+
 
 //	@GET
 //	@Path("migrateQuestions")
@@ -1006,7 +1037,7 @@ public class QuizAPI {
 	}
 
 	@POST
-	@Path("updateRecipe")
+	@Path("recipe")
 	@Produces(MediaType.TEXT_HTML)
 	public Response updateRecipe(@CookieParam("quiz.token") Cookie cookie,
 			@FormParam("name") String name,

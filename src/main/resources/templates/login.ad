@@ -8,6 +8,10 @@ flash:true[]
 <!-- https://www.jqueryscript.net/other/cookie-consent-bar-message.html -->
 <script src="static/jquery.cookieMessage.min.js"></script>
 <script>
+$(document).ready(function(){
+	loadRecipes();
+});
+
 $.cookieMessage({
     mainMessage: "Logging into this website will trigger the use of cookies. By using this website you consent to our use of these cookies.<br>Cookies are not used when generating quizzes for members.<br><br>",
     acceptButton: "Got It!",
@@ -21,21 +25,23 @@ $.cookieMessage({
     linkFontColor: '#ffff00',
     cookieName: 'wcfc_quiz_cookie_message'
 });
+
+function loadRecipes()
+{
+	var url = "/api/recipes";
+	$.getJSON( url , function( data ) {
+		$.each(data, function(key, value) {
+			console.log(key + " : " + value);
+			document.getElementById("quizes").innerHTML += "<a href='generate/" + key + "' target='_blank'>" + value + "</a><br>";
+		});
+	});
+}
 </script>
 <link rel="stylesheet" href="/static/quiz-style.css">
 <center>
 Club members needing a quiz select from the following choices:</p>
 <div style="text-align: center;">
-  <div style="display: inline-block; text-align:left;">
-   <a href="generate/1000" target="_blank"> FAR 61/91, Pre-Solo</a><br>
-   <a href="generate/1001" target="_blank"> SOP/FS, Student Pilots</a><br>
-   <a href="generate/1002" target="_blank"> SOP/FS, Licensed Pilot</a><br>
-   <a href="generate/1003" target="_blank"> SOP/FS, Instructor</a><br>
-   <a href="generate/1004" target="_blank"> C-152</a><br>
-   <a href="generate/1005" target="_blank"> C-172 Skyhawk</a><br>
-   <a href="generate/1006" target="_blank"> PA-28 Warrior</a><br>
-   <a href="generate/1007" target="_blank"> M20J Mooney</a><br>
-  </div>
+  <div id="quizes" style="display: inline-block; text-align:left;"></div>
 </div>
 </p>
 <hr>
@@ -52,8 +58,5 @@ Instructors needing to retrieve a quiz key log in:
 </p>
 <hr>
 </center>
-<div id=footer style="background:lightgray">
-<div style="float:left">Version : ${version}</div>
-<div style="float:right">Commit : ${commit}</div>
-</div>
+<div style="float:left">${version}</div>
 ++++

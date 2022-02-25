@@ -31,10 +31,6 @@ public class Recipe {
     public Recipe(String name) {
 		this.recipeId = Persistence.instance().getID(ID_KEY, 1000);
     }
-
-    public void init() {
-		this.recipeId = Persistence.instance().getID(ID_KEY, 1000);
-    }
     
 	public Long getRecipeId() {
 		return recipeId;
@@ -65,7 +61,7 @@ public class Recipe {
 	}
 
 	public void setName(String name) {
-		this.name = name.toUpperCase();
+		this.name = name;
 	}
 
 	public String getScript() {

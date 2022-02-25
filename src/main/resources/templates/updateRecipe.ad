@@ -100,7 +100,7 @@ function test_script() {
 }
 </script>
 
-<form name="question" action="/api/updateRecipe" method="post">
+<form name="question" action="/api/recipe" method="post">
 <input id="recipeName" type="hidden" name="name" value="goober">
 <table>
 <tr><td width=10>Name</td><td><select id="recipeId" name="recipeId" onchange=load_recipe()></select></td></tr>
