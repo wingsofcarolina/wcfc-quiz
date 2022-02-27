@@ -25,36 +25,34 @@
 <p>
 <#assign index = 0>
 <#if question.answers??>
-<#list question.answers as answer>
-<#if question.isFillInTheBlank()>
-${seq[index]} : ${answer.answer}</br>
+	<#list question.answers as answer>
+		<#if question.isFillInTheBlank()>
+			${seq[index]} : ${answer.answer}</br>
+		<#else>
+			<#if answer.isCorrect()>
+				<strong>${seq[index]}</strong> : ${answer.getAnswerAsHtml()}</br>
+			<#else>
+				${seq[index]} : ${answer.answer}</br>
+			</#if>
+		</#if>
+		<#assign index=index+1>
+	</#list>
 <#else>
-<#if answer.isCorrect()>
-<strong>${seq[index]}</strong> : ${answer.getAnswerAsHtml()}</br>
-<#else>
-${seq[index]} : ${answer.answer}</br>
-</#if>
-</#if>
-<#assign index=index+1>
-</#list>
-<#else>
-<strong>There are no answers to this question! Please fix ASAP!</strong>
+	<strong>There are no answers to this question! Please fix ASAP!</strong>
 </#if>
 </p>
 
+<#if ! question.isFillInTheBlank()>
 <#assign index = 0>
 <#if question.answers??>
 <#list question.answers as answer>
-<#if question.isFillInTheBlank()>
-${seq[index]} : ${answer.answer}</br>
-<#else>
 <#if answer.isCorrect()>
 Correct Answer is : <strong>${seq[index]}</strong></br>
-</#if>
 </#if>
 <#assign index=index+1>
 </#list>
 </p>
+</#if>
 </#if>
 
 <b>References :</b></br>

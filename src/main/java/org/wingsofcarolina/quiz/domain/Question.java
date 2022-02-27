@@ -209,14 +209,81 @@ public class Question {
 
 	@JsonIgnore
 	public String getQuestionAsHtml() {
-		return CommonMarkRenderer.renderAsHtml(details.getQuestion());
+		String text = details.getQuestion();
+		if (type == Type.BLANK) {
+			// Turn all {} instances into blanks
+			text = fillInTheBlank(text);
+		}
+		return CommonMarkRenderer.renderAsHtml(text);
+	}
+
+	private String fillInTheBlank(String input) {
+		String output = "";
+		List<Answer> answers = details.getAnswers();
+		if (input.contains("{}")) {
+			int index = 0;
+			int count = 0;
+			while (input.indexOf("{}", index) != -1) {
+				output += input.substring(index, input.indexOf("{}", index));
+				output += "<span style='font-weight:bold;color:#c90e0e'>" + answers.get(count++).getAnswer() + "</span>";
+				index = input.indexOf("{}", index) + 2;
+			}
+			index = input.lastIndexOf("{}") + 2;
+			if (index <= input.length()) {
+				output += input.substring(index);
+			}
+		} else {
+			output = input;
+		}
+		return output;
 	}
 
 	@JsonIgnore
 	public Paragraph getQuestionAsIText() {
-		return CommonMarkRenderer.renderToParagraph(details.getQuestion());
+		String text = details.getQuestion();
+		if (type == Type.BLANK) {
+			// Turn all {} instances into blanks
+			text = blankify(text);
+		}
+		return CommonMarkRenderer.renderToParagraph(text);
 	}
 
+	private String blankify(String input) {
+		String output = "";
+		if (input.contains("{}")) {
+			int index = 0;
+			int count = 0;
+			while (input.indexOf("{}", index) != -1) {
+				output += input.substring(index, input.indexOf("{}", index));
+				output += makeBlank(count++);
+				index = input.indexOf("{}", index) + 2;
+			}
+			index = input.lastIndexOf("{}") + 2;
+			if (index <= input.length()) {
+				output += input.substring(index);
+			}
+		} else {
+			output = input;
+		}
+		return output;
+	}
+	
+	private String makeBlank(Integer answerIndex) {
+		String blanks = "";
+		List<Answer> answers = details.getAnswers();
+
+		// Get the length of the answer ....
+		int length = answers.get(answerIndex).getAnswer().length();
+		// .... but limit the number of blanks to no more than 20
+		length = length > 20 ? 20 : length;
+		
+		// Build the blank string
+		for (int i = 0; i < length; i++) {
+			blanks += "_";
+		}
+		return blanks;
+	}
+	
 	public void setQuestion(String question) {
 		details.setQuestion(question);
 	}
