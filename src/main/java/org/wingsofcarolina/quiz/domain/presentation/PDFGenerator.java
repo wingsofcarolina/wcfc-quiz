@@ -185,6 +185,7 @@ public class PDFGenerator {
 		cell.setBorder(Border.NO_BORDER);
 		cell.setFontSize(12);
 		Paragraph graph = question.getQuestionAsIText();
+		// TODO: Remove the question number from the PDF once we go live
 		String questionId = new Long(question.getQuestionId()).toString();
 		graph.add(new Text(" (" + questionId + ")"));
 		cell.add(graph);
