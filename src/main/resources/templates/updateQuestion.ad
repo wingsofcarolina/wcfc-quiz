@@ -155,9 +155,12 @@ function add_row() {
         var alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         var table = document.getElementById('answerlist');
         var count = table.rows.length;
-        console.log("Current number of rows ...." + count);
         var row = table.insertRow(-1);
-        row.appendChild(document.createElement("td")).innerHTML = "<input type=\"checkbox\" value=" + count + " name=\"correct\" onclick=setCorrect(this)>";
+        var element = row.appendChild(document.createElement("td"));
+        element.innerHTML = "<input type=\"checkbox\" value=" + count + " name=\"correct\" onclick=setCorrect(this)>";
+        if (question.type.value == 'BLANK') {
+        	element.style.display = 'none';
+        }
         row.appendChild(document.createElement("td")).innerHTML = alphabet.charAt(count);
         row.appendChild(document.createElement("td")).innerHTML = "<textarea name=\"answer\" rows=\"2\" cols=\"70\"></textarea>";       
 }
