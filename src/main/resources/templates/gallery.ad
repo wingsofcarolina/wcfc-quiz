@@ -55,7 +55,7 @@ navbar:${user.userId}[buttons="HomeNavButton;ProfileNavButton", active="ProfileN
 </script>
 <div class="container">
 	<center><div style="font-size:30px;">Select File to Upload</div></center>
-	<input type="file" id="fileUpload" accept="image/png, image/jpg">
+	<input type="file" id="fileUpload" accept="image/png, image/jpg, image/jpeg, image/gif">
 	<button onclick=handleImageUpload()>Upload</button>
 </div>
 <hr>
