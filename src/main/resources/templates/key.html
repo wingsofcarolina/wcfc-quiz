@@ -6,6 +6,13 @@
   <link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
 </head>
 <body>
+<style>
+.key_answer {
+	font-weight:bold;
+	color:#c90e0e;
+	text-decoration: underline;
+}
+</style>
 <#setting number_format="#0"/>
 <#assign seq = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L" ]>
 
@@ -20,8 +27,7 @@
 
 <div>
 <#list questions as question>
-<b>${question.index}</b> : ${question.getQuestionAsHtml()} 
-	<i>(${question.questionId})</i></br>
+<b>${question.index}</b> : ${question.getQuestionAsHtml()}</br>
 <p>
 <#assign index = 0>
 <#if question.answers??>
@@ -66,7 +72,7 @@ ${question.getDiscussionAsHtml()}</p>
 ${attribute}&nbsp;
 </#if>
 </#list>
-}</i></p>
+} (${question.questionId})</i></p>
 <hr>
 </#list>
 </div>

@@ -231,7 +231,7 @@ public class Question {
 			int count = 0;
 			while (input.indexOf("{}", index) != -1) {
 				output += input.substring(index, input.indexOf("{}", index));
-				output += "<span style='font-weight:bold;color:#c90e0e'>" + answers.get(count++).getAnswer() + "</span>";
+				output += "<span class='key_answer'>" + answers.get(count++).getAnswer() + "</span>";
 				index = input.indexOf("{}", index) + 2;
 			}
 			index = input.lastIndexOf("{}") + 2;

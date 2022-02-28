@@ -6,20 +6,21 @@
   <link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
 </head>
 <body>
+<style>
+.key_answer {
+	font-weight:bold;
+	color:#c90e0e;
+	text-decoration: underline;
+}
+</style>
 <#setting number_format="#0"/>
 <#assign seq = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L" ]>
 
 <hr>
 
 <div>
-<b>0</b> : ${question.getQuestionAsHtml()} 
-	<i>(${question.questionId})</i></br>
-&nbsp;&nbsp;&nbsp;
-<i>{ ${question.category}&nbsp;/&nbsp;
-<#list question.attributes as attribute>
-${attribute}&nbsp;
-</#list>
-}</i></p>
+<b>0</b> : ${question.getQuestionAsHtml()}</br>
+</p>
 
 <#if ! question.isFillInTheBlank()>
 <#assign index = 0>
@@ -51,7 +52,14 @@ Correct Answer is : <strong>${seq[index]}</strong></br>
 ${question.getReferencesAsHtml()}</p>
 <b>CFI Discussion :</b> </br>
 ${question.getDiscussionAsHtml()}</p>
+
+<i>{ ${question.category}&nbsp;/&nbsp;
+<#list question.attributes as attribute>
+${attribute}&nbsp;
+</#list>
+} (${question.questionId})</i>
 <hr>
 </div>
+
 </body>
 </html>
