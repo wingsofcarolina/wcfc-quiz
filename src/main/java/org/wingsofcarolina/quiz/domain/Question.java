@@ -208,6 +208,12 @@ public class Question {
 	}
 
 	@JsonIgnore
+	public String getRawQuestionAsHtml() {
+		String text = details.getQuestion();
+		return CommonMarkRenderer.renderAsHtml(text);
+	}
+
+	@JsonIgnore
 	public String getQuestionAsHtml() {
 		String text = details.getQuestion();
 		if (type == Type.BLANK) {
