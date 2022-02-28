@@ -196,43 +196,43 @@ public class QuizAPI {
 		return Response.ok().entity(recipeCatalog).build();
 	}
 
-	@GET
-	@Path("migrate")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response migrate(@CookieParam("quiz.token") Cookie cookie) {
-		List<Question> questions = Question.getAllQuestions();
-		for (Question question : questions) {
-			String newString = scrub(question);
-			if (newString != null) {
-				question.setQuestion(newString);
-				question.save();
-			}
-		}
-		return Response.ok().build();
-	}
-
-	private String scrub(Question question) {
-		boolean found = false;
-		char[] target = question.getQuestion().toCharArray();
-		for (int i = 0; i < target.length; i++) {
-			if (target[i] > 8000) {
-				int value = target[i];
-				System.out.println("======> " + question.getQuestionId() + " <> " + target[i] + " : " + value);
-				switch (value) {
-					case 8217 : target[i] = '\''; break;
-					case 8220 : 
-					case 8221 : target[i] = '\"'; break;
-				}
-				found = true;
-			}
-		}
-		
-		if (found) { 
-			return new String(target);
-		} else {
-			return null;
-		}
-	}
+//	@GET
+//	@Path("migrate")
+//	@Produces(MediaType.APPLICATION_JSON)
+//	public Response migrate(@CookieParam("quiz.token") Cookie cookie) {
+//		List<Question> questions = Question.getAllQuestions();
+//		for (Question question : questions) {
+//			String newString = scrub(question);
+//			if (newString != null) {
+//				question.setQuestion(newString);
+//				question.save();
+//			}
+//		}
+//		return Response.ok().build();
+//	}
+//
+//	private String scrub(Question question) {
+//		boolean found = false;
+//		char[] target = question.getQuestion().toCharArray();
+//		for (int i = 0; i < target.length; i++) {
+//			if (target[i] > 8000) {
+//				int value = target[i];
+//				System.out.println("======> " + question.getQuestionId() + " <> " + target[i] + " : " + value);
+//				switch (value) {
+//					case 8217 : target[i] = '\''; break;
+//					case 8220 : 
+//					case 8221 : target[i] = '\"'; break;
+//				}
+//				found = true;
+//			}
+//		}
+//		
+//		if (found) { 
+//			return new String(target);
+//		} else {
+//			return null;
+//		}
+//	}
 
 //	@GET
 //	@Path("migrateQuestions")
