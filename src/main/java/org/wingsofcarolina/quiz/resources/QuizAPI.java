@@ -197,34 +197,42 @@ public class QuizAPI {
 	}
 
 	@GET
-	@Path("recipe/catalog")
+	@Path("migrate")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response recipeCatalog(@CookieParam("quiz.token") Cookie cookie) {
-		Map<Long, String> recipeCatalog = new HashMap<Long, String>();
-		
-		migrateRecipe(Recipe.getRecipeById(1000L), "FAR 61/91, Pre-Solo");
-		migrateRecipe(Recipe.getRecipeById(1001L), "SOP/FS, Student Pilots");
-		migrateRecipe(Recipe.getRecipeById(1002L), "SOP/FS, Licensed Pilot");
-		migrateRecipe(Recipe.getRecipeById(1003L), "SOP/FS, Instructor");
-		migrateRecipe(Recipe.getRecipeById(1004L), "C-152");
-		migrateRecipe(Recipe.getRecipeById(1005L), "C-172 Skyhawk");
-		migrateRecipe(Recipe.getRecipeById(1006L), "PA-28 Warrior");
-		migrateRecipe(Recipe.getRecipeById(1007L), "M20J Mooney");
-		
-		List<Recipe> recipes = Recipe.getAllRecipes();
-		
-		for (Recipe r : recipes) {
-			recipeCatalog.put(r.getRecipeId(), r.getName());
+	public Response migrate(@CookieParam("quiz.token") Cookie cookie) {
+		List<Question> questions = Question.getAllQuestions();
+		for (Question question : questions) {
+			String newString = scrub(question);
+			if (newString != null) {
+				question.setQuestion(newString);
+				question.save();
+			}
+		}
+		return Response.ok().build();
+	}
+
+	private String scrub(Question question) {
+		boolean found = false;
+		char[] target = question.getQuestion().toCharArray();
+		for (int i = 0; i < target.length; i++) {
+			if (target[i] > 8000) {
+				int value = target[i];
+				System.out.println("======> " + question.getQuestionId() + " <> " + target[i] + " : " + value);
+				switch (value) {
+					case 8217 : target[i] = '\''; break;
+					case 8220 : 
+					case 8221 : target[i] = '\"'; break;
+				}
+				found = true;
+			}
 		}
 		
-		return Response.ok().entity(recipeCatalog).build();
+		if (found) { 
+			return new String(target);
+		} else {
+			return null;
+		}
 	}
-
-	private void migrateRecipe(Recipe recipe, String name) {
-		recipe.setName(name);
-		recipe.save();
-	}
-
 
 //	@GET
 //	@Path("migrateQuestions")
