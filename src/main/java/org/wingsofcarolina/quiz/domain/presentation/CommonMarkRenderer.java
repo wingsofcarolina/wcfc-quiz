@@ -40,6 +40,8 @@ public class CommonMarkRenderer {
 	private static MyVisitor visitor = new MyVisitor();
 
 	private static Paragraph graph;
+	private static boolean firstLine = true;
+	private static boolean noNewline = false;;
 	
 	public static String renderAsHtml(String input) {
 		Node document = parser.parse(input);
@@ -85,7 +87,8 @@ public class CommonMarkRenderer {
 
 	public static Paragraph renderToParagraph(String input) {
 		graph = new Paragraph();
-
+		firstLine = true;
+		
 		Node document = parser.parse(input);
 		document.accept(visitor);
 		
@@ -105,6 +108,7 @@ public class CommonMarkRenderer {
 		
 		private boolean list = false;
 		private com.itextpdf.layout.element.List imbeddedList = null;
+		private boolean noNewline;
 		
 		@Override
 	    public void visit(Text element) {
@@ -123,6 +127,13 @@ public class CommonMarkRenderer {
 	        	}
 	        	imbeddedList.add(new com.itextpdf.layout.element.ListItem(literal));
 	        } else {
+	        	if (! firstLine ) {
+	        		graph.add("\n");
+	        		if ( ! noNewline ) {
+		        		graph.add("\n");
+	        		}
+	        	}
+        		firstLine = false;
 	        	graph.add(text);
 	        }
 	    }
@@ -145,7 +156,9 @@ public class CommonMarkRenderer {
 	    @Override
 	    public void visit(OrderedList orderedList) {
 //	    	LOG.info("OrderedList {}", orderedList);
+	    	noNewline = true;
 	        visitChildren(orderedList);
+	        noNewline = false;
 	    }
 
 	    @Override
