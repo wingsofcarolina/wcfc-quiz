@@ -231,7 +231,11 @@ public class Question {
 			int count = 0;
 			while (input.indexOf("{}", index) != -1) {
 				output += input.substring(index, input.indexOf("{}", index));
-				output += "<span class='key_answer'>" + answers.get(count++).getAnswer() + "</span>";
+				if (count < answers.size()) {
+					output += "<span class='key_answer'>" + answers.get(count++).getAnswer() + "</span>";
+				} else {
+					output += "<span class='key_answer'> {missing answer} </span>";
+				}
 				index = input.indexOf("{}", index) + 2;
 			}
 			index = input.lastIndexOf("{}") + 2;
@@ -275,14 +279,19 @@ public class Question {
 	}
 	
 	private String makeBlank(Integer answerIndex) {
+		int length = 10; // default length if we are "out of bounds"
 		String blanks = "";
 		List<Answer> answers = details.getAnswers();
 
-		// Get the length of the answer ....
-		int length = answers.get(answerIndex).getAnswer().length();
-		// .... but limit the number of blanks to no more than 20
-		length = length > 20 ? 20 : length;
-		
+		// First, see if we have too many {}s in the question
+		if (answerIndex < answers.size()) {
+			// Get the length of the answer ....
+			length = answers.get(answerIndex).getAnswer().length();
+			// .... but limit the number of blanks to no more than 20
+			length = length > 20 ? 20 : length;
+		} else {
+			System.out.println("Ran off the end!");
+		}
 		// Build the blank string
 		for (int i = 0; i < length; i++) {
 			blanks += "_";
