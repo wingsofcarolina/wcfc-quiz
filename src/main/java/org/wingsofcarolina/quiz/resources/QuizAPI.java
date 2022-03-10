@@ -11,6 +11,8 @@ import java.nio.file.Files;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.text.SimpleDateFormat;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -196,32 +198,61 @@ public class QuizAPI {
 		return Response.ok().entity(recipeCatalog).build();
 	}
 
+	@GET
+	@Path("fibs")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response sunset() {
+		List<Long> ids = new ArrayList<Long>();
+		List<Question> questions = Question.getAllQuestions();
+
+		for (Question question : questions) {
+			if (question.getType() == Type.BLANK) {
+				ids.add(question.getQuestionId());
+			}
+		}
+		
+		return Response.ok().entity(ids).build();
+	}
+	
 //	@GET
 //	@Path("migrate")
 //	@Produces(MediaType.APPLICATION_JSON)
 //	public Response migrate(@CookieParam("quiz.token") Cookie cookie) {
 //		List<Question> questions = Question.getAllQuestions();
 //		for (Question question : questions) {
-//			String newString = scrub(question);
+//			Long id = question.getQuestionId();
+//			String newString = scrub(id, question.getQuestion());
 //			if (newString != null) {
 //				question.setQuestion(newString);
+//				question.save();
+//			}
+//			newString = scrub(id, question.getDiscussion());
+//			if (newString != null) {
+//				question.setDiscussion(newString);
+//				question.save();
+//			}
+//			newString = scrub(id, question.getReferences());
+//			if (newString != null) {
+//				question.setReferences(newString);
 //				question.save();
 //			}
 //		}
 //		return Response.ok().build();
 //	}
 //
-//	private String scrub(Question question) {
+//	private String scrub(Long id, String text) {
 //		boolean found = false;
-//		char[] target = question.getQuestion().toCharArray();
+//		char[] target = text.toCharArray();
 //		for (int i = 0; i < target.length; i++) {
 //			if (target[i] > 8000) {
 //				int value = target[i];
-//				System.out.println("======> " + question.getQuestionId() + " <> " + target[i] + " : " + value);
+//				System.out.println("======> " + id + " <> " + target[i] + " : " + value);
 //				switch (value) {
 //					case 8217 : target[i] = '\''; break;
 //					case 8220 : 
 //					case 8221 : target[i] = '\"'; break;
+//					case 8211 : target[i] = '-'; break;
+//					case 8226 : target[i] = '*'; break;
 //				}
 //				found = true;
 //			}

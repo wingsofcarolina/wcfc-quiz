@@ -75,7 +75,7 @@ public class Quiz {
 	}
 	
 	public Date getSunsetDate() {
-	       // convert date to calendar
+	    // convert date to calendar
         Calendar c = Calendar.getInstance();
         c.setTime(createdDate);
 

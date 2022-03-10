@@ -13,8 +13,8 @@ import org.wingsofcarolina.quiz.resources.Quiz;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public class Record {
-    @Id
+public class Record {	
+	@Id
 	@JsonIgnore
     private ObjectId id;
     
@@ -70,6 +70,11 @@ public class Record {
 	/*
 	 * Database Management Functionality
 	 */
+	public static List<Record> getAllRecords() {
+		RecordDAO RecordDao = (RecordDAO) Persistence.instance().get(Record.class);
+		return RecordDao.getAllRecords();
+	}
+	
 	public static Record getByQuizId(Long id) {
 		RecordDAO recordDAO = (RecordDAO) Persistence.instance().get(Record.class);
 		return recordDAO.getByQuizId(id);
@@ -80,14 +85,18 @@ public class Record {
 		return recordDAO.getDeployedIds();
 	}
 	
+	public static List<Record> getEarlierThan(Date sunset) {
+		RecordDAO recordDAO = (RecordDAO) Persistence.instance().get(Record.class);
+		return recordDAO.getEarlierThan(sunset);
+	}
+
 	@SuppressWarnings("unchecked")
 	public void save() {
-		Persistence.instance().get(Question.class).save(this);
+		Persistence.instance().get(Record.class).save(this);
 	}
 	
 	@SuppressWarnings("unchecked")
 	public void delete() {
-		Persistence.instance().get(Question.class).delete(this);
+		Persistence.instance().get(Record.class).delete(this);
 	}
-
 }
