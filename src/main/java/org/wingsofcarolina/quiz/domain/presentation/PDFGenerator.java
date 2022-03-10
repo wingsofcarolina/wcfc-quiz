@@ -195,25 +195,30 @@ public class PDFGenerator {
 		if (question.getAttachment() != null && ! question.getAttachment().equals("NONE")) {
 			String imageDir = context.getConfiguration().getImageDirectory() + "/";
 		    try {
-				Image image = new Image(ImageDataFactory.create(imageDir + question.getAttachment()));
-				float imageWidth = image.getImageWidth();
-				if (imageWidth > 400f) {
-					float scale = imageWidth / 450.0f;
-					float imageHeight = image.getImageHeight() / scale;
-		            image.scaleAbsolute(450f, imageHeight);
-				}
-				cell = new Cell();
-				cell.setBorder(Border.NO_BORDER);
-				cell.add(new Paragraph("\n"));
-				table.addCell(cell);
-				cell = new Cell();
-				cell.setBorder(Border.NO_BORDER);
-				cell.setVerticalAlignment(VerticalAlignment.MIDDLE);
-				cell.setHorizontalAlignment(HorizontalAlignment.CENTER);
-				cell.add(image);
-				table.addCell(cell);
+		    	File iFile = new File(imageDir + question.getAttachment());
+		    	if (iFile.exists()) {
+					Image image = new Image(ImageDataFactory.create(imageDir + question.getAttachment()));
+					float imageWidth = image.getImageWidth();
+					if (imageWidth > 400f) {
+						float scale = imageWidth / 450.0f;
+						float imageHeight = image.getImageHeight() / scale;
+			            image.scaleAbsolute(450f, imageHeight);
+					}
+					cell = new Cell();
+					cell.setBorder(Border.NO_BORDER);
+					cell.add(new Paragraph("\n"));
+					table.addCell(cell);
+					cell = new Cell();
+					cell.setBorder(Border.NO_BORDER);
+					cell.setVerticalAlignment(VerticalAlignment.MIDDLE);
+					cell.setHorizontalAlignment(HorizontalAlignment.CENTER);
+					cell.add(image);
+					table.addCell(cell);
+		    	} else {
+					LOG.error("Could not find requested image attachment : {}", question.getAttachment());
+		    	}
 			} catch (com.itextpdf.io.IOException|MalformedURLException e) {
-				LOG.error("Could not find requested image attachment : {}", question.getAttachment());
+				LOG.error("Exception occured trying to access image file : {}", question.getAttachment());
 			}
 		}
 
