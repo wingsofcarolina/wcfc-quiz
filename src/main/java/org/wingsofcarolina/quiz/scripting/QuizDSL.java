@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wingsofcarolina.quiz.domain.ExclusionGroup;
 import org.wingsofcarolina.quiz.domain.Question;
-import org.wingsofcarolina.quiz.domain.Section;
 import org.wingsofcarolina.quiz.resources.Quiz;
 import org.wingsofcarolina.quiz.resources.QuizContext;
 
@@ -80,6 +79,10 @@ public abstract class QuizDSL extends Script {
 	}
 
 	// Start a "section" of the quiz
+	public void start(String sectionName) {
+		start(null, sectionName);
+	}
+	
 	public void start(Integer questionCount, String sectionName) {
 		if (context.getTestRun()) {
 			System.out.println("### Starting new section : " + sectionName + "<br>");
@@ -217,6 +220,30 @@ public abstract class QuizDSL extends Script {
 				}
 			}
 		}
+	}
+	
+	public void require(Pool pool) {
+		for (Question question : pool.getQuestionList()) {
+			question = resolve(question);
+			if (question != null) {
+				section.addRequired(question);
+				if (context.getTestRun()) {
+					System.out.println("Added to quiz : " + question.getQuestionId() + "<br>");
+				}
+			} else {
+				if (context.getTestRun()) {
+					System.out.println("ERROR : Impossible error, got a null question from a pool<br>");
+				} else {
+					LOG.info("Impossible error, got a null question from a pool");
+				}
+			}
+		}
+	}
+
+	// Return a pool of questions which have the supplied attribute, and
+	// are also noted as being "required" questions.
+	public Pool getRequiredWith(String attribute) {
+		return new Pool().getRequiredWith(attribute);
 	}
 
 	// Return a pool of questions which match any of the supplied attributes. This

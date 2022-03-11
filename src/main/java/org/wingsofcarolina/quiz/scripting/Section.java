@@ -1,11 +1,11 @@
-package org.wingsofcarolina.quiz.domain;
+package org.wingsofcarolina.quiz.scripting;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Id;
-import org.wingsofcarolina.quiz.scripting.Pool;
+import org.wingsofcarolina.quiz.domain.Question;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -85,6 +85,10 @@ public class Section {
 			int max = (count - result.size() > selections.size()) ? selections.size() : count - result.size();
 			for (int i = 0; i < max; i++) {
 				result.add(selections.get(i));
+			}
+		} else {
+			if (selections != null) {
+				result.addAll(selections);
 			}
 		}
 

@@ -61,6 +61,12 @@ public class Pool {
 		pool.addAll(allQuestions);
 		return this;
 	}
+	
+	public Pool getRequiredWith(String attribute) {
+	   	List<Question> result = Question.getRequiredWith(attribute);
+    	this.pool = result;
+    	return this;
+	}
 
     // Filter the list returning only those questions which contain the 
     // indicated attributes.

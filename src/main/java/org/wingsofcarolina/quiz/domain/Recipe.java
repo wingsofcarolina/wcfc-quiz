@@ -8,6 +8,8 @@ import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Transient;
 import org.wingsofcarolina.quiz.domain.dao.RecipeDAO;
 import org.wingsofcarolina.quiz.domain.persistence.Persistence;
+import org.wingsofcarolina.quiz.scripting.Section;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class Recipe {

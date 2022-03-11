@@ -2,6 +2,7 @@ package org.wingsofcarolina.quiz.domain.dao;
 import java.util.List;
 
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.AdvancedDatastore;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.dao.BasicDAO;
 import org.mongodb.morphia.query.FindOptions;
@@ -11,17 +12,16 @@ import org.slf4j.LoggerFactory;
 import org.wingsofcarolina.quiz.domain.Question;
 import org.wingsofcarolina.quiz.domain.Type;
 
+import com.mongodb.BasicDBObject;
+import com.mongodb.BasicDBObjectBuilder;
+import com.mongodb.DBObject;
+
 public class QuestionDAO extends BasicDAO<Question, ObjectId> {
 	@SuppressWarnings("unused")
 	private static final Logger LOG = LoggerFactory.getLogger(QuestionDAO.class);
 
 	public QuestionDAO(Datastore ds) {
 		super(Question.class, ds);
-	}
-
-	public List<Question> getAllValidQuestions() {
-		List<Question> result = getDatastore().find(Question.class).order("questionId").asList();
-		return result;
 	}
 
 	public List<Question> getAllQuestions() {
@@ -44,8 +44,21 @@ public class QuestionDAO extends BasicDAO<Question, ObjectId> {
 	}
 	
 	public List<Question> getByType(Type type) {
-		List<Question> result = getDatastore().find(Question.class).filter("type = ", type).order("questionid").asList();
+		List<Question> result = getDatastore().find(Question.class).filter("type = ", type).order("questionId").asList();
 		return result;
+	}
+	
+	public List<Question> getRequiredWith(String attribute) {
+		if (attribute != null) {
+			List<Question> result = getDatastore().find(Question.class)
+					.filter("attributes = ", attribute)
+					.filter("required = ", true)
+					.order("questionId").asList();
+
+			return result;
+		} else {
+			return null;
+		}
 	}
 	
 	public List<Question> getSelectedWith(String attribute) {

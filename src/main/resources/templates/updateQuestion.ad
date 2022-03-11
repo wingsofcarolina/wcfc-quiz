@@ -245,6 +245,11 @@ Fill in the Blank
 <select id="q-exclusion" name="exclusion">
   <option><strong>NONE</strong></option>
 </select></td></tr>
+<tr><td valign="top">Required</td>
+<td>
+  <input type="radio" name="required" value="true" <#if question.getRequired()>checked</#if>>True
+  <input type="radio" name="required" value="false" <#if ! question.getRequired()>checked</#if>> False
+</td></tr>
 <tr><td valign="top">Question</td><td><textarea name="question" rows="4" cols="70">${question.question}</textarea></td></tr>
 <tr><td valign="top">Discussion</td><td><textarea name="discussion" rows="4" cols="70">${question.discussion}</textarea></td></tr>
 <tr><td valign="top">References</td><td><textarea name="references" rows="2" cols="70">${question.references}</textarea></td></tr>

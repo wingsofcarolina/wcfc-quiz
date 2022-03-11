@@ -107,6 +107,14 @@ public class QuizAPI {
 		dateFormatGmt.setTimeZone(TimeZone.getTimeZone("GMT"));
 	}
 	
+	@GET
+	@Path("required")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response explore(@CookieParam("quiz.token") Cookie cookie) throws Exception, AuthenticationException {
+		List<Question> list = Question.getRequiredWith("FAR");
+		return Response.ok().entity(list).build();
+	}
+	
 //	@GET
 //	@Path("explore")
 //	@Produces(MediaType.APPLICATION_JSON)
@@ -209,6 +217,9 @@ public class QuizAPI {
 			if (question.isSuperseded()) {
 				LOG.info("Deleting : {}", question.getQuestionId());
 				question.delete();
+			} else if (question.getDeployed()) {
+				question.setDeployed(false);
+				question.save();
 			}
 		}
 		
@@ -780,7 +791,7 @@ public class QuizAPI {
 	@Path("addQuestion")
 	@Produces(MediaType.TEXT_HTML)
 	public Response addQuestion(@CookieParam("quiz.token") Cookie cookie, @FormParam("type") String typeName,
-			@FormParam("exclusion") Long exclusionId,
+			@FormParam("exclusion") Long exclusionId, @FormParam("required") Boolean required, 
 			@FormParam("category") String categoryName, @FormParam("question") String question,
 			@FormParam("discussion") String discussion, @FormParam("references") String references,
 			@FormParam("difficulty") String difficulty, @FormParam("attributes") List<String> attributes,
@@ -800,14 +811,14 @@ public class QuizAPI {
 		}
 
 		if (typeName.contentEquals("fib")) {
-			newQuestion = createQuestion(cookie, typeName, categoryName, exclusionId, question, discussion, references, difficulty,
+			newQuestion = createQuestion(cookie, typeName, categoryName, exclusionId, required, question, discussion, references, difficulty,
 					attributes, answers, null, attachment);
 		} else {
 			if (correct == null || correct.size() == 0) {
 				Flash.add(Flash.Code.ERROR, "A question may not be saved with no correct answer set.");
 				return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
 			}
-			newQuestion = createQuestion(cookie, typeName, categoryName, exclusionId, question, discussion, references, difficulty,
+			newQuestion = createQuestion(cookie, typeName, categoryName, exclusionId, required, question, discussion, references, difficulty,
 					attributes, answers, correct.get(0), attachment);
 		}
 
@@ -820,6 +831,7 @@ public class QuizAPI {
 	public Response updateQuestion(@CookieParam("quiz.token") Cookie cookie,
 			@FormParam("exclusion") Long exclusionId,
 			@FormParam("questionId") Long questionId, @FormParam("quarantined") Boolean quarantined, 
+			@FormParam("required") Boolean required, 
 			@FormParam("type") String typeName, @FormParam("category") String categoryName,
 			@FormParam("question") String question, @FormParam("discussion") String discussion,
 			@FormParam("references") String references, @FormParam("difficulty") String difficulty,
@@ -859,6 +871,12 @@ public class QuizAPI {
 
 		if (original != null) {
 			if ((!original.getDeployed()) || overwrite == true) {
+				// Update required status, detecting change
+				if (original.getRequired() != required) {
+					original.setRequired(required);
+					changed = true;
+				}
+				
 				// Update Attributes, detecting changes
 				for (String att : attributes) {
 					if (!original.hasAttribute(att)) {
@@ -934,7 +952,7 @@ public class QuizAPI {
 					Flash.add(Flash.Code.SUCCESS, "No changes made to question with ID : " + original.getQuestionId());
 				}
 			} else {
-				Question q = createQuestion(cookie, typeName, categoryName, exclusionId, question, discussion, references,
+				Question q = createQuestion(cookie, typeName, categoryName, exclusionId, required, question, discussion, references,
 						difficulty, attributes, answers, correctAnswer, attachment);
 				original.setSupersededBy(q.getQuestionId());
 				original.save();
@@ -964,7 +982,7 @@ public class QuizAPI {
 		return true;
 	}
 	
-	private Question createQuestion(Cookie cookie, String typeName, String categoryName, Long exclusionId, String question,
+	private Question createQuestion(Cookie cookie, String typeName, String categoryName, Long exclusionId, Boolean required, String question,
 			String discussion, String references, String difficulty, List<String> attributes, List<String> answers,
 			Integer correct, String attachment) throws Exception {
 
@@ -973,6 +991,7 @@ public class QuizAPI {
 		LOG.debug("Type       --> {}", typeName);
 		LOG.debug("Category   --> {}", categoryName);
 		LOG.debug("Exclusion  --> {}", exclusionId);
+		LOG.debug("Required   --> {}", required);
 		LOG.debug("Question   --> {}", question);
 		LOG.debug("Discussion --> {}", discussion);
 		LOG.debug("References --> {}", references);
@@ -999,10 +1018,10 @@ public class QuizAPI {
 		}
 
 		if (correct == null) {
-			newQuestion = new Question(type, category, attributes,
+			newQuestion = new Question(type, category, attributes, required,
 					new QuestionDetails(question, discussion, references, answers, attachment));
 		} else {
-			newQuestion = new Question(type, category, attributes,
+			newQuestion = new Question(type, category, attributes, required,
 					new QuestionDetails(question, discussion, references, answers, correct, attachment));
 		}
 		

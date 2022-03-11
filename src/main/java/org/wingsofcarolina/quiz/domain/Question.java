@@ -32,6 +32,7 @@ public class Question {
 	private Boolean deployed = false;
 	private Boolean deleted = false;
 	private Boolean quarantined = false;
+	private Boolean required = false;
 	private long supersededBy = -1;
 	private Date createdDate = new Date();
 	@JsonIgnore
@@ -47,11 +48,12 @@ public class Question {
 		details = new QuestionDetails();
 	}
 	
-	public Question(Type type, Category category,  List<String> attributes, QuestionDetails details) {
+	public Question(Type type, Category category,  List<String> attributes, Boolean required, QuestionDetails details) {
 		this.type = type;
 		this.category = category;
 		this.attributes = attributes;
 		this.details = details;
+		this.required = required;
 		this.questionId = Persistence.instance().getID(ID_KEY, 1000);
 	}
 	
@@ -185,6 +187,18 @@ public class Question {
 
 	public void setQuarantined(Boolean quarantined) {
 		this.quarantined = quarantined;
+	}
+
+	public Boolean getRequired() {
+		return required;
+	}
+
+	public Boolean isRequired() {
+		return required;
+	}
+
+	public void setRequired(Boolean required) {
+		this.required = required;
 	}
 
 	public long getSupersededBy() {
@@ -407,6 +421,11 @@ public class Question {
 	public static List<Question> getSuperseded() {
 		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
 		return questionDao.getSuperseded();
+	}
+
+	public static List<Question> getRequiredWith(String attribute) {
+		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
+		return questionDao.getRequiredWith(attribute);
 	}
 
 	@SuppressWarnings("unchecked")

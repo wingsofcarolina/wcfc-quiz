@@ -194,6 +194,11 @@ function checkform()
 <select id="q-exclusion" name="exclusion">
   <option>NONE</option>
 </select></td></tr>
+<tr><td valign="top">Required</td>
+<td>
+  <input type="radio" name="required" value="true">True
+  <input type="radio" name="required" value="false" checked> False
+</td></tr>
 <tr><td valign="top">Question</td><td><textarea name="question" rows="4" cols="70" placeholder=" Enter the question here."></textarea></td></tr>
 <tr><td valign="top">Discussion</td><td><textarea name="discussion" rows="4" cols="70" placeholder=" Enter the CFI discussion here."></textarea></td></tr>
 <tr><td valign="top">References</td><td><textarea name="references" rows="2" cols="70" placeholder=" Enter any references here."></textarea></td></tr>
