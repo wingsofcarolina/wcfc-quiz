@@ -127,7 +127,7 @@ public class CommonMarkRenderer {
 	        	}
 	        	imbeddedList.add(new com.itextpdf.layout.element.ListItem(literal));
 	        } else {
-	        	if (! firstLine ) {
+	        	if (list && ! firstLine ) {
 	        		graph.add("\n");
 	        		if ( ! noNewline ) {
 		        		graph.add("\n");
