@@ -53,6 +53,7 @@ import org.wingsofcarolina.quiz.authentication.Privilege;
 import org.wingsofcarolina.quiz.common.Flash;
 import org.wingsofcarolina.quiz.common.Pages;
 import org.wingsofcarolina.quiz.common.Templates;
+import org.wingsofcarolina.quiz.domain.Answer;
 import org.wingsofcarolina.quiz.domain.Attribute;
 import org.wingsofcarolina.quiz.domain.Category;
 import org.wingsofcarolina.quiz.domain.ExclusionGroup;
@@ -199,71 +200,92 @@ public class QuizAPI {
 	}
 
 	@GET
-	@Path("fibs")
+	@Path("baseline")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response sunset() {
-		List<Long> ids = new ArrayList<Long>();
+	public Response baseline() {
+		// First remove all questions that have been superseded
 		List<Question> questions = Question.getAllQuestions();
-
 		for (Question question : questions) {
-			if (question.getType() == Type.BLANK) {
-				ids.add(question.getQuestionId());
+			if (question.isSuperseded()) {
+				LOG.info("Deleting : {}", question.getQuestionId());
+				question.delete();
 			}
 		}
 		
-		return Response.ok().entity(ids).build();
+		// Then remove ALL records
+		List<Record> records = Record.getAllRecords();
+		for (Record record : records) {
+			record.delete();
+		}
+		
+		return Response.ok().build();
 	}
 	
-//	@GET
-//	@Path("migrate")
-//	@Produces(MediaType.APPLICATION_JSON)
-//	public Response migrate(@CookieParam("quiz.token") Cookie cookie) {
-//		List<Question> questions = Question.getAllQuestions();
-//		for (Question question : questions) {
-//			Long id = question.getQuestionId();
-//			String newString = scrub(id, question.getQuestion());
-//			if (newString != null) {
-//				question.setQuestion(newString);
-//				question.save();
-//			}
-//			newString = scrub(id, question.getDiscussion());
-//			if (newString != null) {
-//				question.setDiscussion(newString);
-//				question.save();
-//			}
-//			newString = scrub(id, question.getReferences());
-//			if (newString != null) {
-//				question.setReferences(newString);
-//				question.save();
-//			}
-//		}
-//		return Response.ok().build();
-//	}
-//
-//	private String scrub(Long id, String text) {
-//		boolean found = false;
-//		char[] target = text.toCharArray();
-//		for (int i = 0; i < target.length; i++) {
-//			if (target[i] > 8000) {
-//				int value = target[i];
-//				System.out.println("======> " + id + " <> " + target[i] + " : " + value);
-//				switch (value) {
-//					case 8217 : target[i] = '\''; break;
-//					case 8220 : 
-//					case 8221 : target[i] = '\"'; break;
-//					case 8211 : target[i] = '-'; break;
-//					case 8226 : target[i] = '*'; break;
-//				}
-//				found = true;
-//			}
-//		}
-//		
-//		if (found) { 
-//			return new String(target);
-//		} else {
-//			return null;
-//		}
-//	}
+	@GET
+	@Path("cleanup")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response migrate() {
+		List<Question> questions = Question.getAllQuestions();
+		for (Question question : questions) {
+			boolean changed = false;
+			Long id = question.getQuestionId();
+			String newString = scrub(id, question.getQuestion());
+			if (newString != null) {
+				question.setQuestion(newString);
+				changed = true;
+			}
+			newString = scrub(id, question.getDiscussion());
+			if (newString != null) {
+				question.setDiscussion(newString);
+				changed = true;
+			}
+			newString = scrub(id, question.getReferences());
+			if (newString != null) {
+				question.setReferences(newString);
+				changed = true;
+			}
+			List<Answer> answers = question.getAnswers();
+			if (answers != null) {
+				for (Answer answer : answers) {
+					newString = scrub(id, answer.getAnswer());
+					if (newString != null) {
+						answer.setAnswer(newString);
+						changed = true;
+					}
+				}
+			}
+			if (changed) {
+				question.save();
+			}
+		}
+		return Response.ok().build();
+	}
+
+	private String scrub(Long id, String text) {
+		boolean found = false;
+		char[] target = text.toCharArray();
+		for (int i = 0; i < target.length; i++) {
+			if (target[i] > 8000) {
+				int value = target[i];
+				System.out.println("======> " + id + " <> " + target[i] + " : " + value);
+				switch (value) {
+					case 8217 : target[i] = '\''; break;
+					case 8220 : 
+					case 8221 : target[i] = '\"'; break;
+					case 8209 : 
+					case 8211 : target[i] = '-'; break;
+					case 8226 : target[i] = '*'; break;
+				}
+				found = true;
+			}
+		}
+		
+		if (found) { 
+			return new String(target);
+		} else {
+			return null;
+		}
+	}
 
 //	@GET
 //	@Path("migrateQuestions")
