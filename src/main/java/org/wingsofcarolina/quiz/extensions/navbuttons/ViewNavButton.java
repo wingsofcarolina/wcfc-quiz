@@ -7,7 +7,7 @@ public class ViewNavButton extends NavButton {
 		StringBuffer sb = new StringBuffer();
 		sb.append("<script>function viewQuestion() {"
 				+ "var questionId = prompt(\"Question ID\");"
-				+ "if (questionId != null) { window.location.href = \"/question/\" + questionId + \"\";\n" + 
+				+ "if (questionId != null) { window.location.href = \"/question/\" + questionId.trim() + \"\";\n" + 
 				" } }</script>");
 		sb.append("<a ");
 		if (active) sb.append("class=\"active\"");
