@@ -36,7 +36,7 @@ function loadExclusionGroups()
 </script>
 <table width=100%>
 <tr><td width=10%>ID</td><td><strong>${question.questionId}
-<#if question.getQuarantined()>&nbsp;<font color="red">Quarantined!</font></#if>
+<#if question.isQuarantined()>&nbsp;<font color="red">Quarantined!</font></#if>
 </strong>
 </td></tr>
 
@@ -57,7 +57,7 @@ Fill in the Blank
 <tr><td>Category</td><td><strong>${question.category}</strong></td></tr>
 <tr><td>Exclusion</td><td id="exclusion"><strong>NONE</strong></td></tr>
 <tr><td valign="top">Required</td>
-<td><#if question.getRequired()>&nbsp;<font color="red">Required!</font><#else>Not Required</#if></td></tr>
+<td><#if question.isRequired()>&nbsp;<font color="red">Required!</font><#else>Not Required</#if></td></tr>
 <tr><td valign="top">Question</td><td>${question.getRawQuestionAsHtml()}</td></tr>
 <tr><td valign="top">Discussion</td><td>${question.getDiscussionAsHtml()}</td></tr>
 <tr><td valign="top">References</td><td>${question.getReferencesAsHtml()}</td></tr>

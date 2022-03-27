@@ -226,7 +226,7 @@ function checkform()
 
 <table>
 <tr><td width=10%>ID</td><td><strong>${question.questionId}
-<#if question.getQuarantined()>&nbsp;<font color="red">Quarantined!</font></#if>
+<#if question.isQuarantined()>&nbsp;<font color="red">Quarantined!</font></#if>
 </strong>
 </td></tr>
 <tr><td>Type</td><td><strong>
@@ -247,8 +247,8 @@ Fill in the Blank
 </select></td></tr>
 <tr><td valign="top">Required</td>
 <td>
-  <input type="radio" name="required" value="true" <#if question.getRequired()>checked</#if>>True
-  <input type="radio" name="required" value="false" <#if ! question.getRequired()>checked</#if>> False
+  <input type="radio" name="required" value="true" <#if question.isRequired()>checked</#if>>True
+  <input type="radio" name="required" value="false" <#if ! question.isRequired()>checked</#if>> False
 </td></tr>
 <tr><td valign="top">Question</td><td><textarea name="question" rows="4" cols="70">${question.question}</textarea></td></tr>
 <tr><td valign="top">Discussion</td><td><textarea name="discussion" rows="4" cols="70">${question.discussion}</textarea></td></tr>
@@ -279,14 +279,14 @@ Fill in the Blank
 </#if>
 <tr><td valign="top">Quarantined</td>
 <td>
-  <input type="radio" name="quarantined" value="true" <#if question.getQuarantined()>checked</#if>>True
-  <input type="radio" name="quarantined" value="false" <#if ! question.getQuarantined()>checked</#if>> False
+  <input type="radio" name="quarantined" value="true" <#if question.isQuarantined()>checked</#if>>True
+  <input type="radio" name="quarantined" value="false" <#if ! question.isQuarantined()>checked</#if>> False
 </td></tr>
 </table>
 </p>
 <input type="submit" value="Update Question"><p>
 ++++
-<#if question.deployed == true>
+<#if question.isDeployed() == true>
 ++++
 </br>
 <input type="checkbox" value=true name="overwrite"> Overwrite previously deployed question?
