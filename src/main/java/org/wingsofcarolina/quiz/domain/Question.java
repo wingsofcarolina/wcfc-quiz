@@ -65,7 +65,7 @@ public class Question {
 		this.details = new QuestionDetails(question, references, answers, discussion, attachment);
 		this.questionId = Persistence.instance().getID(ID_KEY, 1000);
 	}
-
+	
 	@JsonIgnore
 	public boolean isFillInTheBlank() {
 		return type == Type.BLANK;
@@ -161,15 +161,11 @@ public class Question {
 		return false;
 	}
 
-	public Boolean getDeployed() {
-		return deployed;
-	}
-
-	public void setDeployed(Boolean deployed) {
-		this.deployed = deployed;
+	public Boolean isDeployed() {
+		return Record.isQuestionIdDeployed(questionId);
 	}
 	
-	public Boolean getDeleted() {
+	public Boolean isDeleted() {
 		return deleted;
 	}
 
@@ -177,20 +173,12 @@ public class Question {
 		this.deleted = deleted;
 	}
 
-	public Boolean getQuarantined() {
-		return quarantined;
-	}
-
-	public boolean isQuarantined() {
+	public Boolean isQuarantined() {
 		return quarantined;
 	}
 
 	public void setQuarantined(Boolean quarantined) {
 		this.quarantined = quarantined;
-	}
-
-	public Boolean getRequired() {
-		return required;
 	}
 
 	public Boolean isRequired() {
@@ -441,7 +429,7 @@ public class Question {
 	@Override
 	public String toString() {
 		return "Question [questionId=" + questionId + ", index=" + index + ", details=" + details +
-				", deployed=" + deployed + ", supersededBy=" + supersededBy + ", createdDate=" + createdDate + "]";
+				", supersededBy=" + supersededBy + ", createdDate=" + createdDate + "]";
 	}
 
 	public boolean containsAny(List<String> atts) {

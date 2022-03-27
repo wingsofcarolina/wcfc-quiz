@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -108,11 +109,11 @@ public class QuizAPI {
 	}
 	
 	@GET
-	@Path("required")
+	@Path("deployed/{questionId}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response explore(@CookieParam("quiz.token") Cookie cookie) throws Exception, AuthenticationException {
-		List<Question> list = Question.getRequiredWith("FAR");
-		return Response.ok().entity(list).build();
+	public Response explore(@CookieParam("quiz.token") Cookie cookie,
+			@PathParam("questionId") Long questionId) throws Exception, AuthenticationException {
+		return Response.ok().entity(Record.isQuestionIdDeployed(questionId)).build();
 	}
 	
 //	@GET
@@ -217,9 +218,6 @@ public class QuizAPI {
 			if (question.isSuperseded()) {
 				LOG.info("Deleting : {}", question.getQuestionId());
 				question.delete();
-			} else if (question.getDeployed()) {
-				question.setDeployed(false);
-				question.save();
 			}
 		}
 		
@@ -870,9 +868,9 @@ public class QuizAPI {
 		}
 
 		if (original != null) {
-			if ((!original.getDeployed()) || overwrite == true) {
+			if ((!original.isDeployed()) || overwrite == true) {
 				// Update required status, detecting change
-				if (original.getRequired() != required) {
+				if (original.isRequired() != required) {
 					original.setRequired(required);
 					changed = true;
 				}
@@ -901,7 +899,7 @@ public class QuizAPI {
 				}
 				
 				// See if quarantined status has changed
-				if ( original.getQuarantined() != quarantined) {
+				if ( original.isQuarantined() != quarantined) {
 					original.setQuarantined(quarantined);
 					changed = true;
 				}
@@ -1093,7 +1091,7 @@ public class QuizAPI {
 		String referer = headers.getRequestHeader("referer").get(0);
 
 		Question question = Question.getByQuestionId(questionId);
-		if (question.isSuperseded() || question.getDeployed() == true) {
+		if (question.isSuperseded() || question.isDeployed() == true) {
 			Flash.add(Flash.Code.ERROR,
 					"Question " + question.getQuestionId() + " is either superseded or deployed and can't be deleted.");
 			return new RedirectResponse(referer).cookie(authUtils.generateCookie(user)).build();

@@ -103,12 +103,6 @@ public abstract class QuizDSL extends Script {
 			for (Question question : questions) {
 				quiz.addQuestion(question);
 
-				// Make note that the question has now been 'deployed'
-				if (!context.getTestRun() && !question.getDeployed()) {
-					question.setDeployed(true);
-					question.save();
-				}
-
 				// Stop when the quiz is full
 				if (quiz.getMaxCount() != null && quiz.getQuestions().size() >= quiz.getMaxCount()) {
 					break;

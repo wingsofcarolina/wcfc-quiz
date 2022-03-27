@@ -51,4 +51,9 @@ public class RecordDAO extends BasicDAO<Record, ObjectId> {
 		List<Record> result = getDatastore().find(Record.class).filter("createdDate < ", sunset).order("quizId").asList();
 		return result;
 	}
+
+	public Boolean isQuestionIdDeployed(Long questionId) {
+		List<Record> result = getDatastore().find(Record.class).filter("questionIds = ", questionId).asList();
+		return result.size() > 0;
+	}
 }

@@ -90,6 +90,11 @@ public class Record {
 		return recordDAO.getEarlierThan(sunset);
 	}
 
+	public static Boolean isQuestionIdDeployed(Long questionId) {
+		RecordDAO recordDAO = (RecordDAO) Persistence.instance().get(Record.class);
+		return recordDAO.isQuestionIdDeployed(questionId);
+	}
+	
 	@SuppressWarnings("unchecked")
 	public void save() {
 		Persistence.instance().get(Record.class).save(this);
