@@ -426,10 +426,12 @@ public class Question {
 		Persistence.instance().get(Question.class).delete(this);
 	}
 
+
+
 	@Override
 	public String toString() {
-		return "Question [questionId=" + questionId + ", index=" + index + ", details=" + details +
-				", supersededBy=" + supersededBy + ", createdDate=" + createdDate + "]";
+		return "Question [questionId=" + questionId + ", attributes=" + attributes + ", quarantined=" + quarantined
+				+ ", required=" + required + ", supersededBy=" + supersededBy + "]";
 	}
 
 	public boolean containsAny(List<String> atts) {

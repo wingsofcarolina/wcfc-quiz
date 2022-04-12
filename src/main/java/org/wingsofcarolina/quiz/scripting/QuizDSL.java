@@ -159,15 +159,15 @@ public abstract class QuizDSL extends Script {
 						section.addSelection(entity);
 						numSelected++;
 						if (context.getTestRun()) {
-							System.out.println("Added to selections : " + entity.getQuestionId() + "<br>");
+							System.out.println("Added to selections : " + entity.getQuestionId() + " : " + entity.getAttributes() + "<br>");
 						}
 					} else {
 						if (context.getTestRun()) {
-							System.out.println("Rejected " + entity.getQuestionId()
-									+ " because it is excluded/empty/quarantined/already-selected.<br>");
-							System.out.println("Excluded: " + excluded + "  Quarantined: "
-									+ entity.isQuarantined() + "  Selected: " + alreadySelected + "  Empty: "
-									+ missingAnswers(entity) + "<br>");
+							System.out.print("Rejected " + entity.getQuestionId() + " because it is ");
+							if (excluded) System.out.println("<strong>excluded</strong> <br>");
+							if (entity.isQuarantined()) System.out.println("<strong>quarintined</strong> <br>");
+							if (alreadySelected) System.out.println("<strong>already selected</strong> <br>");
+							if (missingAnswers(entity)) System.out.println("<strong>empty</strong> <br>");
 						}
 					}
 				}
@@ -204,7 +204,7 @@ public abstract class QuizDSL extends Script {
 			if (question != null) {
 				section.addRequired(question);
 				if (context.getTestRun()) {
-					System.out.println("Added to quiz : " + question.getQuestionId() + "<br>");
+					System.out.println("Added to quiz : " + question.getQuestionId() + " : " + question.getAttributes() + "<br>");
 				}
 			} else {
 				if (context.getTestRun()) {
@@ -222,7 +222,7 @@ public abstract class QuizDSL extends Script {
 			if (question != null) {
 				section.addRequired(question);
 				if (context.getTestRun()) {
-					System.out.println("Added to quiz : " + question.getQuestionId() + "<br>");
+					System.out.println("Added to quiz : " + question.getQuestionId() + " : " + question.getAttributes() + " : REQUIRED <br>");
 				}
 			} else {
 				if (context.getTestRun()) {
@@ -237,7 +237,11 @@ public abstract class QuizDSL extends Script {
 	// Return a pool of questions which have the supplied attribute, and
 	// are also noted as being "required" questions.
 	public Pool getRequiredWith(String attribute) {
-		return new Pool().getRequiredWith(attribute);
+		Pool pool = new Pool().getRequiredWith(attribute);
+		if (context.getTestRun()) {
+			System.out.println("Required question count for '" + attribute + "' is " + pool.size() + "<br>");
+		}
+		return pool;
 	}
 
 	// Return a pool of questions which match any of the supplied attributes. This
