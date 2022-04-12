@@ -1,5 +1,6 @@
 package org.wingsofcarolina.quiz.domain;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -29,8 +30,6 @@ public class Question {
     private QuestionDetails details;
 	private List<String> attributes;
 	private Long questionId;
-	private Boolean deployed = false;
-	private Boolean deleted = false;
 	private Boolean quarantined = false;
 	private Boolean required = false;
 	private long supersededBy = -1;
@@ -138,6 +137,7 @@ public class Question {
 			}
 		}
 		attributes.add(attribute);
+		Collections.sort(attributes);
 	}
 	
 	public void removeAttribute(String attribute) {
@@ -165,14 +165,6 @@ public class Question {
 		return Record.isQuestionIdDeployed(questionId);
 	}
 	
-	public Boolean isDeleted() {
-		return deleted;
-	}
-
-	public void setDeleted(Boolean deleted) {
-		this.deleted = deleted;
-	}
-
 	public Boolean isQuarantined() {
 		return quarantined;
 	}

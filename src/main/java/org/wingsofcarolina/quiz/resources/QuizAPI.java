@@ -14,6 +14,7 @@ import java.text.SimpleDateFormat;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -218,6 +219,11 @@ public class QuizAPI {
 			if (question.isSuperseded()) {
 				LOG.info("Deleting : {}", question.getQuestionId());
 				question.delete();
+			} else {
+				List<String> attributes = question.getAttributes();
+				Collections.sort(attributes);
+				question.setAttributes(attributes);
+				question.save();
 			}
 		}
 		
@@ -1265,7 +1271,7 @@ public class QuizAPI {
         ps.println("<h3>Questions : </h3><ul>");
         List<Question> questions = context.getQuiz().getQuestions();
         for (Question question : questions) {
-        	ps.println("<li><a href=\"/question/" + question.getQuestionId() + "\">" + question.getQuestionId() + "</a> : " + trim(question.getQuestion()));
+        	ps.println("<li><a href=\"/question/" + question.getQuestionId() + "\" target=\"_blank\">" + question.getQuestionId() + "</a> : " + trim(question.getQuestion()));
         }
         ps.println("</ul>");
         ps.println("Total number of questions : " + questions.size());

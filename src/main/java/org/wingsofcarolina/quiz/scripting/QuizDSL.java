@@ -159,7 +159,7 @@ public abstract class QuizDSL extends Script {
 						section.addSelection(entity);
 						numSelected++;
 						if (context.getTestRun()) {
-							System.out.println("Added to selections : " + entity.getQuestionId() + " : " + entity.getAttributes() + "<br>");
+							System.out.println("Added to selections : " + entity.getQuestionId() + " : " + printList(entity.getAttributes()) + "<br>");
 						}
 					} else {
 						if (context.getTestRun()) {
@@ -204,7 +204,7 @@ public abstract class QuizDSL extends Script {
 			if (question != null) {
 				section.addRequired(question);
 				if (context.getTestRun()) {
-					System.out.println("Added to quiz : " + question.getQuestionId() + " : " + question.getAttributes() + "<br>");
+					System.out.println("Added to quiz : " + question.getQuestionId() + " : " + printList(question.getAttributes()) + "<br>");
 				}
 			} else {
 				if (context.getTestRun()) {
@@ -216,13 +216,22 @@ public abstract class QuizDSL extends Script {
 		}
 	}
 	
+	private String printList(List<String> list) {
+		StringBuffer sb = new StringBuffer();
+		for (String s : list) {
+			sb.append(s);
+			sb.append(" ");
+		}
+		return sb.toString();
+	}
+	
 	public void require(Pool pool) {
 		for (Question question : pool.getQuestionList()) {
 			question = resolve(question);
 			if (question != null) {
 				section.addRequired(question);
 				if (context.getTestRun()) {
-					System.out.println("Added to quiz : " + question.getQuestionId() + " : " + question.getAttributes() + " : REQUIRED <br>");
+					System.out.println("Added to quiz : " + question.getQuestionId() + " : " + printList(question.getAttributes()) + " : REQUIRED <br>");
 				}
 			} else {
 				if (context.getTestRun()) {
