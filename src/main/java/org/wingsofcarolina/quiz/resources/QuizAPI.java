@@ -1142,7 +1142,7 @@ public class QuizAPI {
 	
 			Flash.add(Flash.Code.SUCCESS, "Recipe type " + recipe.getName() + " updated.");
 	
-			return new RedirectResponse(Pages.RECIPE_PAGE).cookie(authUtils.generateCookie(user)).build();
+			return new RedirectResponse(Pages.RECIPE_PAGE, recipeId).cookie(authUtils.generateCookie(user)).build();
 		} else {
 			return Response.status(401).entity("Not authorized.").build();
 		}

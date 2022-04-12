@@ -16,10 +16,15 @@ $(document).ready(function(){
 	    textarea.val(editor.getSession().getValue());
 	});
 	window.aceEditor.setOptions({ wrap: true });
-	load_recipe_list();
+	
+	const queryString = window.location.search;
+	const urlParams = new URLSearchParams(queryString);
+	const recipe = urlParams.get('recipe')
+	load_recipe_list(recipe);
 });
 
-function load_recipe_list() {
+function load_recipe_list(recipe) {
+
 	var first = true;
     var $el = $("#recipeId");
 
@@ -28,12 +33,17 @@ function load_recipe_list() {
 		var start = Array.from(myMap.keys())[0];
 
 		for (const [key, value] of myMap.entries()) {
-			if (first) {
+			if (recipe == null && first) {
 			    $el.append($("<option selected>" + value + "</option>")
 			       .attr("value", key).text(value.label));
 		    } else {
-			    $el.append($("<option>" + value + "</option>")
-			       .attr("value", key).text(value.label));
+		    	if (recipe == key) {
+				    $el.append($("<option selected>" + value + "</option>")
+				       .attr("value", key).text(value.label));
+			    } else {
+				    $el.append($("<option>" + value + "</option>")
+				       .attr("value", key).text(value.label));
+			    }
 		    }
 		    first = false;
 		}

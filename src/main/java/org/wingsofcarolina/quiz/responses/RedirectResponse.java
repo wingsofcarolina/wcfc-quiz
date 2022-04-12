@@ -22,6 +22,11 @@ public class RedirectResponse extends AbstractResponse {
 		this.uriString = uriString;
 	}
 	
+	public RedirectResponse(String uriString, Long recipeId) {
+		super("ok");
+		this.uriString = uriString + "?recipe=" + recipeId.toString();
+	}
+
 	public RedirectResponse cookie(NewCookie cookie) {
 		this.cookies = cookie;
 		return this;
