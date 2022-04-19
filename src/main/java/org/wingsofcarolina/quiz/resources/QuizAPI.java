@@ -1093,7 +1093,9 @@ public class QuizAPI {
 		Question question = Question.getByQuestionId(questionId);
 		if (question.isSuperseded() || question.isDeployed() == true) {
 			Flash.add(Flash.Code.ERROR,
-					"Question " + question.getQuestionId() + " is either superseded or deployed and can't be deleted.");
+					"Question " + question.getQuestionId() + " is either superseded or deployed so is marked for future deletion.");
+			question.setDeleted(true);
+			question.save();
 			return new RedirectResponse(referer).cookie(authUtils.generateCookie(user)).build();
 		} else {
 			// Remove it from any exclusion groups
