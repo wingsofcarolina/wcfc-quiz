@@ -1,12 +1,15 @@
-package org.wingsofcarolina.quiz.common;
+package org.wingsofcarolina.quiz;
 
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wingsofcarolina.quiz.common.Error;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -14,11 +17,18 @@ import javax.ws.rs.core.Response;
 public class RuntimeExceptionMapper implements ExceptionMapper<RuntimeException> {
 	private static final Logger LOG = LoggerFactory.getLogger(RuntimeExceptionMapper.class);
 
+	// magically inject a thing
+    // remember that magic is for evil wizards
+    @Context
+    private HttpServletRequest request;
+    
     @Override
     public Response toResponse(RuntimeException exception) {
     	Integer code = 500;
     	if (exception instanceof NotFoundException) {
     		code = 404;
+            final StringBuffer absolutePath = request.getRequestURL();
+            LOG.error("NotFoundException: " + absolutePath, exception);
     	}
     	
     	LOG.info("{} : {} : {}", code, exception.getClass().getSimpleName(), exception.getMessage());

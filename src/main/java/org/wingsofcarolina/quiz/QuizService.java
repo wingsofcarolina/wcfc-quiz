@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.wingsofcarolina.quiz.authentication.AuthenticationExceptionMapper;
 import org.wingsofcarolina.quiz.authentication.HashUtils;
 import org.wingsofcarolina.quiz.authentication.Privilege;
-import org.wingsofcarolina.quiz.common.RuntimeExceptionMapper;
 import org.wingsofcarolina.quiz.domain.User;
 import org.wingsofcarolina.quiz.domain.persistence.Persistence;
 import org.wingsofcarolina.quiz.healthcheck.MinimalHealthCheck;
@@ -79,9 +78,11 @@ public class QuizService extends Application<QuizConfiguration> {
 
 		// Set exception mappers
 		env.jersey().register(new AuthenticationExceptionMapper());
+		// Log all the 404 errors
+		env.jersey().register(NotFoundFilter.class);
 		if (config.getMode().contentEquals("PROD")) {
 			env.jersey().register(new RuntimeExceptionMapper());
-		}
+ 		}
 		
 		// Now finish setting up the API
 		env.jersey().register(quiz);
