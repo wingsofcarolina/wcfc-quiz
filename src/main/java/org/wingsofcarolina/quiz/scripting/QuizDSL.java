@@ -154,7 +154,10 @@ public abstract class QuizDSL extends Script {
 					// isn't conflicting with a mutually exclusive question already selected
 					boolean excluded = excluded(entity);
 					boolean alreadySelected = alreadySelected(entity);
-					if (!excluded && !alreadySelected) {
+					boolean quarintined = entity.isQuarantined();
+					boolean deleted = entity.isDeleted();
+					boolean empty = missingAnswers(entity);
+					if (!excluded && !alreadySelected && !deleted && !quarintined && !empty) {
 						// Add it and keep track of the count
 						section.addSelection(entity);
 						numSelected++;
@@ -165,9 +168,10 @@ public abstract class QuizDSL extends Script {
 						if (context.getTestRun()) {
 							System.out.print("Rejected " + entity.getQuestionId() + " because it is ");
 							if (excluded) System.out.println("<strong>excluded</strong> <br>");
-							if (entity.isQuarantined()) System.out.println("<strong>quarintined</strong> <br>");
+							if (quarintined) System.out.println("<strong>quarintined</strong> <br>");
 							if (alreadySelected) System.out.println("<strong>already selected</strong> <br>");
-							if (missingAnswers(entity)) System.out.println("<strong>empty</strong> <br>");
+							if (empty) System.out.println("<strong>empty</strong> <br>");
+							if (deleted) System.out.println("<strong>deleted</strong> <br>");
 						}
 					}
 				}

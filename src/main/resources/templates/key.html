@@ -36,7 +36,7 @@
 			${seq[index]} : ${answer.answer}</br>
 		<#else>
 			<#if answer.isCorrect()>
-				<strong>${seq[index]}</strong> : ${answer.getAnswerAsHtml()}</br>
+				<strong>${seq[index]} : ${answer.getAnswerAsHtml()}</strong><br>
 			<#else>
 				${seq[index]} : ${answer.answer}</br>
 			</#if>
@@ -73,6 +73,7 @@ ${attribute}&nbsp;
 </#if>
 </#list>
 } (${question.questionId})</i></p>
+<#if question.isSuperseded()><span style="color:red">This question has been superseded</span></#if>
 <hr>
 </#list>
 </div>
