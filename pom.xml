@@ -22,7 +22,8 @@
 		<docker.registry>planez.co:5000</docker.registry>
 		<dockerRegistry>${docker.registry}</dockerRegistry>
 		<dockerTag>${project.version}</dockerTag>
-		<dockerImage>${dockerRegistry}/${project.artifactId}:${project.version}</dockerImage>
+		<dockerImage>${dockerRegistry}/${project.artifactId}:${project.version}
+		</dockerImage>
 		<containerName>wcfc-quiz</containerName>
 	</properties>
 
@@ -343,6 +344,7 @@
 						<filter>
 							<artifact>*:*</artifact>
 							<excludes>
+								<exclude>**/module-info.class</exclude>
 								<exclude>META-INF/*.SF</exclude>
 								<exclude>META-INF/*.DSA</exclude>
 								<exclude>META-INF/*.RSA</exclude>
