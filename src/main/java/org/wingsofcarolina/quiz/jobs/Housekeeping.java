@@ -11,6 +11,7 @@ import org.knowm.sundial.annotations.CronTrigger;
 import org.knowm.sundial.exceptions.JobInterruptException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wingsofcarolina.quiz.domain.Question;
 import org.wingsofcarolina.quiz.domain.Record;
 import org.wingsofcarolina.quiz.resources.Quiz;
 
@@ -20,13 +21,16 @@ public class Housekeeping extends Job {
 	private static final Logger LOG = LoggerFactory.getLogger(Housekeeping.class);
 
 	SimpleDateFormat dateFormatGmt = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss");
-
+	
 	@Override
 	public void doRun() throws JobInterruptException {
-		LOG.debug("Housekeeping triggered ..... do some work!");
+		LOG.info("Housekeeping triggered ..... do some work!");
 		
 		// Expunge all ancient/expired quiz records
 		expunge();
+		
+		// Clean up questions no longer needed (i.e. not deployed, and "deleted" or "superseded")
+		takeOutTheTrash();
 	}
 
 	// Weed out expired quiz records
@@ -43,6 +47,29 @@ public class Housekeeping extends Job {
 			LOG.info("Expunged expired record for quiz : {} : {} : {}", record.getQuizId(), record.getQuizName(), created);
 			record.delete();
 		}
+	}
+	
+	private void takeOutTheTrash() {
+		List<Question> questions = Question.getAllQuestions();
 		
+		for (Question question : questions) {
+			if ( ! question.isDeployed()) {
+				if (question.isSuperseded() || question.isDeleted()) {
+					LOG.info("Removing trash question {}, as it is marked as {}", question.getQuestionId(), removalReason(question));
+					question.delete();
+				}
+			}
+		}
+	}
+	
+	private String removalReason(Question question) {
+		if (question.isSuperseded() && question.isDeleted())
+			return "SUPERSEDED & DELETED";
+		else {
+			if (question.isSuperseded())
+				return "SUPERSEDED";
+			else
+				return "DELETED";
+		}
 	}
 }
