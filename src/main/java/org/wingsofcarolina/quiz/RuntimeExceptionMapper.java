@@ -28,15 +28,14 @@ public class RuntimeExceptionMapper implements ExceptionMapper<RuntimeException>
     	if (exception instanceof NotFoundException) {
     		code = 404;
             final StringBuffer absolutePath = request.getRequestURL();
-            LOG.error("NotFoundException: " + absolutePath, exception);
+            LOG.error("NotFoundException: " + absolutePath);
+    	} else {
+    		LOG.info("{} : {} : {}", code, exception.getClass().getSimpleName(), exception.getMessage());
+    		exception.printStackTrace();
     	}
     	
-    	LOG.info("{} : {} : {}", code, exception.getClass().getSimpleName(), exception.getMessage());
-    	
-    	exception.printStackTrace();
-    	
         return Response
-                .serverError()
+                .status(code)
                 .entity(new Error(code, exception.getClass().getSimpleName() + " : " + exception.getMessage()))
                 .type(MediaType.APPLICATION_JSON)
                 .build();

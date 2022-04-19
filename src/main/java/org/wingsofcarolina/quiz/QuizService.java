@@ -80,9 +80,9 @@ public class QuizService extends Application<QuizConfiguration> {
 		env.jersey().register(new AuthenticationExceptionMapper());
 		// Log all the 404 errors
 		env.jersey().register(NotFoundFilter.class);
-		if (config.getMode().contentEquals("PROD")) {
+		//if (config.getMode().contentEquals("PROD")) {
 			env.jersey().register(new RuntimeExceptionMapper());
- 		}
+ 		//}
 		
 		// Now finish setting up the API
 		env.jersey().register(quiz);
