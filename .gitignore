@@ -6,6 +6,7 @@
 docker/
 log/
 data/
+images/
 target/
 backups/
 pom.xml.tag
