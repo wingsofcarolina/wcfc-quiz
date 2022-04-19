@@ -32,6 +32,7 @@ public class Question {
 	private Long questionId;
 	private Boolean quarantined = false;
 	private Boolean required = false;
+	private Boolean deleted = false;
 	private long supersededBy = -1;
 	private Date createdDate = new Date();
 	@JsonIgnore
@@ -78,6 +79,14 @@ public class Question {
 	@JsonIgnore
 	public boolean isSuperseded() {
 		return supersededBy != -1;
+	}
+
+	public Boolean isDeleted() {
+		return deleted;
+	}
+
+	public void setDeleted(Boolean deleted) {
+		this.deleted = deleted;
 	}
 
 	public long getQuestionId() {
