@@ -1,27 +1,24 @@
 package org.wingsofcarolina.quiz.resources;
 
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.net.URISyntaxException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.text.SimpleDateFormat;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TimeZone;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -54,6 +51,7 @@ import org.wingsofcarolina.quiz.authentication.HashUtils;
 import org.wingsofcarolina.quiz.authentication.Privilege;
 import org.wingsofcarolina.quiz.common.Flash;
 import org.wingsofcarolina.quiz.common.Pages;
+import org.wingsofcarolina.quiz.common.QuizBuildException;
 import org.wingsofcarolina.quiz.common.Templates;
 import org.wingsofcarolina.quiz.domain.Answer;
 import org.wingsofcarolina.quiz.domain.Attribute;
@@ -66,13 +64,13 @@ import org.wingsofcarolina.quiz.domain.Record;
 import org.wingsofcarolina.quiz.domain.Type;
 import org.wingsofcarolina.quiz.domain.User;
 import org.wingsofcarolina.quiz.domain.persistence.Persistence;
+import org.wingsofcarolina.quiz.domain.presentation.PDFGenerator;
 import org.wingsofcarolina.quiz.domain.presentation.Renderer;
 import org.wingsofcarolina.quiz.responses.LoginResponse;
 import org.wingsofcarolina.quiz.responses.RedirectResponse;
 import org.wingsofcarolina.quiz.responses.ViewQuestionResponse;
 import org.wingsofcarolina.quiz.scripting.Execute;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jsonwebtoken.Claims;
@@ -468,7 +466,7 @@ public class QuizAPI {
 	@Path("retrieve")
 	@Produces("text/html")
 	public Response retrieve(@CookieParam("quiz.token") Cookie cookie, @FormParam("quizId") long quizId,
-			@FormParam("type") String type) throws AuthenticationException, IOException {
+			@FormParam("type") String type) throws AuthenticationException, IOException, QuizBuildException, URISyntaxException {
 
 		String output = "";
 		Jws<Claims> claims = authUtils.validateUser(cookie.getValue());
@@ -482,13 +480,20 @@ public class QuizAPI {
 				LOG.info("Quiz Key for quiz ID {} retrieved by {}", quizId, user.getName());
 				Slack.instance().sendMessage("Quiz Key for quiz ID " + quizId + " retrieved by " + user.getName()
 						+ " at " + dateFormatGmt.format(new Date()));
+				return Response.ok().entity(output).build();
 			} else {
-				output = renderer.render(Templates.QUIZ, quiz).toString();
+				//output = renderer.render(Templates.QUIZ, quiz).toString();
 				LOG.info("Quiz Copy for quiz ID {} retrieved by {}", quizId, user.getName());
 				Slack.instance().sendMessage("Quiz Copy for quiz ID " + quizId + " retrieved by " + user.getName()
 						+ " at " + dateFormatGmt.format(new Date()));
+				
+				// Render the output for the club member
+				QuizContext context = new QuizContext(quiz, config);
+				PDFGenerator generator = new PDFGenerator(context);
+				ByteArrayInputStream inputStream = generator.generate(quiz);
+				
+				return Response.ok().type("application/pdf").entity(inputStream).build();
 			}
-			return Response.ok().entity(output).build();
 		}
 		Flash.add(Flash.Code.ERROR, "Requested quiz not found.");
 		return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(user)).build();
