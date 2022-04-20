@@ -25,10 +25,18 @@ public class RuntimeExceptionMapper implements ExceptionMapper<RuntimeException>
     @Override
     public Response toResponse(RuntimeException exception) {
     	Integer code = 500;
-    	if (exception instanceof NotFoundException) {
-    		code = 404;
+    	
+    	// Log the request that triggered the error, if it was from an external
+    	// trigger and not from some internal boo boo.
+		if (request != null) {
             final StringBuffer absolutePath = request.getRequestURL();
-            LOG.error("NotFoundException: " + absolutePath);
+            LOG.error("HTTP Request: " + absolutePath);
+		}
+		
+		// Make sure we let the client know if it was something that they asked
+		// for that doesn't exist, otherwise it is just a generic server error.
+		if (exception instanceof NotFoundException) {
+    		code = 404;
     	} else {
     		LOG.info("{} : {} : {}", code, exception.getClass().getSimpleName(), exception.getMessage());
     		exception.printStackTrace();
