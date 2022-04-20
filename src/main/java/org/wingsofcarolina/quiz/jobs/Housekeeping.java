@@ -24,17 +24,21 @@ public class Housekeeping extends Job {
 	
 	@Override
 	public void doRun() throws JobInterruptException {
-		LOG.info("Housekeeping triggered ..... do some work!");
+		LOG.info("Housekeeping triggered .....");
 		
 		// Expunge all ancient/expired quiz records
 		expunge();
 		
 		// Clean up questions no longer needed (i.e. not deployed, and "deleted" or "superseded")
 		takeOutTheTrash();
+		
+		LOG.info("Housekeeping completed.");
 	}
 
 	// Weed out expired quiz records
 	private void expunge() {
+		LOG.info("Checking for expired quiz records .....");
+		
 		// First get the sunset time
 		Date sunset = Date.from(OffsetDateTime.now(ZoneOffset.UTC).minusMonths(Quiz.MONTHS_TO_LIVE + 1).toInstant());
 
@@ -50,6 +54,8 @@ public class Housekeeping extends Job {
 	}
 	
 	private void takeOutTheTrash() {
+		LOG.info("Checking for expired trashed questions .....");
+
 		List<Question> questions = Question.getAllQuestions();
 		
 		for (Question question : questions) {
