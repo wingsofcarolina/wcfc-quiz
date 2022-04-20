@@ -1,0 +1,46 @@
+= Question Feedback
+
+<#setting number_format="#0">
+
+<#if user.isAdmin()>
+navbar:${user.userId}[buttons="HomeNavButton;ViewNavButton;AddNavButton;EditNavButton;ProfileNavButton", active="none"]
+<#else>
+navbar:${user.userId}[buttons="HomeNavButton;ProfileNavButton", active="HomeNavButton"]
+</#if>
+
+++++
+<style>
+select {
+  width: 300px;
+}
+.instructions {
+	width: 75%;
+	font-size: 1.2em;
+	margin-bottom: 20px;
+}
+</style>
+
+<form name="question" action="/api/submitFeedback" method="post">
+<input type="hidden" id="userId" name="userId" value=${user.userId}>
+<input type="hidden" id="questionId" name="questionId" value=${question.questionId}>
+
+<div class="instructions">
+Thanks for taking the time to provide us with feedback, ${user.name}.
+</div>
+
+<div class="instructions">
+Please provide any feedback you feel would be useful. This can include comments about typographical
+errors, incorrect answers, poorly worded questions (or answers), or any other thoughts you may have
+regarding the question.
+</div>
+
+<table>
+<tr><td valign="top">Number</td><td>${question.questionId}</td></tr>
+<tr><td valign="top">Question</td><td>${question.getQuestionAsHtml()}</td></tr>
+<tr><td valign="top">Feedback</td><td><textarea name="feedback" rows="4" cols="70" placeholder=" Enter your feedback here."></textarea></td></tr>
+</table>
+
+</p>
+<input type="submit" value="Submit Feedback">
+</form>
+++++

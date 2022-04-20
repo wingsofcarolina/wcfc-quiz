@@ -65,6 +65,7 @@ import org.wingsofcarolina.quiz.domain.Type;
 import org.wingsofcarolina.quiz.domain.User;
 import org.wingsofcarolina.quiz.domain.persistence.Persistence;
 import org.wingsofcarolina.quiz.domain.presentation.PDFGenerator;
+import org.wingsofcarolina.quiz.domain.presentation.QuestionWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.Renderer;
 import org.wingsofcarolina.quiz.responses.LoginResponse;
 import org.wingsofcarolina.quiz.responses.RedirectResponse;
@@ -1362,6 +1363,28 @@ public class QuizAPI {
 		} else {
 			return new RedirectResponse(Pages.LOGIN_PAGE).build();
 		}
+	}
+
+	@POST
+	@Path("submitFeedback")
+	@Produces(MediaType.TEXT_HTML)
+	public Response submitFeedback(@CookieParam("quiz.token") Cookie cookie, @FormParam("userId") String userId,
+			@FormParam("questionId") Long questionId, @FormParam("feedback") String feedback)
+			throws Exception, AuthenticationException {
+
+		Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
+		User user = User.getWithClaims(claims);
+
+		LOG.debug("User       : {}", user.getName());
+		LOG.debug("UserId     : {}", userId);
+		LOG.debug("QuestionId : {}", questionId);
+		LOG.debug("Feedback   : {}", feedback);
+		Slack.instance().sendFeedback(user, questionId, feedback);
+		
+		QuestionWrapper wrapper = new QuestionWrapper(user);
+		String output = renderer.render("thanks.ad", wrapper).toString();
+		NewCookie newCookie = authUtils.generateCookie(user);
+		return Response.ok().entity(output).header("Set-Cookie", AuthUtils.sameSite(newCookie)).build();
 	}
 
 	class AttributeResponse {

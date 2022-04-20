@@ -570,6 +570,28 @@ public class QuizResource {
 	}
 	
 	@GET
+	@Path("feedback/{questionId}")
+	@Produces("text/html")
+	public Response feedback(@CookieParam("quiz.token") Cookie cookie,
+			@PathParam("questionId") Long questionId) throws Exception, AuthenticationException {
+		if (cookie != null) {
+			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
+			User user = User.getWithClaims(claims);
+			if (user != null) {
+				Question question = Question.getByQuestionId(questionId);
+				QuestionWrapper wrapper = new QuestionWrapper(user, question);
+				String output = renderer.render("feedback.ad", wrapper).toString();
+				NewCookie newCookie = authUtils.generateCookie(user);
+				return Response.ok().entity(output).header("Set-Cookie", AuthUtils.sameSite(newCookie)).build();
+			} else {
+				return Response.status(404).build();
+			}
+		} else {
+			return new RedirectResponse(Pages.LOGIN_PAGE).build();
+		}
+	}
+	
+	@GET
 	@Path("browseQuestions")
 	@Produces("text/html")
 	public Response browseFirstQuestions(@CookieParam("quiz.token") Cookie cookie) throws Exception, AuthenticationException {

@@ -12,6 +12,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wingsofcarolina.quiz.QuizConfiguration;
+import org.wingsofcarolina.quiz.domain.User;
 
 public class Slack {
 	private static final Logger LOG = LoggerFactory.getLogger(Slack.class);
@@ -42,6 +43,26 @@ public class Slack {
 			CloseableHttpClient httpclient = HttpClients.createDefault();
 		    HttpPost httpPost = new HttpPost(URL);
 		    String json="{\"text\":\"QUIZ: " + message + "\"}";
+		    HttpEntity stringEntity = new StringEntity(json,ContentType.APPLICATION_JSON);
+		    httpPost.setEntity(stringEntity);
+		    try {
+				CloseableHttpResponse response = httpclient.execute(httpPost);
+				if (response.getStatusLine().getStatusCode() != 200) {
+					LOG.error("Failed to successfully send message to Slack");
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public void sendFeedback(User user, Long questionId, String feedback) {
+		LOG.info("Sending : QUIZ: {} : {} : {}", user.getName(), questionId, feedback);
+		if (config.getMode().contentEquals("PROD")) {
+			CloseableHttpClient httpclient = HttpClients.createDefault();
+		    HttpPost httpPost = new HttpPost(URL);
+		    String json="{\"text\":\"QUIZ: " + user.getName() + " : " + questionId + " : " + feedback + "\"}";
 		    HttpEntity stringEntity = new StringEntity(json,ContentType.APPLICATION_JSON);
 		    httpPost.setEntity(stringEntity);
 		    try {

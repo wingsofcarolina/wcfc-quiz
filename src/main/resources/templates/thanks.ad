@@ -1,0 +1,23 @@
+= Thanks!
+
+++++
+<style>
+.thanks {
+	width: 80%;
+	font-size: 1.2em;
+	margin-bottom: 20px;
+}
+</style>
+
+<div class="thanks">Thanks for providing feedback, ${user.name}!</div>
+
+<div class="thanks">
+We appreciate your input. With your help, and the input from your fellow instructors, we can continue to make
+this service better, the questions more meaningful, and the utility to our membership more significant. Your
+submission has been forwarded to the Quiz System administrators and will be reviewed promptly.
+</div>
+
+<div class="thanks">
+This page can now be closed.
+</div>
+++++

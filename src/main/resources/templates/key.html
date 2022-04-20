@@ -12,6 +12,9 @@
 	color:#c90e0e;
 	text-decoration: underline;
 }
+a {
+	text-decoration: none;
+}
 </style>
 <#setting number_format="#0"/>
 <#assign seq = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L" ]>
@@ -72,7 +75,7 @@ ${question.getDiscussionAsHtml()}</p>
 ${attribute}&nbsp;
 </#if>
 </#list>
-} (${question.questionId})</i></p>
+} (<a href="/feedback/${question.questionId}" target="_blank">${question.questionId}</a>)</i></p>
 <#if question.isSuperseded()><span style="color:red">This question has been superseded</span></#if>
 <hr>
 </#list>
