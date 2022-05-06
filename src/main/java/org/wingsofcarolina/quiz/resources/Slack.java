@@ -58,11 +58,11 @@ public class Slack {
 	}
 	
 	public void sendFeedback(User user, Long questionId, String feedback) {
-		LOG.info("Sending : QUIZ: {} : {} : {}", user.getName(), questionId, feedback);
+		LOG.info("Sending : QUIZ: Feedback : {} : {} : {}", user.getName(), questionId, feedback);
 		if (config.getMode().contentEquals("PROD")) {
 			CloseableHttpClient httpclient = HttpClients.createDefault();
 		    HttpPost httpPost = new HttpPost(URL);
-		    String json="{\"text\":\"QUIZ: " + user.getName() + " : " + questionId + " : " + feedback + "\"}";
+		    String json="{\"text\":\"QUIZ: Feedback : " + user.getName() + " : " + questionId + " : " + feedback + "\"}";
 		    HttpEntity stringEntity = new StringEntity(json,ContentType.APPLICATION_JSON);
 		    httpPost.setEntity(stringEntity);
 		    try {

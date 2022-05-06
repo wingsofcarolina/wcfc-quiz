@@ -597,7 +597,7 @@ public class QuizResource {
 	public Response feedback(@CookieParam("quiz.token") Cookie cookie,
 			@PathParam("questionId") Long questionId) throws Exception, AuthenticationException {
 		if (cookie != null) {
-			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
+			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.USER);
 			User user = User.getWithClaims(claims);
 			if (user != null) {
 				Question question = Question.getByQuestionId(questionId);
