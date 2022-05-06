@@ -20,6 +20,7 @@ $(document).ready(function(){
 	const queryString = window.location.search;
 	const urlParams = new URLSearchParams(queryString);
 	const recipe = urlParams.get('recipe')
+	console.log("recipe == ", recipe);
 	load_recipe_list(recipe);
 });
 
@@ -29,24 +30,21 @@ function load_recipe_list(recipe) {
     var $el = $("#recipeId");
 
 	$.getJSON( "api/recipes" , function( data ) {
-		let myMap = new Map(Object.entries(data));
-		var start = Array.from(myMap.keys())[0];
-
-		for (const [key, value] of myMap.entries()) {
+		$.each(data, function(key, value) {
 			if (recipe == null && first) {
-			    $el.append($("<option selected>" + value + "</option>")
-			       .attr("value", key).text(value.label));
+			    $el.append($("<option selected>" + value['recipeId'] + "</option>")
+			       .attr("value", value['recipeId']).text(value['name']));
 		    } else {
-		    	if (recipe == key) {
-				    $el.append($("<option selected>" + value + "</option>")
-				       .attr("value", key).text(value.label));
+		    	if (recipe == value['recipeId']) {
+				    $el.append($("<option selected>" + value['recipeId'] + "</option>")
+			       		.attr("value", value['recipeId']).text(value['name']));
 			    } else {
-				    $el.append($("<option>" + value + "</option>")
-				       .attr("value", key).text(value.label));
+				    $el.append($("<option>" + value['recipeId'] + "</option>")
+			       		.attr("value", value['recipeId']).text(value['name']));
 			    }
 		    }
-		    first = false;
-		}
+		    first = false;		
+		});
 		
 		load_recipe();
 	});

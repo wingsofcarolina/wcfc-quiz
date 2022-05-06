@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -194,18 +196,50 @@ public class QuizAPI {
 //	}
 	
 	@GET
-	@Path("recipes")
+	@Path("alias")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response recipes(@CookieParam("quiz.token") Cookie cookie) {
-		Map<Long, String> recipeCatalog = new HashMap<Long, String>();
+	public Response alias(@CookieParam("quiz.token") Cookie cookie) {
+		 Map<Long, String> map = Stream.of(new Object[][] { 
+		     { 1000L, "FAR" }, 
+		     { 1001L, "SOP_STUDENT" }, 
+		     { 1002L, "SOP_PILOT" }, 
+		     { 1003L, "SOP_INSTRUCTOR" }, 
+		     { 1004L, "C152" }, 
+		     { 1005L, "PA28" }, 
+		     { 1006L, "C172" }, 
+		     { 1007L, "M20J" }, 
+		 }).collect(Collectors.toMap(data -> (Long) data[0], data -> (String) data[1]));
+		 
+		 Map<Long, String> recipeCatalog = new HashMap<Long, String>();
 		
 		List<Recipe> recipes = Recipe.getAllRecipes();
 		
-		for (Recipe r : recipes) {
-			recipeCatalog.put(r.getRecipeId(), r.getName());
+		for (Recipe recipe : recipes) {
+			String alias = map.get(recipe.getRecipeId());
+			if (alias != null) {
+				recipe.setAlias(alias);
+				recipe.save();
+			} else {
+				System.out.println("Woah! Something ain't right. Failed Alias lookup!!!");
+			}
 		}
 		
 		return Response.ok().entity(recipeCatalog).build();
+	}
+
+	@GET
+	@Path("recipes")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response recipes(@CookieParam("quiz.token") Cookie cookie) {
+//		Map<String, String> recipeCatalog = new HashMap<String, String>();
+		
+		List<Recipe> recipes = Recipe.getAllRecipes();
+		
+//		for (Recipe r : recipes) {
+//			recipeCatalog.put(r.getAlias(), r.getName());
+//		}
+		
+		return Response.ok().entity(recipes).build();
 	}
 
 	@GET

@@ -31,8 +31,9 @@ function loadRecipes()
 	var url = "/api/recipes";
 	$.getJSON( url , function( data ) {
 		$.each(data, function(key, value) {
-			console.log(key + " : " + value);
-			document.getElementById("quizes").innerHTML += "<a href='generate/" + key + "' target='_blank'>" + value + "</a><br>";
+			alias = value['alias'].toLowerCase();
+			document.getElementById("quizes").innerHTML +=
+				"<a href='generate/" + alias + "' target='_blank'>" + value['name'] + "</a><br>";
 		});
 	});
 }

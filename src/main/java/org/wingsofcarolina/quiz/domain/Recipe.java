@@ -18,6 +18,7 @@ public class Recipe {
     private ObjectId id;
     
     String name;
+    String alias;
     Long recipeId;
     String script = null;
     Category category;
@@ -38,8 +39,12 @@ public class Recipe {
 		return recipeId;
 	}
 
-	public void setRecipeId(Long recipeId) {
-		this.recipeId = recipeId;
+	public String getAlias() {
+		return alias;
+	}
+
+	public void setAlias(String alias) {
+		this.alias = alias;
 	}
 
 	public Category getCategory() {
@@ -110,6 +115,11 @@ public class Recipe {
 	public static Recipe getRecipeById(Long recipeId) {
 		RecipeDAO recipeDao = (RecipeDAO) Persistence.instance().get(Recipe.class);
 		return recipeDao.getRecipeById(recipeId);
+	}
+	
+	public static Recipe getRecipeByAlias(String alias) {
+		RecipeDAO recipeDao = (RecipeDAO) Persistence.instance().get(Recipe.class);
+		return recipeDao.getRecipeByAlias(alias);
 	}
 	
 	public static Recipe getRecipe(String name) {

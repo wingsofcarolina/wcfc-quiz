@@ -40,6 +40,15 @@ public class RecipeDAO extends BasicDAO<Recipe, ObjectId> {
 		return recipe;
 	}
 
+	public Recipe getRecipeByAlias(String alias) {
+		Recipe recipe = null;
+		List<Recipe> result = getDatastore().find(Recipe.class).filter("alias = ", alias).asList();
+		if (result != null && result.size() > 0) {
+			recipe = result.get(0);
+		} 
+		return recipe;
+	}
+	
 	public void drop() {
 		getDatastore().getCollection(Recipe.class).drop();
 	}

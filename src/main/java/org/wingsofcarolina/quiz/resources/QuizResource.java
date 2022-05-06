@@ -253,46 +253,58 @@ public class QuizResource {
 	}
 
 	@GET
-	@Path("generate/{recipeId}")
+	@Path("generate/{alias}")
 	@Produces("text/html")
 	public Response generate(
-			@PathParam("recipeId") Long recipeId) throws Exception {
+			@PathParam("alias") String alias) throws Exception {
+		Recipe recipe = null;
 		Quiz quiz = null;
-		Recipe recipe = Recipe.getRecipeById(recipeId);
 		
-		String output = "";
-		try {
-			// Build the quiz itself
-			quiz = new Quiz(recipe);
-			QuizContext context = new QuizContext(quiz, config);
-			quiz.build(context);
-
-			// Render the output for the club member
-			PDFGenerator generator = new PDFGenerator(context);
-
-			// Store the quiz question set for later retrieval
-			Record record = quiz.getRecord();
-			record.save();
-			LOG.info(record.toString());
-
-			// Actually perform the PDF quiz generation
-			Slack.instance().sendMessage("Quiz '" + quiz.getQuizName() + "', ID " +  quiz.getQuizId() + ", requested at " + dateFormatGmt.format(new Date()));
-			ByteArrayInputStream inputStream = generator.generate(quiz);
-			
-			return Response.ok().type("application/pdf").entity(inputStream).build();
-		} catch (QuizBuildException e) {
-			ObjectMapper mapper = new ObjectMapper();
-			mapper.enable(SerializationFeature.INDENT_OUTPUT);
-			output = mapper.writeValueAsString(recipe);
-			output = output.replaceAll("(\r\n|\n)", "<br/>");
-			output = output.replaceAll("\\s", "&nbsp;&nbsp;");
-
-			// Notify someone of the failure to generate a quiz. This is critical!
-			Slack.instance().sendMessage("ERROR generating quiz for " + quiz.getQuizName() + " : " + e.getMessage());
-			
-			QuizBuildErrorWrapper wrapper = new QuizBuildErrorWrapper(e.getMessage(), output);
-			output = renderer.render("quizBuildError.ad", wrapper);
-			return Response.ok().entity(output).build();
+		if (StringUtils.isNumeric(alias)) {
+			// Assumme we are asking for the Recipe by ID
+			Long recipeId = Long.parseLong(alias);
+			recipe = Recipe.getRecipeById(recipeId);
+		} else {
+			recipe = Recipe.getRecipeByAlias(alias.toUpperCase());
+		}
+		
+		if (recipe != null) {
+			String output = "";
+			try {
+				// Build the quiz itself
+				quiz = new Quiz(recipe);
+				QuizContext context = new QuizContext(quiz, config);
+				quiz.build(context);
+	
+				// Render the output for the club member
+				PDFGenerator generator = new PDFGenerator(context);
+	
+				// Store the quiz question set for later retrieval
+				Record record = quiz.getRecord();
+				record.save();
+				LOG.info(record.toString());
+	
+				// Actually perform the PDF quiz generation
+				Slack.instance().sendMessage("Quiz '" + quiz.getQuizName() + "', ID " +  quiz.getQuizId() + ", requested at " + dateFormatGmt.format(new Date()));
+				ByteArrayInputStream inputStream = generator.generate(quiz);
+				
+				return Response.ok().type("application/pdf").entity(inputStream).build();
+			} catch (QuizBuildException e) {
+				ObjectMapper mapper = new ObjectMapper();
+				mapper.enable(SerializationFeature.INDENT_OUTPUT);
+				output = mapper.writeValueAsString(recipe);
+				output = output.replaceAll("(\r\n|\n)", "<br/>");
+				output = output.replaceAll("\\s", "&nbsp;&nbsp;");
+	
+				// Notify someone of the failure to generate a quiz. This is critical!
+				Slack.instance().sendMessage("ERROR generating quiz for " + quiz.getQuizName() + " : " + e.getMessage());
+				
+				QuizBuildErrorWrapper wrapper = new QuizBuildErrorWrapper(e.getMessage(), output);
+				output = renderer.render("quizBuildError.ad", wrapper);
+				return Response.ok().entity(output).build();
+			}
+		} else {
+			return Response.status(404).entity("Recipe not found").build();
 		}
 	}
 	
