@@ -205,8 +205,8 @@ public class QuizAPI {
 		     { 1002L, "SOP_PILOT" }, 
 		     { 1003L, "SOP_INSTRUCTOR" }, 
 		     { 1004L, "C152" }, 
-		     { 1005L, "PA28" }, 
-		     { 1006L, "C172" }, 
+		     { 1005L, "C172" }, 
+		     { 1006L, "PA28" }, 
 		     { 1007L, "M20J" }, 
 		 }).collect(Collectors.toMap(data -> (Long) data[0], data -> (String) data[1]));
 		 
@@ -1168,6 +1168,7 @@ public class QuizAPI {
 	public Response updateRecipe(@CookieParam("quiz.token") Cookie cookie,
 			@FormParam("name") String name,
 			@FormParam("recipeId") Long recipeId,
+			@FormParam("alias") String alias,
 			@FormParam("script") String script
 			) throws Exception, AuthenticationException {
 		
@@ -1182,6 +1183,9 @@ public class QuizAPI {
 			if (recipe == null) {
 				recipe = new Recipe();
 				recipe.setName(name);
+			}
+			if ( ! recipe.getAlias().equals(alias.toUpperCase())) {
+				recipe.setAlias(alias.toUpperCase());
 			}
 			recipe.setScript(script);
 			

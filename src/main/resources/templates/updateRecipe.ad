@@ -56,10 +56,13 @@ function load_recipe() {
 	
 	$("#recipeName").val(recipeName);
 
+	var alias = ""
 	var url = "api/recipe/" + recipeId;
 	
 	window.aceEditor.setValue("");
 	$.getJSON( url , function( data ) {
+		alias = data.alias;
+		console.log("Alias ==> ", alias);
 		var script = data.script
 		if (script == null) {
 			script = "";
@@ -69,10 +72,11 @@ function load_recipe() {
 		
 		var textarea = $('textarea[name="script"]');
 		textarea.val(data.script);
+		
+		$("#alias").val(alias);
+		var recipeUrl = "${url}" + "generate/" + alias.toLowerCase();
+		$("#url").html("<a href='" + recipeUrl + "' target=_blank>" + recipeUrl + "</a>");	
 	});
-	
-	var recipeUrl = "${url}" + "generate/" + recipeId;
-	$("#url").html("<a href='" + recipeUrl + "' target=_blank>" + recipeUrl + "</a>");
 }
 
 function test_script() {
@@ -112,6 +116,7 @@ function test_script() {
 <input id="recipeName" type="hidden" name="name" value="goober">
 <table>
 <tr><td width=10>Name</td><td><select id="recipeId" name="recipeId" onchange=load_recipe()></select></td></tr>
+<tr><td width=10>Alias</td><td><input id="alias" name="alias"></td></tr>
 <tr><td width=10>URL</td><td><div id="url"></div></td></tr>
 <tr><td colspan=3>Enter the quiz script text used in the Recipe below.</td><tr>
 <tr><td colspan=3>
