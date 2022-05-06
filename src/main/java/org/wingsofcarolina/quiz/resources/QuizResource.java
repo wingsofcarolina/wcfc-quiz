@@ -499,12 +499,22 @@ public class QuizResource {
 			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.USER);
 			User user = User.getWithClaims(claims);
 			List<Question> questions = Question.getByAttribute(attribute);
+			int index = 1;
+			for (Question question : questions) {
+				question.setIndex(index++);
+			}
 			
 			if (questions != null) {
-				PDFGenerator generator = new PDFGenerator(new QuizContext(new Quiz(), config));
-		
-				ByteArrayInputStream inputStream = generator.generate(questions);
-				return Response.ok().type("application/pdf").entity(inputStream).build();
+//				PDFGenerator generator = new PDFGenerator(new QuizContext(new Quiz(), config));
+//		
+//				ByteArrayInputStream inputStream = generator.generate(questions);
+//				return Response.ok().type("application/pdf").entity(inputStream).build();
+				Quiz quiz = new Quiz();
+				quiz.addAll(questions);
+				quiz.setQuizName("All " + attribute + " questions");
+				quiz.setQuizId(0l);
+				String output = renderer.render(Templates.KEY, quiz).toString();
+				return Response.ok().entity(output).type("text/html").build();
 			} else {
 				Flash.add(Flash.Code.ERROR, "Questions in requested category \"" + attribute + "\" not found.");
 				NewCookie newCookie = authUtils.generateCookie(user);
