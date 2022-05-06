@@ -38,7 +38,7 @@ select {
 </style>
 <script>
 $(document).ready(function(){
-	loadAttributes();
+	loadQuestionAttributes();
 	loadDifficultyAttributes();
 	loadExclusionGroups();
 <#if question.type != "CHOICE">
@@ -47,7 +47,20 @@ $(document).ready(function(){
 	$("#q-category").val('${question.category}'.toLowerCase());
 });
 
-function loadAttributes()
+function loadCategoryAttributes(sel)
+{
+	var url = "/api/attributes/" + sel;
+    var $el = $("#attributes");
+	$el.empty(); // remove old options
+	$.getJSON( url , function( data ) {
+		$.each(data, function(key, value) {
+		  $el.append($("<option></option>")
+		     .attr("key", value).text(value));
+		});
+	});
+}
+
+function loadQuestionAttributes(choice)
 {
 	var url = "/api/question/attributes/${question.questionId}";
 	var $el = $("#attributes");
@@ -194,6 +207,9 @@ function checkform()
 	if (cat == 'aircraft' && doesInclude(attributes, ['C152', 'C172', 'PA28', 'M20J'])) {
 		good = true;
 	}
+	if (cat == 'general') {
+		good = true;
+	}
 	
 	if (good == false) {
 	 if (cat == 'regulations') {
@@ -237,9 +253,10 @@ Fill in the Blank
 </#if>
 </strong></td></tr>
 <tr><td>Category</td><td>
-<select id="q-category" name="category" onchange=loadAttributes(this.value)>
+<select id="q-category" name="category" onchange=loadCategoryAttributes(this.value)>
   <option value="regulations">FAR 61/91, SOP/FS</option>
   <option value="aircraft">Aircraft Type (C-152/C-172/PA28/M20J)</option>
+  <option value="general">General Knowledge</option>
 </select></td></tr>
 <tr><td>Exclusion</td><td>
 <select id="q-exclusion" name="exclusion">
@@ -257,7 +274,7 @@ Fill in the Blank
 <tr><td valign="top">Difficulty</td><td><select id="difficulty" name="difficulty" multiple="" class="form-control select-checkbox" size="3"></select></td></tr>
 
 <tr><td valign="top">Attributes</td><td><select id="attributes" name="attributes" multiple="" class="form-control select-checkbox" size="10"></select></td></tr>
-<tr><td></td><td><i>Control-click to select multiple attributes.</td></tr>
+<tr><td></td><td><i>Control-click (or Command-click) to select multiple attributes.</td></tr>
 
 <tr><td colspan=2><hr></td></tr>
 <tr><td valign="top" id="answerLabel">Answers</br>(Max 5)</br></br>Select</br>correct</br>answer.</p><button type="button" onclick="add_row()">Add</button></td><td>

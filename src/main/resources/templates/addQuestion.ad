@@ -37,7 +37,7 @@ select {
 </style>
 <script>
 $(document).ready(function(){
-	loadAttributes("regulations");
+	loadCategoryAttributes("regulations");
 	loadDifficultyAttributes();
 	loadExclusionGroups();
 });
@@ -48,9 +48,9 @@ $(document).on("keydown", ":input:not(textarea)", function(event) {
     }
 });
 
-function loadAttributes(sel)
+function loadCategoryAttributes(sel)
 {
-	var url = "api/attributes/" + sel;
+	var url = "/api/attributes/" + sel;
     var $el = $("#attributes");
 	$el.empty(); // remove old options
 	$.getJSON( url , function( data ) {
@@ -186,9 +186,10 @@ function checkform()
 </select>
 </td></tr>
 <tr><td>Category</td><td>
-<select id="q-category" name="category" onchange=loadAttributes(this.value)>
+<select id="q-category" name="category" onchange=loadCategoryAttributes(this.value)>
   <option value="regulations">FAR 61/91, SOP/FS</option>
   <option value="aircraft">Aircraft Type (C-152/C-172/PA28/M20J)</option>
+  <option value="general">General Knowledge</option>
 </select></td></tr>
 <tr><td>Exclusion</td><td>
 <select id="q-exclusion" name="exclusion">

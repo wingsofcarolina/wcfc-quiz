@@ -21,7 +21,11 @@ public class Attribute {
 	public static String MEDIUM = "MEDIUM";
 	public static String HARD = "HARD";
 	public static List<String> difficulty_attributes = Arrays.asList(EASY, MEDIUM, HARD);
-	
+
+	// General attributes
+	public static String WEATHER = "WEATHER";
+	public static List<String> general_attributes = Arrays.asList(WEATHER);
+
 	// Aircraft attributes
 	public static String GENERAL = "GENERAL";
 	public static String LIMITATIONS = "LIMITATIONS";
@@ -59,6 +63,8 @@ public class Attribute {
 	
 	public static List<String> attributes(String category) {
 		switch (category.toLowerCase()) {
+		case "general" :
+			return generalAttributes();
 		case "regulations" :
 		case "far" :
 		case "sop" :
@@ -88,6 +94,13 @@ public class Attribute {
 	private static List<String> sopAttributes() {
 		List<String> attributeList = new ArrayList<String>();
 		attributeList.addAll(sop_attributes);
+		attributeList.addAll(level_attributes);
+		return attributeList;
+	}
+	
+	private static List<String> generalAttributes() {
+		List<String> attributeList = new ArrayList<String>();
+		attributeList.addAll(general_attributes);
 		attributeList.addAll(level_attributes);
 		return attributeList;
 	}
