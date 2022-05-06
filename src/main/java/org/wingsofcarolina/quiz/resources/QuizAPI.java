@@ -196,49 +196,10 @@ public class QuizAPI {
 //	}
 	
 	@GET
-	@Path("alias")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response alias(@CookieParam("quiz.token") Cookie cookie) {
-		 Map<Long, String> map = Stream.of(new Object[][] { 
-		     { 1000L, "FAR" }, 
-		     { 1001L, "SOP_STUDENT" }, 
-		     { 1002L, "SOP_PILOT" }, 
-		     { 1003L, "SOP_INSTRUCTOR" }, 
-		     { 1004L, "C152" }, 
-		     { 1005L, "C172" }, 
-		     { 1006L, "PA28" }, 
-		     { 1007L, "M20J" }, 
-		 }).collect(Collectors.toMap(data -> (Long) data[0], data -> (String) data[1]));
-		 
-		 Map<Long, String> recipeCatalog = new HashMap<Long, String>();
-		
-		List<Recipe> recipes = Recipe.getAllRecipes();
-		
-		for (Recipe recipe : recipes) {
-			String alias = map.get(recipe.getRecipeId());
-			if (alias != null) {
-				recipe.setAlias(alias);
-				recipe.save();
-			} else {
-				System.out.println("Woah! Something ain't right. Failed Alias lookup!!!");
-			}
-		}
-		
-		return Response.ok().entity(recipeCatalog).build();
-	}
-
-	@GET
 	@Path("recipes")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response recipes(@CookieParam("quiz.token") Cookie cookie) {
-//		Map<String, String> recipeCatalog = new HashMap<String, String>();
-		
 		List<Recipe> recipes = Recipe.getAllRecipes();
-		
-//		for (Recipe r : recipes) {
-//			recipeCatalog.put(r.getAlias(), r.getName());
-//		}
-		
 		return Response.ok().entity(recipes).build();
 	}
 
