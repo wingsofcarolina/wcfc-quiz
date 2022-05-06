@@ -189,7 +189,7 @@ function checkform()
 <select id="q-category" name="category" onchange=loadCategoryAttributes(this.value)>
   <option value="regulations">FAR 61/91, SOP/FS</option>
   <option value="aircraft">Aircraft Type (C-152/C-172/PA28/M20J)</option>
-  <option value="general">General Knowledge</option>
+  <option value="knowledge">General Knowledge</option>
 </select></td></tr>
 <tr><td>Exclusion</td><td>
 <select id="q-exclusion" name="exclusion">

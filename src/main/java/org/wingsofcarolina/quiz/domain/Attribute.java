@@ -22,9 +22,9 @@ public class Attribute {
 	public static String HARD = "HARD";
 	public static List<String> difficulty_attributes = Arrays.asList(EASY, MEDIUM, HARD);
 
-	// General attributes
+	// General knowledge attributes
 	public static String WEATHER = "WEATHER";
-	public static List<String> general_attributes = Arrays.asList(WEATHER);
+	public static List<String> knowledge_attributes = Arrays.asList(WEATHER);
 
 	// Aircraft attributes
 	public static String GENERAL = "GENERAL";
@@ -63,7 +63,7 @@ public class Attribute {
 	
 	public static List<String> attributes(String category) {
 		switch (category.toLowerCase()) {
-		case "general" :
+		case "knowledge" :
 			return generalAttributes();
 		case "regulations" :
 		case "far" :
