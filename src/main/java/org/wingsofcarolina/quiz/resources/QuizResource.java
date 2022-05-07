@@ -46,6 +46,7 @@ import org.wingsofcarolina.quiz.common.Pages;
 import org.wingsofcarolina.quiz.common.QuizBuildException;
 import org.wingsofcarolina.quiz.common.Templates;
 import org.wingsofcarolina.quiz.domain.*;
+import org.wingsofcarolina.quiz.domain.presentation.AttributeReportWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.CategoryChartWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.CategoryReportWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.FileListWrapper;
@@ -418,9 +419,9 @@ public class QuizResource {
 	}
 	
 	@GET
-	@Path("report/{attribute}")
+	@Path("report/attribute/{attribute}")
 	@Produces("text/html")
-	public Response report(@CookieParam("quiz.token") Cookie cookie,
+	public Response reportAttribute(@CookieParam("quiz.token") Cookie cookie,
 			@PathParam("attribute") String attribute,
 			@QueryParam("alphabetical") Boolean alphabetical,
 			@QueryParam("superseded") Boolean superseded) throws AuthenticationException, IOException {
@@ -453,8 +454,8 @@ public class QuizResource {
 				questions = Arrays.asList(questionArray);
 			}
 
-			CategoryReportWrapper wrapper = new CategoryReportWrapper(user, questions, attribute);
-			String output = renderer.render("reportCategory.ad", wrapper).toString();
+			AttributeReportWrapper wrapper = new AttributeReportWrapper(user, questions, attribute);
+			String output = renderer.render("reportAttribute.ad", wrapper).toString();
 			NewCookie newCookie = authUtils.generateCookie(user);
 			return Response.ok().entity(output).header("Set-Cookie", AuthUtils.sameSite(newCookie)).build();
 		} else {
@@ -462,6 +463,51 @@ public class QuizResource {
 		}
 	}
 	
+	@GET
+	@Path("report/category/{category}")
+	@Produces("text/html")
+	public Response reportCategory(@CookieParam("quiz.token") Cookie cookie,
+			@PathParam("category") String category,
+			@QueryParam("alphabetical") Boolean alphabetical,
+			@QueryParam("superseded") Boolean superseded) throws AuthenticationException, IOException {
+
+		// We only check to see if ?alphabetical is in the URL, not the value
+		// of the parameter. IF it exists at all, we sort, otherwise we don't.
+		alphabetical = alphabetical == null ? false : true;
+		superseded = superseded == null ? false : true;
+		
+		if (cookie != null) {
+			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.USER);
+			User user = User.getWithClaims(claims);
+			List<Question> questions = Question.getByCategory(category);
+			
+			// Weed out any superseded questions.
+			if ( ! superseded) {
+				Iterator<Question> it = questions.iterator();
+				while (it.hasNext()) {
+					Question question = it.next();
+					if (question.isSuperseded()) {
+						it.remove();
+					}
+				}
+			}
+			
+			// Optionally, sort alphabetically by question
+			if (alphabetical) {
+				Question[] questionArray = (Question[]) questions.toArray(new Question[0]);
+				Arrays.sort(questionArray, Comparator.comparing(Question::getQuestion));
+				questions = Arrays.asList(questionArray);
+			}
+
+			CategoryReportWrapper wrapper = new CategoryReportWrapper(user, questions, category);
+			String output = renderer.render("reportCategory.ad", wrapper).toString();
+			NewCookie newCookie = authUtils.generateCookie(user);
+			return Response.ok().entity(output).header("Set-Cookie", AuthUtils.sameSite(newCookie)).build();
+		} else {
+			return new RedirectResponse(Pages.LOGIN_PAGE).build();
+		}
+	}
+
 	@GET
 	@Path("quarantinedReport")
 	@Produces("text/html")

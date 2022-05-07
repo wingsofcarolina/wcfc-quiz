@@ -259,9 +259,8 @@ public abstract class QuizDSL extends Script {
 
 	// Return a pool of questions which match any of the supplied attributes. This
 	// can result in a very large question pool potentially spanning multiple
-	// aircraft
-	// types. This is essentially an inclusive OR operation on the attributes.Be
-	// ware.
+	// aircraft types. This is essentially an inclusive OR operation on the attributes.
+	// Beware.
 	public Pool getWithAny(String attribute) {
 		List<String> list = new ArrayList<String>();
 		list.add(attribute);
@@ -272,6 +271,21 @@ public abstract class QuizDSL extends Script {
 		return new Pool().getWithAny(attributes);
 	}
 
+	// Return a pool of questions which match any of the supplied attributes, scoped by
+	// the specified category. No other categories are included in this search. This
+	// can result in a very large question pool potentially spanning multiple
+	// aircraft types. This is essentially an inclusive OR operation on the attributes.
+	// Beware.
+	public Pool getCategoryWithAny(String category, String attribute) {
+		List<String> list = new ArrayList<String>();
+		list.add(attribute);
+		return getCategoryWithAny(category, list);
+	}
+
+	public Pool getCategoryWithAny(String category, List<String> attributes) {
+		return new Pool().getCategoryWithAny(category, attributes);
+	}
+	
 	// Return a pool of questions which match ALL of the supplied attributes. This
 	// is essentially an inclusive AND operation on the attributes.
 	public Pool getWithAll(String attribute) {
@@ -284,6 +298,21 @@ public abstract class QuizDSL extends Script {
 		return new Pool().getWithAll(attributes);
 	}
 
+	// Return a pool of questions which match any of the supplied attributes, scoped by
+	// the specified category. No other categories are included in this search. This
+	// can result in a very large question pool potentially spanning multiple
+	// aircraft types. This is essentially an inclusive OR operation on the attributes.
+	// Beware.
+	public Pool getCategoryWithAll(String category, String attribute) {
+		List<String> list = new ArrayList<String>();
+		list.add(attribute);
+		return getCategoryWithAll(category, list);
+	}
+
+	public Pool getCategoryWithAll(String category, List<String> attributes) {
+		return new Pool().getCategoryWithAll(category, attributes);
+	}
+	
 	// Filter a pool such that all questions with the listed attributes are
 	// included in the resulting pool.
 	public Pool filterIn(Pool pool, String attribute) {

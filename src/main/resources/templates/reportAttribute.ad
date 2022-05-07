@@ -1,0 +1,34 @@
+= Attribute Report
+
+<#setting number_format="#0">
+
+<#if user.isAdmin()>
+navbar:${user.userId}[buttons="HomeNavButton;ViewNavButton;AddNavButton;EditNavButton;ProfileNavButton"]
+<#else>
+navbar:${user.userId}[buttons="HomeNavButton;ProfileNavButton", active="HomeNavButton"]
+</#if>
+
+== Attribute : ${attribute}
+
+++++
+<ul>
+++++
+<#list questions as question>
+++++
+<li><a href="/question/${question.questionId}">${question.questionId}</a> : ${question.question}</br>
+${question.category} / 
+<#if question.attributes??>
+<#list question.attributes as attribute>
+<#if attribute??>
+${attribute}&nbsp;
+</#if>
+</#list>
+<#else>
+No Attributes Assigned!
+</#if>
+++++
+</#list>
+++++
+</ul>
+
+++++

@@ -29,6 +29,11 @@ public class QuestionDAO extends BasicDAO<Question, ObjectId> {
 		return result;
 	}
 
+	public List<Question> getByCategory(String category) {
+		List<Question> result = getDatastore().find(Question.class).filter("category = ", category).order("questionId").asList();
+		return result;
+	}
+
 	public List<Question> getQuestionsLimited(int skip, int count) {
 		List<Question> result = getDatastore().find(Question.class).order("questionId").asList(new FindOptions().skip(skip).limit(10));
 		return result;
@@ -88,6 +93,20 @@ public class QuestionDAO extends BasicDAO<Question, ObjectId> {
 		}
 	}
 
+	public List<Question> getCategoryWithAll(String category, List<String> attributes) {
+		if (attributes == null || attributes.isEmpty()) {
+			return null;
+		} else {
+			Query<Question> query = getDatastore().createQuery(Question.class).disableValidation();
+			
+			query.field("category").equalIgnoreCase(category);
+			query.field("attributes").hasAllOf(attributes).get();
+			
+			List<Question> result = query.order("questionid").asList();
+			return result;
+		}
+	}
+	
 	public List<Question> getWithAny(List<String> attributes) {
 		if (attributes == null || attributes.isEmpty()) {
 			return null;
@@ -95,7 +114,20 @@ public class QuestionDAO extends BasicDAO<Question, ObjectId> {
 			Query<Question> query = getDatastore().createQuery(Question.class).disableValidation();
 			
 			query.field("attributes").hasAnyOf(attributes).get();
+			
+			List<Question> result = query.order("questionid").asList();
+			return result;
+		}
+	}
 
+	public List<Question> getCategoryWithAny(String category, List<String> attributes) {
+		if (attributes == null || attributes.isEmpty()) {
+			return null;
+		} else {
+			Query<Question> query = getDatastore().createQuery(Question.class).disableValidation();
+			
+			query.field("category").equalIgnoreCase(category);
+			query.field("attributes").hasAnyOf(attributes).get();
 			
 			List<Question> result = query.order("questionid").asList();
 			return result;
@@ -115,5 +147,4 @@ public class QuestionDAO extends BasicDAO<Question, ObjectId> {
 	public void drop() {
 		getDatastore().getCollection(Question.class).drop();
 	}
-
 }

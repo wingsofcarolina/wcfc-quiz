@@ -377,6 +377,11 @@ public class Question {
 		return questionDao.getAllQuestions();
 	}
 
+	public static List<Question> getByCategory(String category) {
+		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
+		return questionDao.getByCategory(category);
+	}
+	
 	public static List<Question> getByAttribute(String attribute) {
 		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
 		return questionDao.getSelectedWith(attribute);
@@ -402,11 +407,21 @@ public class Question {
 		return questionDao.getWithAll(attributes);
 	}
 
+	public static List<Question> getCategoryWithAll(String category, List<String> attributes) {
+		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
+		return questionDao.getCategoryWithAll(category, attributes);
+	}
+	
 	public static List<Question> getWithAny(List<String> attributes) {
 		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
 		return questionDao.getWithAny(attributes);
 	}
 
+	public static List<Question> getCategoryWithAny(String category, List<String> attributes) {
+		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
+		return questionDao.getCategoryWithAny(category, attributes);
+	}
+	
 	public static List<Question> getSuperseded() {
 		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
 		return questionDao.getSuperseded();
@@ -426,8 +441,6 @@ public class Question {
 	public void delete() {
 		Persistence.instance().get(Question.class).delete(this);
 	}
-
-
 
 	@Override
 	public String toString() {

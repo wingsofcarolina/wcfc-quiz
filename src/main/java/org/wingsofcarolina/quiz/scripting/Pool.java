@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.wingsofcarolina.quiz.domain.Attribute;
 import org.wingsofcarolina.quiz.domain.Question;
 
 public class Pool {
@@ -75,7 +74,12 @@ public class Pool {
     	this.pool = result;
     	return this;
     }
-    
+
+	public Pool getCategoryWithAll(String category, List<String> attributes) {
+    	List<Question> result = Question.getCategoryWithAll(category, attributes);
+    	this.pool = result;
+    	return this;	}
+
     // Filter the list returning only those questions which contain the 
     // indicated attributes.
     public Pool getWithAny(List<String> attributes) {
@@ -83,7 +87,15 @@ public class Pool {
     	this.pool = result;
     	return this;
     }
-    
+
+    // Filter the list returning only those questions which contain the 
+    // indicated attributes.
+	public Pool getCategoryWithAny(String category, List<String> attributes) {
+    	List<Question> result = Question.getCategoryWithAny(category, attributes);
+    	this.pool = result;
+    	return this;
+	}
+	
     // Filter the list removing all those questions which contain the 
     // indicated attributes.
     public Pool excludeAll(List<String> attributes) {

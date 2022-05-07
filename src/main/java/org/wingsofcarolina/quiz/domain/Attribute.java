@@ -64,7 +64,7 @@ public class Attribute {
 	public static List<String> attributes(String category) {
 		switch (category.toLowerCase()) {
 		case "knowledge" :
-			return generalAttributes();
+			return knowledgeAttributes();
 		case "regulations" :
 		case "far" :
 		case "sop" :
@@ -98,9 +98,9 @@ public class Attribute {
 		return attributeList;
 	}
 	
-	private static List<String> generalAttributes() {
+	private static List<String> knowledgeAttributes() {
 		List<String> attributeList = new ArrayList<String>();
-		attributeList.addAll(general_attributes);
+		attributeList.addAll(knowledge_attributes);
 		attributeList.addAll(level_attributes);
 		return attributeList;
 	}
