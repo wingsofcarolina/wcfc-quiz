@@ -57,18 +57,8 @@ public abstract class QuizDSL extends Script {
 		context.setVariable("instructions", value);
 	}
 
-	// Trim a string to the first newline, if one exists
-	public String trim(String line) {
-		String result = line;
-		int pos = line.indexOf('\n');
-		if (pos != -1) {
-			result = line.substring(0, pos);
-		}
-		return result;
-	}
-
 	// Set quiz global values
-	public void quiz(Integer count) {
+	private void quiz(Integer count) {
 		Quiz quiz = context.getQuiz();
 		quiz.setMaxCount(count);
 	}

@@ -2,7 +2,6 @@ package org.wingsofcarolina.quiz.domain.dao;
 import java.util.List;
 
 import org.bson.types.ObjectId;
-import org.mongodb.morphia.AdvancedDatastore;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.dao.BasicDAO;
 import org.mongodb.morphia.query.FindOptions;
@@ -11,10 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wingsofcarolina.quiz.domain.Question;
 import org.wingsofcarolina.quiz.domain.Type;
-
-import com.mongodb.BasicDBObject;
-import com.mongodb.BasicDBObjectBuilder;
-import com.mongodb.DBObject;
 
 public class QuestionDAO extends BasicDAO<Question, ObjectId> {
 	@SuppressWarnings("unused")
