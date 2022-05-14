@@ -47,7 +47,7 @@ import org.wingsofcarolina.quiz.common.QuizBuildException;
 import org.wingsofcarolina.quiz.common.Templates;
 import org.wingsofcarolina.quiz.domain.*;
 import org.wingsofcarolina.quiz.domain.presentation.AttributeReportWrapper;
-import org.wingsofcarolina.quiz.domain.presentation.CategoryChartWrapper;
+import org.wingsofcarolina.quiz.domain.presentation.AttributeChartWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.CategoryReportWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.FileListWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.JsonWrapper;
@@ -537,9 +537,9 @@ public class QuizResource {
 			User user = User.getWithClaims(claims);
 			List<Question> questions = Question.getByAttribute(attribute);
 			
-			CategoryChartWrapper wrapper = new CategoryChartWrapper(user, questions, attribute);
+			AttributeChartWrapper wrapper = new AttributeChartWrapper(user, questions, attribute);
 			
-			String output = renderer.render("chartCategory.ad", wrapper).toString();
+			String output = renderer.render("chartAttribute.ad", wrapper).toString();
 			NewCookie newCookie = authUtils.generateCookie(user);
 			return Response.ok().entity(output).header("Set-Cookie", AuthUtils.sameSite(newCookie)).build();
 		} else {

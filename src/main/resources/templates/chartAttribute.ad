@@ -1,4 +1,4 @@
-= Category Graph
+= Attribute Graph
 
 <#setting number_format="#0">
 
@@ -8,7 +8,7 @@ navbar:${user.userId}[buttons="HomeNavButton;ViewNavButton;AddNavButton;EditNavB
 navbar:${user.userId}[buttons="HomeNavButton;ProfileNavButton", active="HomeNavButton"]
 </#if>
 
-== Category : ${category}
+== Attribute : ${attribute}
 
 ++++
   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
@@ -40,6 +40,9 @@ navbar:${user.userId}[buttons="HomeNavButton;ProfileNavButton", active="HomeNavB
   }
   </script>
 <div id="totals">Total number of questions : ${count}</div>
+<div id="totals">     Total Easy questions : ${easy}</div>
+<div id="totals">   Total Medium questions : ${medium}</div>
+<div id="totals">     Total Hard questions : ${hard}</div>
 <div id="barchart_values" style="width: 1000px; height: 700px;"></div>
 
 <style>

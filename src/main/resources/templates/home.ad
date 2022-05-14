@@ -81,8 +81,8 @@ function do_click(href) {
 	<a href="report/attribute/M20J">Mooney Questions</a>
 	<a href="report/attribute/M20J?alphabetical">(Alphabetical Order)</a>
 	<a href="report/attribute/M20J?superseded">(With Superseded)</a>
-<li><button onclick="window.location.href = 'chart/KNOWLEDGE';">Chart</button> &nbsp;
-	<button onclick="do_click('allQuestions/KNOWLEDGE');">All Questions</button> &nbsp;
+<li><button onclick="window.location.href = 'chart/KNOWLEDGE';" disabled>Chart</button> &nbsp;
+	<button onclick="do_click('allQuestions/KNOWLEDGE');" disabled>All Questions</button> &nbsp;
 	<a href="report/category/KNOWLEDGE">General Knowledge Questions</a>
 	<a href="report/category/KNOWLEDGE?alphabetical">(Alphabetical Order)</a>
 	<a href="report/category/KNOWLEDGE?superseded">(With Superseded)</a>	

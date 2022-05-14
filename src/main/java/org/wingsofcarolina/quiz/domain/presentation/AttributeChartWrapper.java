@@ -8,21 +8,27 @@ import java.util.TreeMap;
 import org.wingsofcarolina.quiz.domain.Question;
 import org.wingsofcarolina.quiz.domain.User;
 
-public class CategoryChartWrapper extends QuestionListWrapper {
+public class AttributeChartWrapper extends QuestionListWrapper {
 
-	private String category;
-	private CategoryStats stats;
+	private String attribute;
+	private AttributeStats stats;
 	private Integer count;
-
-	public CategoryChartWrapper(User user, List<Question> questions, String category) {
+	private Integer easy = 0;
+	private Integer medium = 0;
+	private Integer hard = 0;
+	
+	public AttributeChartWrapper(User user, List<Question> questions, String attribute) {
 		super(user, questions);
-		this.category = category;
-		this.stats = new CategoryStats(questions);
+		this.attribute = attribute;
+		this.stats = new AttributeStats(questions);
+		this.easy = stats.getEasy();
+		this.medium = stats.getMedium();
+		this.hard = stats.getHard();
 		this.count = questions.size();
 		
 		int count = 0;
 		int last = stats.attributes.size() - 1;
-		for (AttributeStats stat : stats.attributes.values()) {
+		for (ColumnStats stat : stats.attributes.values()) {
 			if (count == last) {
 				stat.setLast();
 			}
@@ -30,31 +36,49 @@ public class CategoryChartWrapper extends QuestionListWrapper {
 		}
 	}
 
-	public String getCategory() {
-		return category;
+	public Integer getCount() {
+		return count;
 	}
 
-	public CategoryStats getStats() {
+	public Integer getEasy() {
+		return easy;
+	}
+
+	public Integer getMedium() {
+		return medium;
+	}
+
+	public Integer getHard() {
+		return hard;
+	}
+
+	public String getAttribute() {
+		return attribute;
+	}
+
+	public AttributeStats getStats() {
 		return stats;
 	}
 
-	public class CategoryStats {
-		Map<String, AttributeStats> attributes = new TreeMap<String, AttributeStats>();
+	public class AttributeStats {
+		private Integer easy = 0;
+		private Integer medium = 0;
+		private Integer hard = 0;
+		Map<String, ColumnStats> attributes = new TreeMap<String, ColumnStats>();
 		
-		public CategoryStats(List<Question> questions) {
+		public AttributeStats(List<Question> questions) {
 			for (Question question : questions) {
 				for (String attribute : question.getAttributes()) {
 					if (attribute != null) {
 						switch (attribute) {
-						case "EASY" :
-						case "MEDIUM" :
-						case "HARD" :
-							break;
+						case "EASY" : easy ++ ; break;
+						case "MEDIUM" : medium++ ; break;
+						case "HARD" : hard++ ; break;
 						default :
 							if (attributes.containsKey(attribute)) {
 								attributes.get(attribute).increment(question.getAttributes());
 							} else {
-								attributes.put(attribute, new AttributeStats(attribute, question.getAttributes()));
+								attributes.put(attribute, new ColumnStats(attribute, question.getAttributes()));
 							}
 						}
 					}
@@ -62,12 +86,24 @@ public class CategoryChartWrapper extends QuestionListWrapper {
 			}
 		}
 
-		public Collection<AttributeStats> getAttributes() {
+		public Integer getEasy() {
+			return easy;
+		}
+
+		public Integer getMedium() {
+			return medium;
+		}
+
+		public Integer getHard() {
+			return hard;
+		}
+
+		public Collection<ColumnStats> getAttributes() {
 			return attributes.values();
 		}
 	}
 	
-	public class AttributeStats {
+	public class ColumnStats {
 		private String name;
 		private Integer easy = 0;
 		private Integer medium = 0;
@@ -75,7 +111,7 @@ public class CategoryChartWrapper extends QuestionListWrapper {
 		private Integer other = 0;
 		private boolean last = false;
 
-		public AttributeStats(String name, List<String> attributes) {
+		public ColumnStats(String name, List<String> attributes) {
 			this.name = name;
 			increment(attributes);
 		}
