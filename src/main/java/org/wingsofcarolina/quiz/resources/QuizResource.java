@@ -479,7 +479,7 @@ public class QuizResource {
 		if (cookie != null) {
 			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.USER);
 			User user = User.getWithClaims(claims);
-			List<Question> questions = Question.getByCategory(category);
+			List<Question> questions = Question.getByCategory(Category.valueOf(category));
 			
 			// Weed out any superseded questions.
 			if ( ! superseded) {
@@ -529,7 +529,7 @@ public class QuizResource {
 	@GET
 	@Path("chart/{attribute}")
 	@Produces("text/html")
-	public Response chartCategory(@CookieParam("quiz.token") Cookie cookie,
+	public Response chartAttribute(@CookieParam("quiz.token") Cookie cookie,
 			@PathParam("attribute") String attribute) throws AuthenticationException, IOException {
 
 		if (cookie != null) {
@@ -547,10 +547,31 @@ public class QuizResource {
 		}
 	}
 	
+
+	@GET
+	@Path("chart/category/{category}")
+	@Produces("text/html")
+	public Response chartCategory(@CookieParam("quiz.token") Cookie cookie,
+			@PathParam("category") String category) throws AuthenticationException, IOException {
+
+		if (cookie != null) {
+			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.USER);
+			User user = User.getWithClaims(claims);
+			List<Question> questions = Question.getByCategory(Category.valueOf(category));
+			
+			AttributeChartWrapper wrapper = new AttributeChartWrapper(user, questions, category);
+			
+			String output = renderer.render("chartAttribute.ad", wrapper).toString();
+			NewCookie newCookie = authUtils.generateCookie(user);
+			return Response.ok().entity(output).header("Set-Cookie", AuthUtils.sameSite(newCookie)).build();
+		} else {
+			return new RedirectResponse(Pages.LOGIN_PAGE).build();
+		}
+	}
 	@GET
 	@Path("allQuestions/{attribute}")
 	@Produces("application/pdf")
-	public Response allQuestionsInCategory(@CookieParam("quiz.token") Cookie cookie,
+	public Response allQuestionsWithAttribute(@CookieParam("quiz.token") Cookie cookie,
 			@PathParam("attribute") String attribute) throws AuthenticationException, IOException, QuizBuildException, URISyntaxException {
 
 		if (cookie != null) {
@@ -574,7 +595,43 @@ public class QuizResource {
 				String output = renderer.render(Templates.KEY, quiz).toString();
 				return Response.ok().entity(output).type("text/html").build();
 			} else {
-				Flash.add(Flash.Code.ERROR, "Questions in requested category \"" + attribute + "\" not found.");
+				Flash.add(Flash.Code.ERROR, "Questions with requested attribute \"" + attribute + "\" not found.");
+				NewCookie newCookie = authUtils.generateCookie(user);
+				return new RedirectResponse(Pages.HOME_PAGE).header("Set-Cookie", AuthUtils.sameSite(newCookie)).build();
+			}
+		} else {
+			return new RedirectResponse(Pages.LOGIN_PAGE).build();
+		}
+	}
+	
+	@GET
+	@Path("allQuestions/category/{category}")
+	@Produces("application/pdf")
+	public Response allQuestionsInCategory(@CookieParam("quiz.token") Cookie cookie,
+			@PathParam("category") String category) throws AuthenticationException, IOException, QuizBuildException, URISyntaxException {
+
+		if (cookie != null) {
+			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.USER);
+			User user = User.getWithClaims(claims);
+			List<Question> questions = Question.getByCategory(Category.valueOf(category));
+			int index = 1;
+			for (Question question : questions) {
+				question.setIndex(index++);
+			}
+			
+			if (questions != null) {
+//				PDFGenerator generator = new PDFGenerator(new QuizContext(new Quiz(), config));
+//		
+//				ByteArrayInputStream inputStream = generator.generate(questions);
+//				return Response.ok().type("application/pdf").entity(inputStream).build();
+				Quiz quiz = new Quiz();
+				quiz.addAll(questions);
+				quiz.setQuizName("All " + category + " questions");
+				quiz.setQuizId(0l);
+				String output = renderer.render(Templates.KEY, quiz).toString();
+				return Response.ok().entity(output).type("text/html").build();
+			} else {
+				Flash.add(Flash.Code.ERROR, "Questions in requested category \"" + category + "\" not found.");
 				NewCookie newCookie = authUtils.generateCookie(user);
 				return new RedirectResponse(Pages.HOME_PAGE).header("Set-Cookie", AuthUtils.sameSite(newCookie)).build();
 			}

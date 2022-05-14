@@ -8,6 +8,7 @@ import org.mongodb.morphia.query.FindOptions;
 import org.mongodb.morphia.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wingsofcarolina.quiz.domain.Category;
 import org.wingsofcarolina.quiz.domain.Question;
 import org.wingsofcarolina.quiz.domain.Type;
 
@@ -24,7 +25,7 @@ public class QuestionDAO extends BasicDAO<Question, ObjectId> {
 		return result;
 	}
 
-	public List<Question> getByCategory(String category) {
+	public List<Question> getByCategory(Category category) {
 		List<Question> result = getDatastore().find(Question.class).filter("category = ", category).order("questionId").asList();
 		return result;
 	}

@@ -377,7 +377,7 @@ public class Question {
 		return questionDao.getAllQuestions();
 	}
 
-	public static List<Question> getByCategory(String category) {
+	public static List<Question> getByCategory(Category category) {
 		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
 		return questionDao.getByCategory(category);
 	}

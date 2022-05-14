@@ -20,8 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -1009,17 +1007,12 @@ public class QuizAPI {
 
 		Type type = null;
 		Category category = null;
-		if (categoryName.toUpperCase().startsWith("SOP")) {
+		if (typeName.equals("fib")) {
 			type = Type.BLANK;
-			category = Category.SOP;
+			category = Category.valueOf(categoryName.toUpperCase());
 		} else {
-			if (typeName.equals("fib")) {
-				type = Type.BLANK;
-				category = Category.valueOf(categoryName.toUpperCase());
-			} else {
-				type = Type.CHOICE;
-				category = Category.valueOf(categoryName.toUpperCase());
-			}
+			type = Type.CHOICE;
+			category = Category.valueOf(categoryName.toUpperCase());
 		}
 
 		if (correct == null) {
