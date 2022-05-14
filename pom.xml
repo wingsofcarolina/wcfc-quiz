@@ -5,7 +5,7 @@
 
 	<groupId>org.wingsofcarolina</groupId>
 	<artifactId>wcfc-quiz</artifactId>
-	<version>3.0.5</version>
+	<version>3.0.6</version>
 	<packaging>jar</packaging>
 
 	<name>wcfc-quiz</name>
