@@ -91,11 +91,11 @@ public abstract class QuizDSL extends Script {
 		if (section != null) {
 			Quiz quiz = context.getQuiz();
 			for (Question question : questions) {
-				quiz.addQuestion(question);
-
 				// Stop when the quiz is full
 				if (quiz.getMaxCount() != null && quiz.getQuestions().size() >= quiz.getMaxCount()) {
 					break;
+				} else {
+					quiz.addQuestion(question);
 				}
 			}
 		} else {
