@@ -117,22 +117,7 @@ public class QuizAPI {
 			@PathParam("questionId") Long questionId) throws Exception, AuthenticationException {
 		return Response.ok().entity(Record.isQuestionIdDeployed(questionId)).build();
 	}
-	@GET
-	@Path("reorder")
-	public Response reorder() {
-		
-		List<Recipe>recipes = Recipe.getAllRecipes();
-		recipes.sort(Comparator.comparing(Recipe::getRecipeId));
-		Integer order = 20;
-		for (Recipe recipe : recipes) {
-			recipe.setOrder(order);
-			LOG.info("Recipe : {} : {}", recipe.getOrder(), recipe.getName());
-			recipe.save();
-			order += 20;
-		}
-		return Response.ok().build();
-	}
-	
+
 //	@GET
 //	@Path("explore")
 //	@Produces(MediaType.APPLICATION_JSON)
