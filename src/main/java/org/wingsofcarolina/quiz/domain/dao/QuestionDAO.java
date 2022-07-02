@@ -49,12 +49,12 @@ public class QuestionDAO extends BasicDAO<Question, ObjectId> {
 		return result;
 	}
 	
-	public List<Question> getRequiredWith(String attribute) {
-		if (attribute != null) {
-			List<Question> result = getDatastore().find(Question.class)
-					.filter("attributes = ", attribute)
-					.filter("required = ", true)
-					.order("questionId").asList();
+	public List<Question> getRequiredWithAll(List<String> attributes) {
+		if (attributes != null) {
+			Query<Question> query = getDatastore().createQuery(Question.class).disableValidation();
+			query.field("attributes").hasAllOf(attributes)
+				 .field("required").equal(true).get();
+			List<Question> result = query.order("questionid").asList();
 
 			return result;
 		} else {

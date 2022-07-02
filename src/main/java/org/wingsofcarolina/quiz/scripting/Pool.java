@@ -61,8 +61,8 @@ public class Pool {
 		return this;
 	}
 	
-	public Pool getRequiredWith(String attribute) {
-	   	List<Question> result = Question.getRequiredWith(attribute);
+	public Pool getRequiredWithAll(List<String> attributes) {
+	   	List<Question> result = Question.getRequiredWithAll(attributes);
     	this.pool = result;
     	return this;
 	}

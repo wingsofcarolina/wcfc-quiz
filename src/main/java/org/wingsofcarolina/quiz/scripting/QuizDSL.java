@@ -83,10 +83,10 @@ public abstract class QuizDSL extends Script {
 	}
 
 	// Apply the collection set of questions to the quiz
-	public void end(String name) {
+	public void end() {
 		List<Question> questions = section.getQuestions();
 		if (context.getTestRun()) {
-			System.out.println("### Applying collected selections : " + name + "(" + questions.size() + ")<br>");
+			System.out.println("### Applying collected selections : " + section.getName() + "(" + questions.size() + ")<br>");
 		}
 		if (section != null) {
 			Quiz quiz = context.getQuiz();
@@ -156,12 +156,14 @@ public abstract class QuizDSL extends Script {
 						}
 					} else {
 						if (context.getTestRun()) {
+							boolean previous = false;
 							System.out.print("Rejected " + entity.getQuestionId() + " because it is ");
-							if (excluded) System.out.println("<strong>excluded</strong> <br>");
-							if (quarintined) System.out.println("<strong>quarintined</strong> <br>");
-							if (alreadySelected) System.out.println("<strong>already selected</strong> <br>");
-							if (empty) System.out.println("<strong>empty</strong> <br>");
-							if (deleted) System.out.println("<strong>deleted</strong> <br>");
+							if (excluded) previous = failOut(previous, "<strong>excluded</strong> ");
+							if (quarintined) previous = failOut(previous, "<strong>quarintined</strong> ");
+							if (alreadySelected) previous = failOut(previous, "<strong>already selected</strong> ");
+							if (empty) previous = failOut(previous, "<strong>empty</strong> ");
+							if (deleted) previous = failOut(previous, "<strong>deleted</strong> ");
+							System.out.println("<br>");
 						}
 					}
 				}
@@ -183,6 +185,12 @@ public abstract class QuizDSL extends Script {
 		}
 	}
 
+	private boolean failOut(Boolean previous, String message) {
+		if (previous) System.out.print(" / ");
+		System.out.print(message);
+		return true;
+	}
+	
 	// Add to the section (not pool) all (resolved) questions listed
 	// in the question ID list provided.
 	public void require(Integer questionId) {
@@ -240,9 +248,14 @@ public abstract class QuizDSL extends Script {
 	// Return a pool of questions which have the supplied attribute, and
 	// are also noted as being "required" questions.
 	public Pool getRequiredWith(String attribute) {
-		Pool pool = new Pool().getRequiredWith(attribute);
+		List<String> list = new ArrayList<String>();
+		list.add(attribute);
+		return getRequiredWith(list);
+	}
+	public Pool getRequiredWith(List<String> attributes) {
+		Pool pool = new Pool().getRequiredWithAll(attributes);
 		if (context.getTestRun()) {
-			System.out.println("Required question count for '" + attribute + "' is " + pool.size() + "<br>");
+			System.out.println("Required question count for '" + attributes + "' is " + pool.size() + "<br>");
 		}
 		return pool;
 	}

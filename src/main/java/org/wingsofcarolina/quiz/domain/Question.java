@@ -427,9 +427,9 @@ public class Question {
 		return questionDao.getSuperseded();
 	}
 
-	public static List<Question> getRequiredWith(String attribute) {
+	public static List<Question> getRequiredWithAll(List<String> attributes) {
 		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
-		return questionDao.getRequiredWith(attribute);
+		return questionDao.getRequiredWithAll(attributes);
 	}
 
 	@SuppressWarnings("unchecked")
