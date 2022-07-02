@@ -15,6 +15,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +30,7 @@ import javax.ws.rs.CookieParam;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -115,6 +117,21 @@ public class QuizAPI {
 			@PathParam("questionId") Long questionId) throws Exception, AuthenticationException {
 		return Response.ok().entity(Record.isQuestionIdDeployed(questionId)).build();
 	}
+	@GET
+	@Path("reorder")
+	public Response reorder() {
+		
+		List<Recipe>recipes = Recipe.getAllRecipes();
+		recipes.sort(Comparator.comparing(Recipe::getRecipeId));
+		Integer order = 20;
+		for (Recipe recipe : recipes) {
+			recipe.setOrder(order);
+			LOG.info("Recipe : {} : {}", recipe.getOrder(), recipe.getName());
+			recipe.save();
+			order += 20;
+		}
+		return Response.ok().build();
+	}
 	
 //	@GET
 //	@Path("explore")
@@ -198,6 +215,7 @@ public class QuizAPI {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response recipes(@CookieParam("quiz.token") Cookie cookie) {
 		List<Recipe> recipes = Recipe.getAllRecipes();
+		recipes.sort(Comparator.comparing(Recipe::getOrder));
 		return Response.ok().entity(recipes).build();
 	}
 
@@ -1120,31 +1138,45 @@ public class QuizAPI {
 	@Path("recipe")
 	@Produces(MediaType.TEXT_HTML)
 	public Response updateRecipe(@CookieParam("quiz.token") Cookie cookie,
+			@FormParam("action") String action,
 			@FormParam("name") String name,
 			@FormParam("recipeId") Long recipeId,
 			@FormParam("alias") String alias,
+			@FormParam("order") Integer order,
 			@FormParam("script") String script
 			) throws Exception, AuthenticationException {
 		
 		if (cookie != null) {
+			Recipe recipe = null;
+
 			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.ADMIN);
 			User user = User.getWithClaims(claims);
 	
-			// Retrieve the recipe
-			Recipe recipe = Recipe.getRecipeById(recipeId);
-	
-			// Create a new recipe, if needed
-			if (recipe == null) {
+			if (action.equalsIgnoreCase("update")) {
+				// Retrieve the recipe
+				recipe = Recipe.getRecipeById(recipeId);
+		
+				// Create a new recipe, if needed
+				if (recipe == null) {
+					recipe = new Recipe();
+					recipe.setName(name);
+				}
+				if ( ! recipe.getAlias().equals(alias.toUpperCase())) {
+					recipe.setAlias(alias.toUpperCase());
+				}
+				recipe.setScript(script);
+			} else if (action.equals("create")) {
 				recipe = new Recipe();
 				recipe.setName(name);
+				recipe.setAlias(alias);
+				recipe.setOrder(order);
 			}
-			if ( ! recipe.getAlias().equals(alias.toUpperCase())) {
-				recipe.setAlias(alias.toUpperCase());
-			}
-			recipe.setScript(script);
 			
 			// Save the recipe
 			recipe.save();
+			
+			// Retrieve the ID in case of a newly created recipe
+			recipeId = recipe.getRecipeId();
 	
 			Flash.add(Flash.Code.SUCCESS, "Recipe type " + recipe.getName() + " updated.");
 	

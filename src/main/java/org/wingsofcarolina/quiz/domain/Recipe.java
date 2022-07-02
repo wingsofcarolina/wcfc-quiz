@@ -19,6 +19,7 @@ public class Recipe {
     
     String name;
     String alias;
+    Integer order;
     Long recipeId;
     String script = null;
     Category category;
@@ -29,9 +30,7 @@ public class Recipe {
     
 	public static String ID_KEY = "recipe";
 
-    public Recipe() {}
-    
-    public Recipe(String name) {
+    public Recipe() {
 		this.recipeId = Persistence.instance().getID(ID_KEY, 1000);
     }
     
@@ -45,6 +44,14 @@ public class Recipe {
 
 	public void setAlias(String alias) {
 		this.alias = alias;
+	}
+	
+	public Integer getOrder() {
+		return order;
+	}
+
+	public void setOrder(Integer order) {
+		this.order = order;
 	}
 
 	public Category getCategory() {

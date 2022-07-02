@@ -74,6 +74,7 @@ function load_recipe() {
 		textarea.val(data.script);
 		
 		$("#alias").val(alias);
+		$("#order").val(data.order);
 		var recipeUrl = "${url}" + "generate/" + alias.toLowerCase();
 		$("#url").html("<a href='" + recipeUrl + "' target=_blank>" + recipeUrl + "</a>");	
 	});
@@ -110,16 +111,25 @@ function test_script() {
 		}
     });
 }
+
+function create_recipe() {
+	var modal = document.getElementById("myModal");
+	modal.style.display = "block";
+}
 </script>
 
-<form name="question" action="/api/recipe" method="post">
-<input id="recipeName" type="hidden" name="name" value="goober">
+<form name="recipe" action="/api/recipe" method="post">
+<input id="recipeName" type="hidden" name="name">
+<input type="hidden" name="action" value="update"/>
 <table>
-<tr><td width=10>Name</td><td><select id="recipeId" name="recipeId" onchange=load_recipe()></select></td></tr>
-<tr><td width=10>Alias</td><td><input id="alias" name="alias"></td></tr>
-<tr><td width=10>URL</td><td><div id="url"></div></td></tr>
-<tr><td colspan=3>Enter the quiz script text used in the Recipe below.</td><tr>
-<tr><td colspan=3>
+<tr><td width=10>Name</td><td colspan=3><select id="recipeId" name="recipeId" onchange=load_recipe()></select></td></tr>
+<tr>
+  <td width=10>Alias</td><td width=20><input id="alias" name="alias"></td>
+  <td width=10>Order</td><td width=20><input id="order" name="order"></td>
+</tr>
+<tr><td width=10>URL</td><td colspan=3><div id="url"></div></td></tr>
+<tr><td colspan=4>Enter the quiz script text used in the Recipe below.</td><tr>
+<tr><td colspan=4>
 <div id="editor" style="height: 500px; width: 0750px">Enter script text here .....</div>
 <script>
     var editor = ace.edit("editor");
@@ -132,10 +142,52 @@ function test_script() {
 </form>
 </p>
 <button onclick="test_script();">Test Recipe</button>
+</p>
+<button onclick="create_recipe();">New Recipe</button>
+
+<div id="myModal" class="modal">
+  <div class="modal-content">
+    <p>Enter the details of the new recipe :</p>
+    <form name="new_recipe" action="/api/recipe" method="post">
+    <input type="hidden" name="action" value="create"/>
+	<table>
+	<tr><td>Name</td><td colspan=3><input id="name" name="name"></td></tr>
+	<tr><td>Alias</td><td><input id="alias" name="alias"></td></tr>
+	<tr><td>Order</td><td><input id="order" name="order"></td></tr>
+	</table>
+	<input type="submit" value="Update Recipe">
+	</form>
+  </div>
+</div>
 
 <style>
 #url {
 	font-size: 1.2em;
+}
+
+/* The Modal (background) */
+.modal {
+  display: none; /* Hidden by default */
+  z-index: 100; /* Sit on top */
+  position: fixed;
+  top:0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content/Box */
+.modal-content {
+  background-color: #fefefe;
+  padding: 20px;
+  border: 1px solid #888;
+    width: 440px; /* Can be in percentage also. */
+    height: auto;
+    margin: 0 auto;
+    padding: 10px;
+    position: relative;
 }
 </style>
 
