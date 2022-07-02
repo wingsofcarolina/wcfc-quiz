@@ -40,8 +40,9 @@ public class Attribute {
 	public static String AIRCRAFT_RULES = "AIRCRAFT_RULES";
 	public static String AVIONICS = "AVIONICS";
 	public static String IFR = "IFR";
+	public static String LICENSED_PILOT = "LICENSED_PILOT";
 	public static List<String> aircraft_attributes = Arrays.asList(C152, PA28, C172, M20J, GENERAL, LIMITATIONS, EMERGENCY, PROCEDURES, PERFORMANCE,
-			WB, SYSTEMS, SERVICING, SUPPLEMENTS, MISCELLANEOUS, AVIONICS, IFR, AIRCRAFT_RULES);
+			WB, SYSTEMS, SERVICING, SUPPLEMENTS, MISCELLANEOUS, AVIONICS, IFR, LICENSED_PILOT, AIRCRAFT_RULES);
 
 	// SOP/FAR attributes
 	public static String SOP_I = "SOP_I";
