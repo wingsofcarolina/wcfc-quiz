@@ -8,6 +8,7 @@ public class Templates {
 	public static final String STUDENT = BASE + "/student.ad";
 	public static final String PROFILE = BASE + "/profile.ad";
 	public static final String REGISTER = BASE + "/register.ad";
+	public static final String SHOW_USERS = BASE + "/showUsers.ad";
 	public static final String LOGIN = BASE + "/login.ad";
 	public static final String ADD_INSTRUCTOR = BASE + "/addInstructor.ad";
 	public static final String EDIT_NOTES = BASE + "/editNote.ad";

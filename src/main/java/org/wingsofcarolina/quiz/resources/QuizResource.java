@@ -57,6 +57,7 @@ import org.wingsofcarolina.quiz.domain.presentation.QuestionWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.QuizBuildErrorWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.RecipeWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.Renderer;
+import org.wingsofcarolina.quiz.domain.presentation.UsersWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.Version;
 import org.wingsofcarolina.quiz.domain.presentation.Wrapper;
 import org.wingsofcarolina.quiz.responses.RedirectResponse;
@@ -232,6 +233,26 @@ public class QuizResource {
 			e.printStackTrace();
 		}
 		return Response.ok().entity(output).build();
+	}
+
+	@GET
+	@Path("showUsers")
+	@Produces("text/html")
+	public Response showUsers(@CookieParam("quiz.token") Cookie cookie) throws Exception, AuthenticationException {
+		String output = "";
+		if (cookie != null) {
+			Jws<Claims> claims = authUtils.validateUser(cookie.getValue());
+			User user = User.getWithClaims(claims);
+			try {
+				UsersWrapper wrapper = new UsersWrapper(user, User.getAllUsers());
+				output = renderer.render(Templates.SHOW_USERS, wrapper).toString();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			return Response.ok().entity(output).build();
+		} else {
+			return new RedirectResponse(Pages.LOGIN_PAGE).build();
+		}
 	}
 	
 	@GET

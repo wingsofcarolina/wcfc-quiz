@@ -194,6 +194,15 @@ public class QuizAPI {
 //			r.save();
 //		}
 //	}
+
+	@GET
+	@Path("users")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response users(@CookieParam("quiz.token") Cookie cookie) {
+		List<User> users = User.getAllUsers();
+		users.sort(Comparator.comparing(User::getCreated));
+		return Response.ok().entity(users).build();
+	}
 	
 	@GET
 	@Path("recipes")

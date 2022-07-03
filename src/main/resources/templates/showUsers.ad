@@ -1,0 +1,48 @@
+= Show Users
+
+<#if user.isAdmin()>
+navbar:${user.userId}[buttons="HomeNavButton;ViewNavButton;AddNavButton;EditNavButton;ProfileNavButton"]
+<#else>
+navbar:${user.userId}[buttons="HomeNavButton;ProfileNavButton", active="HomeNavButton"]
+</#if>
+
+++++
+<script>
+$(document).ready(function(){
+	loadUsers();
+});
+
+function loadUsers()
+{
+	var url = "/api/users";
+	$.getJSON( url , function( data ) {
+		console.log("data ==> ", data);
+		$.each(data, function(key, value) {
+			addRow(value);
+		});
+	});
+}
+
+function addRow(value) {
+	var table = document.getElementById("users");
+
+	var rowCount = table.rows.length;
+	var row = table.insertRow(rowCount);
+
+	var cell1 = row.insertCell(0);
+	var element1 = document.createTextNode(value.name);
+	cell1.appendChild(element1);
+
+	var cell2 = row.insertCell(1);
+	var element2 = document.createTextNode(value.email);
+	cell2.appendChild(element2);
+	
+	var cell3 = row.insertCell(2);
+	var element3 = document.createTextNode(value.privs);
+	cell3.appendChild(element3);
+}
+</script>
+
+<table width=80% id="users" name="users" style="border:1px solid black;margin-left:auto;margin-right:auto;">
+</table>
+++++
