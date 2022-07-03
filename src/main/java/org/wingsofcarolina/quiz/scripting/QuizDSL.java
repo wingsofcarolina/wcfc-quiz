@@ -106,6 +106,12 @@ public abstract class QuizDSL extends Script {
 			}
 		}
 	}
+	
+	// For backward compatibility with older recipes
+	public void end(String name) {
+		LOG.info("Old version of end() called");
+		this.end();
+	}
 
 	// Add questions to the selected set of questions in the quiz
 	// NOTE: The items are pulled out of the Pool pool in a random order
