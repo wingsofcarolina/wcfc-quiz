@@ -482,6 +482,11 @@ public class QuizAPI {
 		if (record != null) {
 			Quiz quiz = Quiz.quizFromRecord(record);
 			if (type.equals("Key")) {
+				// Lets make note of the last person to retrieve the key
+				record.setRetrievedBy(user.getName());
+				record.save();
+				
+				// Then render the key for the instructor
 				output = renderer.render(Templates.KEY, quiz).toString();
 				LOG.info("Quiz Key for quiz ID {} retrieved by {}", quizId, user.getName());
 				Slack.instance().sendMessage("Quiz Key for quiz ID " + quizId + " retrieved by " + user.getName()

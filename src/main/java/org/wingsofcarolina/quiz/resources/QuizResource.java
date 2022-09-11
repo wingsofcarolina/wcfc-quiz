@@ -56,6 +56,7 @@ import org.wingsofcarolina.quiz.domain.presentation.QuestionListWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.QuestionWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.QuizBuildErrorWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.RecipeWrapper;
+import org.wingsofcarolina.quiz.domain.presentation.RecordListWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.Renderer;
 import org.wingsofcarolina.quiz.domain.presentation.UsersWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.Version;
@@ -547,6 +548,24 @@ public class QuizResource {
 		}
 	}
 
+	@GET
+	@Path("recordReport")
+	@Produces("text/html")
+	public Response recordReport(@CookieParam("quiz.token") Cookie cookie) throws AuthenticationException, IOException {
+
+		if (cookie != null) {
+			Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.USER);
+			User user = User.getWithClaims(claims);
+			List<Record> questions = Record.getAllRecords();
+			RecordListWrapper wrapper = new RecordListWrapper(user, questions);
+			String output = renderer.render("recordReport.ad", wrapper).toString();
+			NewCookie newCookie = authUtils.generateCookie(user);
+			return Response.ok().entity(output).header("Set-Cookie", AuthUtils.sameSite(newCookie)).build();
+		} else {
+			return new RedirectResponse(Pages.LOGIN_PAGE).build();
+		}
+	}
+	
 	@GET
 	@Path("chart/{attribute}")
 	@Produces("text/html")

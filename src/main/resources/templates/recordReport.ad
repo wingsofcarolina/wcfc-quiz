@@ -1,0 +1,42 @@
+= Recorded Quiz Report
+
+<#setting number_format="#0">
+
+<#if user.isAdmin()>
+navbar:${user.userId}[buttons="HomeNavButton;ViewNavButton;AddNavButton;EditNavButton;ProfileNavButton"]
+<#else>
+navbar:${user.userId}[buttons="HomeNavButton;ProfileNavButton", active="HomeNavButton"]
+</#if>
+
+
+<#if records?has_content>
+++++
+<h3>There are ${records?size} recorded quizzes in the system.</h3>
+<div style="width:80%;padding-bottom:15px"><b>NOTE</b> : The sunset date shown here is <i>not</i> the same as the one
+on the quiz itself. This is the date that the system will actually purge the record,
+and is set to be a month after the date shown on the quiz. This allows the member
+an unannounced "grace period" so we limit the number of pissed off people.</div>
+<div style="width:80%;padding-bottom:15px"><b>NOTE</b> : Any quizzes retrieved prior to September 11, 2022 will not 
+have a "Retrieved By" name set. That capability was added as of version 4.0, and deployed on September 11, 2022. In
+time those older records will be expunged.</div>
+<table width=80%>
+<tr><th>Created</th><th>Sunset</th><th>ID</th><th>Retrieved By</th><th>Name</th></tr>
+++++
+<#list records as record>
+++++
+<tr>
+  <td align=center>${record.createdDate?date}</td>
+  <td align=center>${record.getSunsetDate()?date}</td>
+  <td align=center>${record.quizId}</td>
+  <td align=center>${record.retrievedBy!""}</td>
+  <td>${record.quizName}</td></tr>
+++++
+</#list>
+++++
+</table>
+++++
+<#else>
+++++
+<h2>No quiz records are in available at this time.</h2>
+++++
+</#if>

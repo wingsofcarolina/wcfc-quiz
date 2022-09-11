@@ -97,6 +97,7 @@ function do_click(href) {
 <li><a href="/api/globalKey" target="_blank">Generate a whole-database key</a>
 <li><a href="/gallery">Show gallery of uploaded images</a>
 <li><a href="/quarantinedReport">Show a report of all Quarantined questions</a>
+<li><a href="/recordReport">Show a report of all recorded quizzes</a>
 </ul>
 
 <b>System management :</b>

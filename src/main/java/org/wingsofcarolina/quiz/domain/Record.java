@@ -1,6 +1,7 @@
 package org.wingsofcarolina.quiz.domain;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -13,7 +14,7 @@ import org.wingsofcarolina.quiz.resources.Quiz;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public class Record {	
+public class Record {
 	@Id
 	@JsonIgnore
     private ObjectId id;
@@ -21,6 +22,7 @@ public class Record {
 	private Long quizId;
 	private String quizName;
 	private Date createdDate = new Date();
+	private String retrievedBy;
     private List<Long> questionIds = new ArrayList<Long>();
 
 	public Record() {}
@@ -59,6 +61,25 @@ public class Record {
 
 	public void add(Long index) {
 		questionIds.add(index);
+	}
+	
+	public String getRetrievedBy() {
+		return retrievedBy;
+	}
+
+	public void setRetrievedBy(String retrievedBy) {
+		this.retrievedBy = retrievedBy;
+	}
+
+	public Date getSunsetDate() {
+	    // convert date to calendar
+        Calendar c = Calendar.getInstance();
+        c.setTime(createdDate);
+
+        // manipulate date
+        c.add(Calendar.MONTH, Quiz.MONTHS_TO_LIVE + 1);
+
+		return c.getTime();
 	}
 	
 	@Override
