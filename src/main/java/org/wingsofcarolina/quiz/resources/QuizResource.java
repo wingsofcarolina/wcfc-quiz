@@ -46,6 +46,7 @@ import org.wingsofcarolina.quiz.common.Pages;
 import org.wingsofcarolina.quiz.common.QuizBuildException;
 import org.wingsofcarolina.quiz.common.Templates;
 import org.wingsofcarolina.quiz.domain.*;
+import org.wingsofcarolina.quiz.domain.Record;
 import org.wingsofcarolina.quiz.domain.presentation.AttributeReportWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.AttributeChartWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.CategoryReportWrapper;
@@ -308,7 +309,7 @@ public class QuizResource {
 				LOG.info(record.toString());
 	
 				// Actually perform the PDF quiz generation
-				Slack.instance().sendMessage("Quiz '" + quiz.getQuizName() + "', ID " +  quiz.getQuizId() + ", requested at " + dateFormatGmt.format(new Date()));
+				// Slack.instance().sendMessage("Quiz '" + quiz.getQuizName() + "', ID " +  quiz.getQuizId() + ", requested at " + dateFormatGmt.format(new Date()));
 				ByteArrayInputStream inputStream = generator.generate(quiz);
 				
 				return Response.ok().type("application/pdf").entity(inputStream).build();

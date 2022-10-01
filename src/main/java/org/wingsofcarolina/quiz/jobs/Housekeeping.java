@@ -48,7 +48,11 @@ public class Housekeeping extends Job {
 		// For all too-old records, delete them
 		for (Record record : records) {
 			String created = dateFormatGmt.format(record.getCreatedDate());
-			LOG.info("Expunged expired record for quiz : {} : {} : {}", record.getQuizId(), record.getQuizName(), created);
+			if (record.getRetrievedBy() == null || record.getRetrievedBy().isEmpty()) {
+				LOG.info("Expunged never retrieved record for quiz : {} : {} : {}", record.getQuizId(), record.getQuizName(), created);
+			} else {
+				LOG.info("Expunged expired record for quiz : {} : {} : {}", record.getQuizId(), record.getQuizName(), created);
+			}
 			record.delete();
 		}
 	}

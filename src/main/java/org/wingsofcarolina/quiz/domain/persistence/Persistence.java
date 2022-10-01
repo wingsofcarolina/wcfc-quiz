@@ -12,6 +12,7 @@ import org.mongodb.morphia.query.UpdateOperations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wingsofcarolina.quiz.domain.*;
+import org.wingsofcarolina.quiz.domain.Record;
 import org.wingsofcarolina.quiz.domain.dao.*;
 
 import com.mongodb.MongoClient;
