@@ -886,7 +886,12 @@ public class QuizAPI {
 		Question original = Question.getByQuestionId(questionId);
 		// Pick up the correct answer
 		if (!typeName.contentEquals("BLANK")) {
-			correctAnswer = correct.get(0);
+			if (correct.size() > 0) {
+				correctAnswer = correct.get(0);
+			} else {
+				Flash.add(Flash.Code.ERROR, "Question with ID " + questionId + " had no answers provided. Not updated.");
+				return new ViewQuestionResponse(original.getQuestionId()).cookie(authUtils.generateCookie(user)).build();
+			}
 		}
 
 		if (original != null) {
