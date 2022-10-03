@@ -38,7 +38,7 @@ public class Slack {
 	}
 	
 	public void sendMessage(String message) {
-		LOG.info("Sending : QUIZ: {}", message);
+		//LOG.info("Sending : QUIZ: {}", message);
 		if (config.getMode().contentEquals("PROD")) {
 			CloseableHttpClient httpclient = HttpClients.createDefault();
 		    HttpPost httpPost = new HttpPost(URL);
@@ -58,7 +58,7 @@ public class Slack {
 	}
 	
 	public void sendFeedback(User user, Long questionId, String feedback) {
-		LOG.info("Sending : QUIZ: Feedback : {} : {} : {}", user.getName(), questionId, feedback);
+		//LOG.info("Sending : QUIZ: Feedback : {} : {} : {}", user.getName(), questionId, feedback);
 		if (config.getMode().contentEquals("PROD")) {
 			CloseableHttpClient httpclient = HttpClients.createDefault();
 		    HttpPost httpPost = new HttpPost(URL);
