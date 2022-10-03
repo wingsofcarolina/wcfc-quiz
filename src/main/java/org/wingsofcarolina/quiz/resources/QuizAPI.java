@@ -1029,7 +1029,7 @@ public class QuizAPI {
 
 		Type type = null;
 		Category category = null;
-		if (typeName.equals("fib")) {
+		if (typeName.equals("BLANK")) {
 			type = Type.BLANK;
 			category = Category.valueOf(categoryName.toUpperCase());
 		} else {
