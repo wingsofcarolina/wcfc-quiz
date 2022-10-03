@@ -9,11 +9,6 @@ flash:true[]
 <script src="static/jquery.cookieMessage.min.js"></script>
 <script>
 $(document).ready(function(){
-	var beta = window.localStorage.getItem('wcfc_quiz_beta_accepted');
-	console.log("Beta ==> ", beta);
-	if (beta == null) {
-		$('#beta').show();
-	}
 	loadRecipes();
 });
 
@@ -30,12 +25,6 @@ $.cookieMessage({
     linkFontColor: '#ffff00',
     cookieName: 'wcfc_quiz_cookie_message'
 });
-
-function agreeToBeta() {
-	console.log("They bought it!");
-	window.localStorage.setItem('wcfc_quiz_beta_accepted', 'yes');
-	$('#beta').hide(800);
-}
 
 function loadRecipes()
 {
@@ -71,33 +60,4 @@ Instructors needing to retrieve a quiz key log in:
 <hr>
 </center>
 <div style="float:left">${version}</div>
-
-<div class="beta" id="beta">
-	<div class="beta_title">Notification</div>
-	<p>This site is currently under development, and not ready for general use. Some instructors are
-	electing to utilize this on a trial basis with the understanding that some quizzes (particularly
-	the SOP/FS quizzes) might be sub-optimal at this time.</p>
-	<p>The system may go down for maintenance and/or upgrades at arbitrary times during this beta test
-	period. If you can't access the system, wait a short time and try again.</p>  
-	<p>By clicking "agree"  you accept these limitations.</p>
-	<center><button id="beta_button" onClick="agreeToBeta()">Agree!</button></center>
-</div>
-<style>
-.beta_title {
-	text-align: center;
-	font-size: 2.5em;
-}
-.beta {
-	display: none;
-	width: 600px;
-	position: fixed;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-	background: #f5a9a4;
-	border: 3px solid black;
-	border-radius: 30px;
-	padding: 10px;
-	font-family: "Open Sans","DejaVu Sans",sans-serif;
-}
 ++++
