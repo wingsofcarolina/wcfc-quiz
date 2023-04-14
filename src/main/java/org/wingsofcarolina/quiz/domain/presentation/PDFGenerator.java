@@ -299,12 +299,14 @@ public class PDFGenerator {
 		document.add(table);
 
 		// Add quiz details (i.e. who/what/when/how)
-		Table details = new Table(new float[] { 1, 1} );
+		Cell tc1;
+		Table details = new Table(4);
 		details.setWidth(UnitValue.createPercentValue(100));
-		details.addCell(new Cell().add(new Paragraph("Instructor : ")));
-		details.addCell(new Cell().add(new Paragraph("Date  : ")));
-		details.addCell(new Cell().add(new Paragraph("Pilot      : ")));
-		details.addCell(new Cell().add(new Paragraph("Score : ")));
+		details.addCell(new Cell(1,3).add(new Paragraph("Instructor :")));
+		details.addCell(new Cell(1,1).add(new Paragraph("Date  :")));
+		details.addCell(new Cell(1,1).add(new Paragraph("Pilot    :")));
+		details.addCell(new Cell(1,2).add(new Paragraph("Member # :")));
+		details.addCell(new Cell(1,1).add(new Paragraph("Score :")));
 		document.add(details);
 
 		// Add instructions
