@@ -5,7 +5,7 @@
 
 	<groupId>org.wingsofcarolina</groupId>
 	<artifactId>wcfc-quiz</artifactId>
-	<version>4.0.2</version>
+	<version>4.0.4</version>
 	<packaging>jar</packaging>
 
 	<name>wcfc-quiz</name>
@@ -19,7 +19,7 @@
 		<dropwizard.version>2.0.29</dropwizard.version>
 		<jackson.version>2.13.2</jackson.version>
 		<docker.pull.registry>docker.io</docker.pull.registry>
-		<docker.registry>planez.co:5000</docker.registry>
+		<docker.registry>reg.planez.co</docker.registry>
 		<dockerRegistry>${docker.registry}</dockerRegistry>
 		<dockerTag>${project.version}</dockerTag>
 		<dockerImage>${dockerRegistry}/${project.artifactId}:${project.version}

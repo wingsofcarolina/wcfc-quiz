@@ -205,6 +205,27 @@ public class QuizAPI {
 	}
 	
 	@GET
+	@Path("resetPassword/{email}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response resetPassword(@CookieParam("quiz.token") Cookie cookie,
+			@PathParam("email") String email) throws NoSuchAlgorithmException, InvalidKeySpecException {
+		
+		User user = null;
+		User requester = authUtils.getUserFromCookie(cookie);
+		if (requester.isAdmin()) {
+			user = User.getByEmail(email);
+			if (user != null) {
+				String hashedPw = HashUtils.generateStrongPasswordHash("REDACTED");
+				user.setPassword(hashedPw);
+				user.save();
+			}
+		}
+		
+		Flash.add(Flash.Code.SUCCESS, "Password for " + user.getName() + " reset to the default 'REDACTED'.");
+		return new RedirectResponse(Pages.HOME_PAGE).cookie(authUtils.generateCookie(requester)).build();
+	}
+	
+	@GET
 	@Path("recipes")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response recipes(@CookieParam("quiz.token") Cookie cookie) {

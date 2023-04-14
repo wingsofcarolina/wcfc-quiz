@@ -40,6 +40,12 @@ function addRow(value) {
 	var cell3 = row.insertCell(2);
 	var element3 = document.createTextNode(value.privs);
 	cell3.appendChild(element3);
+	
+	var cell4 = row.insertCell(3);
+    var a = document.createElement('a');
+    a.href =  '/api/resetPassword/' + value.email;
+    a.innerHTML = "Reset Password"
+    cell4.appendChild(a);
 }
 </script>
 

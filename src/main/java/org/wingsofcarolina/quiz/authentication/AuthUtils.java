@@ -22,7 +22,8 @@ import io.jsonwebtoken.impl.DefaultClaims;
 
 public class AuthUtils {
 	private static final Logger LOG = LoggerFactory.getLogger(AuthUtils.class);
-
+	private static AuthUtils instance;
+	
 	// For SecretKeySpec generation
 	private String algorithm = "HmacSHA512";
 	private byte[] encoded = {-8, -36, 93, 58, -106, 125, -77, -120, -119, 80, -67, -58, -103,
@@ -34,10 +35,16 @@ public class AuthUtils {
 	private SecretKeySpec key;
 	private JwtParser parser;
 
-
 	public AuthUtils() {
 		key = new SecretKeySpec(encoded, algorithm);
 		parser = Jwts.parser().setSigningKey(key);
+	}
+	
+	public static AuthUtils instance() {
+		if (instance == null) {
+			AuthUtils.instance = new AuthUtils();
+		}
+		return instance;
 	}
 	
 	// The following header hack is due to (a) Chrome demanding SameSite be set
@@ -60,6 +67,27 @@ public class AuthUtils {
 	public Jws<Claims> validateUser(String authString) throws AuthenticationException {
 		return validateUser(authString, Privilege.USER);
 	}
+
+	public User getUserFromCookie(Cookie cookie) {
+		User user = null;
+		if (cookie != null) {
+			Jws<Claims> claims = decodeCookie(cookie);
+			if (claims != null) {
+				user = User.getWithClaims(claims);
+			}
+		}
+		return user;
+	}
+	
+	public Jws<Claims> decodeCookie(Cookie cookie) {
+		Jws<Claims> claims = null;
+		String compactJws = cookie.getValue();
+		if (compactJws != null && !compactJws.isEmpty()) {
+			claims = parser.setSigningKey(key).parseClaimsJws(compactJws);
+		}
+		return claims;
+	}
+	
 
 
 	public Jws<Claims> validateCookie(Cookie cookie, Privilege admin) throws AuthenticationException {

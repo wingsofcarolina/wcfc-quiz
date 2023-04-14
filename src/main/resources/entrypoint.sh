@@ -39,5 +39,5 @@ fi
 if [ "$1" == "/bin/bash" ]; then
   exec /bin/sh
 else
-  exec java --add-opens java.base/java.lang=ALL-UNNAMED ${DEBUG_ARGS} -jar wcfc-quiz.jar server configuration.ftl
+  exec java ${DEBUG_ARGS} -jar wcfc-quiz.jar server configuration.ftl
 fi
