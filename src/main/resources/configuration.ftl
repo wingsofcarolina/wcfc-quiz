@@ -35,10 +35,10 @@ server:
     requestLog:
         appenders:
           - type: file
-            currentLogFilename: log/quiz-http.log
+            currentLogFilename: ${LOG_DIR!'/log'}/quiz-http.log
             threshold: ALL
             archive: true
-            archivedLogFilenamePattern: log/quiz-%i-%d-http.log
+            archivedLogFilenamePattern: ${LOG_DIR!'/log'}/quiz-%i-%d-http.log
             maxFileSize: 100MB
             archivedFileCount: 3
             timeZone: UTC
@@ -68,10 +68,10 @@ logging:
         timeZone: UTC
         target: stdout
       - type: file
-        currentLogFilename: ./log/quiz.log
+        currentLogFilename: ${LOG_DIR!'/log'}/quiz.log
         threshold: ALL
         archive: true
-        archivedLogFilenamePattern: ./log/quiz-%i-%d.log
+        archivedLogFilenamePattern: ${LOG_DIR!'/log'}/quiz-%i-%d.log
         maxFileSize: 100MB
         archivedFileCount: 3
         timeZone: UTC
