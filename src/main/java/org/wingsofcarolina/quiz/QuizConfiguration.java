@@ -1,71 +1,83 @@
 package org.wingsofcarolina.quiz;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.dropwizard.core.Configuration;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-
 import org.knowm.dropwizard.sundial.SundialConfiguration;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import io.dropwizard.core.Configuration;
-
 public class QuizConfiguration extends Configuration {
-	@JsonProperty String mongodb;
-	@JsonProperty String templates;
-	@JsonProperty String dataDirectory;
-	@JsonProperty String imageDirectory;
-	@JsonProperty String imageRoot;
-	@JsonProperty String assetDirectory;
-	@JsonProperty String mode;
-	@JsonProperty String slackTarget;
-	
-	@Valid
-	@NotNull
-	public SundialConfiguration sundialConfiguration = new SundialConfiguration();
-	
-	public String getMongodb() {
-		return mongodb;
-	}
 
-	public void setMongodb(String mongodb) {
-		this.mongodb = mongodb;
-	}
+  @JsonProperty
+  String mongodb;
 
-	public String getTemplates() {
-		return templates;
-	}
+  @JsonProperty
+  String templates;
 
-	public void setTemplates(String templates) {
-		this.templates = templates;
-	}
+  @JsonProperty
+  String dataDirectory;
 
-	@JsonProperty("sundial")
-	public SundialConfiguration getSundialConfiguration() {
+  @JsonProperty
+  String imageDirectory;
 
-	  return sundialConfiguration;
-	}
+  @JsonProperty
+  String imageRoot;
 
-	public String getDataDirectory() {
-		return dataDirectory;
-	}
+  @JsonProperty
+  String assetDirectory;
 
-	public String getImageDirectory() {
-		return imageDirectory;
-	}
-	
-	public String getImageRoot() {
-		return imageRoot;
-	}
-	
-	public String getMode() {
-		return mode;
-	}
+  @JsonProperty
+  String mode;
 
-	public String getSlackTarget() {
-		return slackTarget;
-	}
+  @JsonProperty
+  String slackTarget;
 
-	public String getAssetDirectory() {
-		return assetDirectory;
-	}
+  @Valid
+  @NotNull
+  public SundialConfiguration sundialConfiguration = new SundialConfiguration();
+
+  public String getMongodb() {
+    return mongodb;
+  }
+
+  public void setMongodb(String mongodb) {
+    this.mongodb = mongodb;
+  }
+
+  public String getTemplates() {
+    return templates;
+  }
+
+  public void setTemplates(String templates) {
+    this.templates = templates;
+  }
+
+  @JsonProperty("sundial")
+  public SundialConfiguration getSundialConfiguration() {
+    return sundialConfiguration;
+  }
+
+  public String getDataDirectory() {
+    return dataDirectory;
+  }
+
+  public String getImageDirectory() {
+    return imageDirectory;
+  }
+
+  public String getImageRoot() {
+    return imageRoot;
+  }
+
+  public String getMode() {
+    return mode;
+  }
+
+  public String getSlackTarget() {
+    return slackTarget;
+  }
+
+  public String getAssetDirectory() {
+    return assetDirectory;
+  }
 }

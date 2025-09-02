@@ -1,126 +1,141 @@
 package org.wingsofcarolina.quiz.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Id;
 import org.wingsofcarolina.quiz.authentication.Privilege;
 import org.wingsofcarolina.quiz.domain.dao.UserDAO;
 import org.wingsofcarolina.quiz.domain.persistence.Persistence;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-
 public class User {
-    @Id
-	@JsonIgnore
-    private ObjectId id;
-	private String userId;
-	private String name;
-	private String email;
-	@JsonIgnore
-	private String password;
-	@JsonIgnore
-	private List<Privilege> privileges = new ArrayList<Privilege>();
-	private Date created;
 
-	// Default empty constructor needed for database
-	public User() {}
-	
-	public User(String email) {
-		this.userId = UUID.randomUUID().toString();
-		this.email = email;
-		this.created = new Date();
-	}
-	public User(String email, String hashedPw) {
-		this(email);
-		this.password = hashedPw;
-	}
-	public String getUserId() {
-		return userId;
-	}
-	public String getEmail() {
-		return email;
-	}
-	public String getName() {
-		return name;
-	}
-	public void setName(String fullname) {
-		this.name = fullname;
-	}
-	public Date getCreated() {
-		return created;
-	}
-	public void setCreated(Date created) {
-		this.created = created;
-	}
-	public List<Privilege> getPrivs() {
-		return privileges;
-	}
-	public boolean isAdmin() {
-		return privileges.contains(Privilege.ADMIN);
-	}
-	public String getPassword() {
-		return password;
-	}
-	public void setPassword(String password) {
-		this.password = password;
-	}
-	public List<Privilege> getPrivileges() {
-		return privileges;
-	}
-	public void setPrivileges(List<Privilege> privileges) {
-		this.privileges = privileges;
-	}
-	public void addPriv(Privilege priv) {
-		privileges.add(priv);
-	}
+  @Id
+  @JsonIgnore
+  private ObjectId id;
 
-	@Override
-	public String toString() {
-		return "User [name=" + name + ", email=" + email + ", privileges=" + privileges + "]";
-	}
+  private String userId;
+  private String name;
+  private String email;
 
-	/*
-	 * Database Management Functionality
-	 */
-	public static User getWithClaims(Jws<Claims> claims) {
-		User user = null;
-		String userId = (String)claims.getBody().get("userId");
-		if (userId != null) {
-			user = getByUserId(userId);
-		}
-		return user;
-	}
+  @JsonIgnore
+  private String password;
 
-	public static List<User> getAllUsers() {
-		UserDAO userDao = (UserDAO) Persistence.instance().get(User.class);
-		return userDao.getAllUsers();
-	}
-	
-	public static User getByUserId(String userId) {
-		UserDAO userDao = (UserDAO) Persistence.instance().get(User.class);
-		return userDao.getByUserId(userId);
-	}
-	
-	public static User getByEmail(String email) {
-		UserDAO userDao = (UserDAO) Persistence.instance().get(User.class);
-		return userDao.getByEmail(email);
-	}
-	
-	@SuppressWarnings("unchecked")
-	public void save() {
-		Persistence.instance().get(User.class).save(this);
-	}
-	
-	@SuppressWarnings("unchecked")
-	public void delete() {
-		Persistence.instance().get(User.class).delete(this);
-	}
+  @JsonIgnore
+  private List<Privilege> privileges = new ArrayList<Privilege>();
 
+  private Date created;
+
+  // Default empty constructor needed for database
+  public User() {}
+
+  public User(String email) {
+    this.userId = UUID.randomUUID().toString();
+    this.email = email;
+    this.created = new Date();
+  }
+
+  public User(String email, String hashedPw) {
+    this(email);
+    this.password = hashedPw;
+  }
+
+  public String getUserId() {
+    return userId;
+  }
+
+  public String getEmail() {
+    return email;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String fullname) {
+    this.name = fullname;
+  }
+
+  public Date getCreated() {
+    return created;
+  }
+
+  public void setCreated(Date created) {
+    this.created = created;
+  }
+
+  public List<Privilege> getPrivs() {
+    return privileges;
+  }
+
+  public boolean isAdmin() {
+    return privileges.contains(Privilege.ADMIN);
+  }
+
+  public String getPassword() {
+    return password;
+  }
+
+  public void setPassword(String password) {
+    this.password = password;
+  }
+
+  public List<Privilege> getPrivileges() {
+    return privileges;
+  }
+
+  public void setPrivileges(List<Privilege> privileges) {
+    this.privileges = privileges;
+  }
+
+  public void addPriv(Privilege priv) {
+    privileges.add(priv);
+  }
+
+  @Override
+  public String toString() {
+    return "User [name=" + name + ", email=" + email + ", privileges=" + privileges + "]";
+  }
+
+  /*
+   * Database Management Functionality
+   */
+  public static User getWithClaims(Jws<Claims> claims) {
+    User user = null;
+    String userId = (String) claims.getBody().get("userId");
+    if (userId != null) {
+      user = getByUserId(userId);
+    }
+    return user;
+  }
+
+  public static List<User> getAllUsers() {
+    UserDAO userDao = (UserDAO) Persistence.instance().get(User.class);
+    return userDao.getAllUsers();
+  }
+
+  public static User getByUserId(String userId) {
+    UserDAO userDao = (UserDAO) Persistence.instance().get(User.class);
+    return userDao.getByUserId(userId);
+  }
+
+  public static User getByEmail(String email) {
+    UserDAO userDao = (UserDAO) Persistence.instance().get(User.class);
+    return userDao.getByEmail(email);
+  }
+
+  @SuppressWarnings("unchecked")
+  public void save() {
+    Persistence.instance().get(User.class).save(this);
+  }
+
+  @SuppressWarnings("unchecked")
+  public void delete() {
+    Persistence.instance().get(User.class).delete(this);
+  }
 }

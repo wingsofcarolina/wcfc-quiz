@@ -1,68 +1,69 @@
 package org.wingsofcarolina.quiz.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.itextpdf.layout.element.Paragraph;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Id;
 import org.wingsofcarolina.quiz.domain.presentation.CommonMarkRenderer;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.itextpdf.layout.element.Paragraph;
-
 public class Answer {
-    @Id
-	@JsonIgnore
-    private ObjectId id;
-	private String answer;
-	private boolean correct;
 
-	public Answer() {}
-	
-	public Answer(String answer, boolean correct) {
-		this.answer = answer;
-		this.correct = correct;
-	}
+  @Id
+  @JsonIgnore
+  private ObjectId id;
 
-	public Answer(String answer) {
-		this(answer, false);
-	}
+  private String answer;
+  private boolean correct;
 
-	public ObjectId getId() {
-		return id;
-	}
-	
-	public String getAnswer() {
-		return answer;
-	}
+  public Answer() {}
 
-	@JsonIgnore
-	public String getAnswerAsHtml() {
-		return CommonMarkRenderer.renderAsHtml(answer);
-	}
+  public Answer(String answer, boolean correct) {
+    this.answer = answer;
+    this.correct = correct;
+  }
 
-	@JsonIgnore
-	public Paragraph getAnswerAsIText() {
-		return CommonMarkRenderer.renderToParagraph(answer);
-	}
+  public Answer(String answer) {
+    this(answer, false);
+  }
 
-	public void setAnswer(String answer) {
-		this.answer = answer;
-	}
+  public ObjectId getId() {
+    return id;
+  }
 
-	public boolean isCorrect() {
-		return correct;
-	}
+  public String getAnswer() {
+    return answer;
+  }
 
-	public void setCorrect(boolean correct) {
-		this.correct = correct;
-	}
+  @JsonIgnore
+  public String getAnswerAsHtml() {
+    return CommonMarkRenderer.renderAsHtml(answer);
+  }
 
-	@Override
-	public String toString() {
-		return "Answer [answer=" + answer + ", correct=" + correct + "]";
-	}
+  @JsonIgnore
+  public Paragraph getAnswerAsIText() {
+    return CommonMarkRenderer.renderToParagraph(answer);
+  }
 
-	public int compareTo(Answer other) {
-		if (! answer.equals(other.getAnswer())) return -1;
-		if (correct != other.isCorrect()) return -1;
-		return 0;
-	}
+  public void setAnswer(String answer) {
+    this.answer = answer;
+  }
+
+  public boolean isCorrect() {
+    return correct;
+  }
+
+  public void setCorrect(boolean correct) {
+    this.correct = correct;
+  }
+
+  @Override
+  public String toString() {
+    return "Answer [answer=" + answer + ", correct=" + correct + "]";
+  }
+
+  public int compareTo(Answer other) {
+    if (!answer.equals(other.getAnswer())) return -1;
+    if (correct != other.isCorrect()) return -1;
+    return 0;
+  }
 }

@@ -1,10 +1,11 @@
 package org.wingsofcarolina.quiz.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.itextpdf.layout.element.Paragraph;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-
 import org.bson.types.ObjectId;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
@@ -14,446 +15,482 @@ import org.wingsofcarolina.quiz.domain.dao.QuestionDAO;
 import org.wingsofcarolina.quiz.domain.persistence.Persistence;
 import org.wingsofcarolina.quiz.domain.presentation.CommonMarkRenderer;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.itextpdf.layout.element.Paragraph;
-
 public class Question {
-    @Id
-	@JsonIgnore
-    private ObjectId id;
-    @JsonIgnore
-    @Transient
-    private Integer index;
-    private Type type;
-    private Category category;
-    private Long exclusionId;
-    private QuestionDetails details;
-	private List<String> attributes;
-	private Long questionId;
-	private Boolean quarantined = false;
-	private Boolean required = false;
-	private Boolean deleted = false;
-	private long supersededBy = -1;
-	private Date createdDate = new Date();
-	@JsonIgnore
-	@Transient
-	private Parser parser;
-	@JsonIgnore
-	@Transient
-	private HtmlRenderer renderer;
-	
-	public static String ID_KEY = "question";
 
-	public Question() {
-		details = new QuestionDetails();
-	}
-	
-	public Question(Type type, Category category,  List<String> attributes, Boolean required, QuestionDetails details) {
-		this.type = type;
-		this.category = category;
-		this.attributes = attributes;
-		this.details = details;
-		this.required = required;
-		this.questionId = Persistence.instance().getID(ID_KEY, 1000);
-	}
-	
-	public Question(Type type, Category category, List<String> attributes, String question, String references, List<Answer> answers, String discussion, String attachment) {
-		super();
-		this.type = type;
-		this.category = category;
-		this.attributes = attributes;
-		this.details = new QuestionDetails(question, references, answers, discussion, attachment);
-		this.questionId = Persistence.instance().getID(ID_KEY, 1000);
-	}
-	
-	@JsonIgnore
-	public boolean isFillInTheBlank() {
-		return type == Type.BLANK;
-	}
-	
-	@JsonIgnore
-	public boolean isMultipleChoice() {
-		return type != Type.BLANK;
-	}
-	
-	@JsonIgnore
-	public boolean isSuperseded() {
-		return supersededBy != -1;
-	}
+  @Id
+  @JsonIgnore
+  private ObjectId id;
 
-	public Boolean isDeleted() {
-		return deleted;
-	}
+  @JsonIgnore
+  @Transient
+  private Integer index;
 
-	public void setDeleted(Boolean deleted) {
-		this.deleted = deleted;
-	}
+  private Type type;
+  private Category category;
+  private Long exclusionId;
+  private QuestionDetails details;
+  private List<String> attributes;
+  private Long questionId;
+  private Boolean quarantined = false;
+  private Boolean required = false;
+  private Boolean deleted = false;
+  private long supersededBy = -1;
+  private Date createdDate = new Date();
 
-	public long getQuestionId() {
-		return questionId;
-	}
+  @JsonIgnore
+  @Transient
+  private Parser parser;
 
-	public void setQuestionId(long questionId) {
-		this.questionId = questionId;
-	}
+  @JsonIgnore
+  @Transient
+  private HtmlRenderer renderer;
 
-	public Long getExclusionId() {
-		if (exclusionId == null) return 0L;
-		return exclusionId;
-	}
+  public static String ID_KEY = "question";
 
-	public void setExclusionId(Long exclusionId) {
-		this.exclusionId = exclusionId;
-	}
+  public Question() {
+    details = new QuestionDetails();
+  }
 
-	public Integer getIndex() {
-		return index;
-	}
+  public Question(
+    Type type,
+    Category category,
+    List<String> attributes,
+    Boolean required,
+    QuestionDetails details
+  ) {
+    this.type = type;
+    this.category = category;
+    this.attributes = attributes;
+    this.details = details;
+    this.required = required;
+    this.questionId = Persistence.instance().getID(ID_KEY, 1000);
+  }
 
-	public void setIndex(Integer index) {
-		this.index = index;
-	}
+  public Question(
+    Type type,
+    Category category,
+    List<String> attributes,
+    String question,
+    String references,
+    List<Answer> answers,
+    String discussion,
+    String attachment
+  ) {
+    super();
+    this.type = type;
+    this.category = category;
+    this.attributes = attributes;
+    this.details =
+      new QuestionDetails(question, references, answers, discussion, attachment);
+    this.questionId = Persistence.instance().getID(ID_KEY, 1000);
+  }
 
-	public Type getType() {
-		return type;
-	}
+  @JsonIgnore
+  public boolean isFillInTheBlank() {
+    return type == Type.BLANK;
+  }
 
-	public void setType(Type type) {
-		this.type = type;
-	}
+  @JsonIgnore
+  public boolean isMultipleChoice() {
+    return type != Type.BLANK;
+  }
 
-	public Category getCategory() {
-		return category;
-	}
+  @JsonIgnore
+  public boolean isSuperseded() {
+    return supersededBy != -1;
+  }
 
-	public void setCategory(Category category) {
-		this.category = category;
-	}
+  public Boolean isDeleted() {
+    return deleted;
+  }
 
-	public List<String> getAttributes() {
-		return attributes;
-	}
+  public void setDeleted(Boolean deleted) {
+    this.deleted = deleted;
+  }
 
-	public void setAttributes(List<String> attributes) {
-		this.attributes = attributes;
-	}
+  public long getQuestionId() {
+    return questionId;
+  }
 
-	public void addAttribute(String attribute) {
-		if (attribute == null) return;
-		for (String a : attributes) {
-			if (a != null && a.equals(attribute)) {
-				return;
-			}
-		}
-		attributes.add(attribute);
-		Collections.sort(attributes);
-	}
-	
-	public void removeAttribute(String attribute) {
-		Iterator<String> it = attributes.iterator();
-		while (it.hasNext()) {
-			String value = it.next();
-			if (attribute.equals(value)) {
-				it.remove();
-			}
-		}
-	}
-	
-	public boolean hasAttribute(String attribute) {
-		if (attribute != null) {
-			for (String att : attributes) {
-				if (att != null && att.equals(attribute) ) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
+  public void setQuestionId(long questionId) {
+    this.questionId = questionId;
+  }
 
-	public Boolean isDeployed() {
-		return Record.isQuestionIdDeployed(questionId);
-	}
-	
-	public Boolean isQuarantined() {
-		return quarantined;
-	}
+  public Long getExclusionId() {
+    if (exclusionId == null) return 0L;
+    return exclusionId;
+  }
 
-	public void setQuarantined(Boolean quarantined) {
-		this.quarantined = quarantined;
-	}
+  public void setExclusionId(Long exclusionId) {
+    this.exclusionId = exclusionId;
+  }
 
-	public Boolean isRequired() {
-		return required;
-	}
+  public Integer getIndex() {
+    return index;
+  }
 
-	public void setRequired(Boolean required) {
-		this.required = required;
-	}
+  public void setIndex(Integer index) {
+    this.index = index;
+  }
 
-	public long getSupersededBy() {
-		return supersededBy;
-	}
-	
-	public void setSupersededBy(long supersededBy) {
-		this.supersededBy = supersededBy;
-	}
+  public Type getType() {
+    return type;
+  }
 
-	public Date getCreatedDate() {
-		return createdDate;
-	}
+  public void setType(Type type) {
+    this.type = type;
+  }
 
-	public void setCreatedDate(Date createdDate) {
-		this.createdDate = createdDate;
-	}
+  public Category getCategory() {
+    return category;
+  }
 
-	public String getQuestion() {
-		return details.getQuestion();
-	}
+  public void setCategory(Category category) {
+    this.category = category;
+  }
 
-	@JsonIgnore
-	public String getRawQuestionAsHtml() {
-		String text = details.getQuestion();
-		return CommonMarkRenderer.renderAsHtml(text);
-	}
+  public List<String> getAttributes() {
+    return attributes;
+  }
 
-	@JsonIgnore
-	public String getQuestionAsHtml() {
-		String text = details.getQuestion();
-		if (type == Type.BLANK) {
-			// Turn all {} instances into blanks
-			text = fillInTheBlank(text);
-		}
-		return CommonMarkRenderer.renderAsHtml(text);
-	}
+  public void setAttributes(List<String> attributes) {
+    this.attributes = attributes;
+  }
 
-	private String fillInTheBlank(String input) {
-		String output = "";
-		List<Answer> answers = details.getAnswers();
-		if (input.contains("{}")) {
-			int index = 0;
-			int count = 0;
-			while (input.indexOf("{}", index) != -1) {
-				output += input.substring(index, input.indexOf("{}", index));
-				if (count < answers.size()) {
-					output += "<span class='key_answer'>" + answers.get(count++).getAnswer() + "</span>";
-				} else {
-					output += "<span class='key_answer'> {missing answer} </span>";
-				}
-				index = input.indexOf("{}", index) + 2;
-			}
-			index = input.lastIndexOf("{}") + 2;
-			if (index <= input.length()) {
-				output += input.substring(index);
-			}
-		} else {
-			output = input;
-		}
-		return output;
-	}
+  public void addAttribute(String attribute) {
+    if (attribute == null) return;
+    for (String a : attributes) {
+      if (a != null && a.equals(attribute)) {
+        return;
+      }
+    }
+    attributes.add(attribute);
+    Collections.sort(attributes);
+  }
 
-	@JsonIgnore
-	public Paragraph getQuestionAsIText() {
-		String text = details.getQuestion();
-		if (type == Type.BLANK) {
-			// Turn all {} instances into blanks
-			text = blankify(text);
-		}
-		return CommonMarkRenderer.renderToParagraph(text);
-	}
+  public void removeAttribute(String attribute) {
+    Iterator<String> it = attributes.iterator();
+    while (it.hasNext()) {
+      String value = it.next();
+      if (attribute.equals(value)) {
+        it.remove();
+      }
+    }
+  }
 
-	private String blankify(String input) {
-		String output = "";
-		if (input.contains("{}")) {
-			int index = 0;
-			int count = 0;
-			while (input.indexOf("{}", index) != -1) {
-				output += input.substring(index, input.indexOf("{}", index));
-				output += makeBlank(count++);
-				index = input.indexOf("{}", index) + 2;
-			}
-			index = input.lastIndexOf("{}") + 2;
-			if (index <= input.length()) {
-				output += input.substring(index);
-			}
-		} else {
-			output = input;
-		}
-		return output;
-	}
-	
-	private String makeBlank(Integer answerIndex) {
-		int length = 10; // default length if we are "out of bounds"
-		String blanks = "";
-		List<Answer> answers = details.getAnswers();
+  public boolean hasAttribute(String attribute) {
+    if (attribute != null) {
+      for (String att : attributes) {
+        if (att != null && att.equals(attribute)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
 
-		// First, see if we have too many {}s in the question
-		if (answerIndex < answers.size()) {
-			// Get the length of the answer ....
-			length = answers.get(answerIndex).getAnswer().length();
-			// .... but limit the number of blanks to no more than 20
-			length = length > 20 ? 20 : length;
-		} else {
-			System.out.println("Ran off the end!");
-		}
-		// Build the blank string
-		for (int i = 0; i < length; i++) {
-			blanks += "_";
-		}
-		return blanks;
-	}
-	
-	public void setQuestion(String question) {
-		details.setQuestion(question);
-	}
+  public Boolean isDeployed() {
+    return Record.isQuestionIdDeployed(questionId);
+  }
 
-	public String getReferences() {
-		return details.getReference();
-	}
+  public Boolean isQuarantined() {
+    return quarantined;
+  }
 
-	@JsonIgnore
-	public String getReferencesAsHtml() {
-		return CommonMarkRenderer.renderAsHtml(details.getReference());
-	}
-	
-	public void setReferences(String references) {
-		details.setReference(references);
-	}
+  public void setQuarantined(Boolean quarantined) {
+    this.quarantined = quarantined;
+  }
 
-	public List<Answer> getAnswers() {
-		return details.getAnswers();
-	}
+  public Boolean isRequired() {
+    return required;
+  }
 
-	public Answer getAnswerAt(int index) {
-		List<Answer> answers = details.getAnswers();
-		if (answers != null && index-1 < answers.size()) {
-			return answers.get(index-1);
-		} else {
-			return new EmptyAnswer();
-		}
-	}
-	
-	public void setAnswers(List<Answer> answers) {
-		details.setAnswers(answers);
-	}
+  public void setRequired(Boolean required) {
+    this.required = required;
+  }
 
-	public String getDiscussion() {
-		return details.getDiscussion();
-	}
+  public long getSupersededBy() {
+    return supersededBy;
+  }
 
-	@JsonIgnore
-	public String getDiscussionAsHtml() {
-		return CommonMarkRenderer.renderAsHtml(details.getDiscussion());
-	}
+  public void setSupersededBy(long supersededBy) {
+    this.supersededBy = supersededBy;
+  }
 
-	public void setDiscussion(String discussion) {
-		details.setDiscussion(discussion);
-	}
-	
-	@JsonIgnore
-	public QuestionDetails getDetails() {
-		return details;
-	}
-	
-	@JsonIgnore
-	public void setDetails(QuestionDetails details) {
-		this.details = details;
-	}
-	
-	@JsonIgnore
-	public Object getAttachment() {
-		return details.getAttachment();
-	}
-	
-	/*
-	 * Database Management Functionality
-	 */
-	public static void drop() {
-		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
-		questionDao.drop();
-	}
-	
-	public static List<Question> getAllQuestions() {
-		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
-		return questionDao.getAllQuestions();
-	}
+  public Date getCreatedDate() {
+    return createdDate;
+  }
 
-	public static List<Question> getByCategory(Category category) {
-		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
-		return questionDao.getByCategory(category);
-	}
-	
-	public static List<Question> getByAttribute(String attribute) {
-		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
-		return questionDao.getSelectedWith(attribute);
-	}
-	
-	public static List<Question> getQuestionsLimited(int skip, int count) {
-		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
-		return questionDao.getQuestionsLimited(skip, count);
-	}
+  public void setCreatedDate(Date createdDate) {
+    this.createdDate = createdDate;
+  }
 
-	public static Question getByQuestionId(Long id) {
-		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
-		return questionDao.getByQuestionId(id);
-	}
+  public String getQuestion() {
+    return details.getQuestion();
+  }
 
-	public static List<Question> getAllQuarantined() {
-		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
-		return questionDao.getAllQuarantined();
-	}
-	
-	public static List<Question> getWithAll(List<String> attributes) {
-		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
-		return questionDao.getWithAll(attributes);
-	}
+  @JsonIgnore
+  public String getRawQuestionAsHtml() {
+    String text = details.getQuestion();
+    return CommonMarkRenderer.renderAsHtml(text);
+  }
 
-	public static List<Question> getCategoryWithAll(String category, List<String> attributes) {
-		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
-		return questionDao.getCategoryWithAll(category, attributes);
-	}
-	
-	public static List<Question> getWithAny(List<String> attributes) {
-		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
-		return questionDao.getWithAny(attributes);
-	}
+  @JsonIgnore
+  public String getQuestionAsHtml() {
+    String text = details.getQuestion();
+    if (type == Type.BLANK) {
+      // Turn all {} instances into blanks
+      text = fillInTheBlank(text);
+    }
+    return CommonMarkRenderer.renderAsHtml(text);
+  }
 
-	public static List<Question> getCategoryWithAny(String category, List<String> attributes) {
-		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
-		return questionDao.getCategoryWithAny(category, attributes);
-	}
-	
-	public static List<Question> getSuperseded() {
-		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
-		return questionDao.getSuperseded();
-	}
+  private String fillInTheBlank(String input) {
+    String output = "";
+    List<Answer> answers = details.getAnswers();
+    if (input.contains("{}")) {
+      int index = 0;
+      int count = 0;
+      while (input.indexOf("{}", index) != -1) {
+        output += input.substring(index, input.indexOf("{}", index));
+        if (count < answers.size()) {
+          output +=
+            "<span class='key_answer'>" + answers.get(count++).getAnswer() + "</span>";
+        } else {
+          output += "<span class='key_answer'> {missing answer} </span>";
+        }
+        index = input.indexOf("{}", index) + 2;
+      }
+      index = input.lastIndexOf("{}") + 2;
+      if (index <= input.length()) {
+        output += input.substring(index);
+      }
+    } else {
+      output = input;
+    }
+    return output;
+  }
 
-	public static List<Question> getRequiredWithAll(List<String> attributes) {
-		QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
-		return questionDao.getRequiredWithAll(attributes);
-	}
+  @JsonIgnore
+  public Paragraph getQuestionAsIText() {
+    String text = details.getQuestion();
+    if (type == Type.BLANK) {
+      // Turn all {} instances into blanks
+      text = blankify(text);
+    }
+    return CommonMarkRenderer.renderToParagraph(text);
+  }
 
-	@SuppressWarnings("unchecked")
-	public void save() {
-		Persistence.instance().get(Question.class).save(this);
-	}
-	
-	@SuppressWarnings("unchecked")
-	public void delete() {
-		Persistence.instance().get(Question.class).delete(this);
-	}
+  private String blankify(String input) {
+    String output = "";
+    if (input.contains("{}")) {
+      int index = 0;
+      int count = 0;
+      while (input.indexOf("{}", index) != -1) {
+        output += input.substring(index, input.indexOf("{}", index));
+        output += makeBlank(count++);
+        index = input.indexOf("{}", index) + 2;
+      }
+      index = input.lastIndexOf("{}") + 2;
+      if (index <= input.length()) {
+        output += input.substring(index);
+      }
+    } else {
+      output = input;
+    }
+    return output;
+  }
 
-	@Override
-	public String toString() {
-		return "Question [questionId=" + questionId + ", attributes=" + attributes + ", quarantined=" + quarantined
-				+ ", required=" + required + ", supersededBy=" + supersededBy + "]";
-	}
+  private String makeBlank(Integer answerIndex) {
+    int length = 10; // default length if we are "out of bounds"
+    String blanks = "";
+    List<Answer> answers = details.getAnswers();
 
-	public boolean containsAny(List<String> atts) {
-		for (String attribute : attributes) {
-			if (atts.contains(attribute)) {
-				return true;
-			}
-		}
-		return false;
-	}
+    // First, see if we have too many {}s in the question
+    if (answerIndex < answers.size()) {
+      // Get the length of the answer ....
+      length = answers.get(answerIndex).getAnswer().length();
+      // .... but limit the number of blanks to no more than 20
+      length = length > 20 ? 20 : length;
+    } else {
+      System.out.println("Ran off the end!");
+    }
+    // Build the blank string
+    for (int i = 0; i < length; i++) {
+      blanks += "_";
+    }
+    return blanks;
+  }
+
+  public void setQuestion(String question) {
+    details.setQuestion(question);
+  }
+
+  public String getReferences() {
+    return details.getReference();
+  }
+
+  @JsonIgnore
+  public String getReferencesAsHtml() {
+    return CommonMarkRenderer.renderAsHtml(details.getReference());
+  }
+
+  public void setReferences(String references) {
+    details.setReference(references);
+  }
+
+  public List<Answer> getAnswers() {
+    return details.getAnswers();
+  }
+
+  public Answer getAnswerAt(int index) {
+    List<Answer> answers = details.getAnswers();
+    if (answers != null && index - 1 < answers.size()) {
+      return answers.get(index - 1);
+    } else {
+      return new EmptyAnswer();
+    }
+  }
+
+  public void setAnswers(List<Answer> answers) {
+    details.setAnswers(answers);
+  }
+
+  public String getDiscussion() {
+    return details.getDiscussion();
+  }
+
+  @JsonIgnore
+  public String getDiscussionAsHtml() {
+    return CommonMarkRenderer.renderAsHtml(details.getDiscussion());
+  }
+
+  public void setDiscussion(String discussion) {
+    details.setDiscussion(discussion);
+  }
+
+  @JsonIgnore
+  public QuestionDetails getDetails() {
+    return details;
+  }
+
+  @JsonIgnore
+  public void setDetails(QuestionDetails details) {
+    this.details = details;
+  }
+
+  @JsonIgnore
+  public Object getAttachment() {
+    return details.getAttachment();
+  }
+
+  /*
+   * Database Management Functionality
+   */
+  public static void drop() {
+    QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
+    questionDao.drop();
+  }
+
+  public static List<Question> getAllQuestions() {
+    QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
+    return questionDao.getAllQuestions();
+  }
+
+  public static List<Question> getByCategory(Category category) {
+    QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
+    return questionDao.getByCategory(category);
+  }
+
+  public static List<Question> getByAttribute(String attribute) {
+    QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
+    return questionDao.getSelectedWith(attribute);
+  }
+
+  public static List<Question> getQuestionsLimited(int skip, int count) {
+    QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
+    return questionDao.getQuestionsLimited(skip, count);
+  }
+
+  public static Question getByQuestionId(Long id) {
+    QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
+    return questionDao.getByQuestionId(id);
+  }
+
+  public static List<Question> getAllQuarantined() {
+    QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
+    return questionDao.getAllQuarantined();
+  }
+
+  public static List<Question> getWithAll(List<String> attributes) {
+    QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
+    return questionDao.getWithAll(attributes);
+  }
+
+  public static List<Question> getCategoryWithAll(
+    String category,
+    List<String> attributes
+  ) {
+    QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
+    return questionDao.getCategoryWithAll(category, attributes);
+  }
+
+  public static List<Question> getWithAny(List<String> attributes) {
+    QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
+    return questionDao.getWithAny(attributes);
+  }
+
+  public static List<Question> getCategoryWithAny(
+    String category,
+    List<String> attributes
+  ) {
+    QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
+    return questionDao.getCategoryWithAny(category, attributes);
+  }
+
+  public static List<Question> getSuperseded() {
+    QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
+    return questionDao.getSuperseded();
+  }
+
+  public static List<Question> getRequiredWithAll(List<String> attributes) {
+    QuestionDAO questionDao = (QuestionDAO) Persistence.instance().get(Question.class);
+    return questionDao.getRequiredWithAll(attributes);
+  }
+
+  @SuppressWarnings("unchecked")
+  public void save() {
+    Persistence.instance().get(Question.class).save(this);
+  }
+
+  @SuppressWarnings("unchecked")
+  public void delete() {
+    Persistence.instance().get(Question.class).delete(this);
+  }
+
+  @Override
+  public String toString() {
+    return (
+      "Question [questionId=" +
+      questionId +
+      ", attributes=" +
+      attributes +
+      ", quarantined=" +
+      quarantined +
+      ", required=" +
+      required +
+      ", supersededBy=" +
+      supersededBy +
+      "]"
+    );
+  }
+
+  public boolean containsAny(List<String> atts) {
+    for (String attribute : attributes) {
+      if (atts.contains(attribute)) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

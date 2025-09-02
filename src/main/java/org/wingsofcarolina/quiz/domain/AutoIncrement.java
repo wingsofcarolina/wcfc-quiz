@@ -35,9 +35,9 @@ public class AutoIncrement {
   }
 
   public void setValue(Long value) {
-	  this.value = value;
+    this.value = value;
   }
-  
+
   public Long getValue() {
     return value;
   }

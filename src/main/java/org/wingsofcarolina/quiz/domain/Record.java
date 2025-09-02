@@ -1,128 +1,136 @@
 package org.wingsofcarolina.quiz.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Id;
 import org.wingsofcarolina.quiz.domain.dao.RecordDAO;
 import org.wingsofcarolina.quiz.domain.persistence.Persistence;
 import org.wingsofcarolina.quiz.resources.Quiz;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 public class Record {
-	@Id
-	@JsonIgnore
-    private ObjectId id;
-    
-	private Long quizId;
-	private String quizName;
-	private Date createdDate = new Date();
-	private String retrievedBy;
-    private List<Long> questionIds = new ArrayList<Long>();
 
-	public Record() {}
-	
-	public Record(Quiz quiz) {
-		this.quizId = quiz.getQuizId();
-		this.quizName = quiz.getQuizName();
-		for (Question question : quiz.getQuestions()) {
-			questionIds.add(question.getQuestionId());
-		}
-	}
+  @Id
+  @JsonIgnore
+  private ObjectId id;
 
-	public long getQuizId() {
-		return quizId;
-	}
+  private Long quizId;
+  private String quizName;
+  private Date createdDate = new Date();
+  private String retrievedBy;
+  private List<Long> questionIds = new ArrayList<Long>();
 
-	public void setQuizId(long quizId) {
-		this.quizId = quizId;
-	}
+  public Record() {}
 
-	public Date getCreatedDate() {
-		return createdDate;
-	}
+  public Record(Quiz quiz) {
+    this.quizId = quiz.getQuizId();
+    this.quizName = quiz.getQuizName();
+    for (Question question : quiz.getQuestions()) {
+      questionIds.add(question.getQuestionId());
+    }
+  }
 
-	public String getQuizName() {
-		return quizName;
-	}
+  public long getQuizId() {
+    return quizId;
+  }
 
-	public void setQuizName(String quizName) {
-		this.quizName = quizName;
-	}
+  public void setQuizId(long quizId) {
+    this.quizId = quizId;
+  }
 
-	public List<Long> getQuestionIds() {
-		return questionIds;
-	}
+  public Date getCreatedDate() {
+    return createdDate;
+  }
 
-	public void add(Long index) {
-		questionIds.add(index);
-	}
-	
-	public String getRetrievedBy() {
-		return retrievedBy;
-	}
+  public String getQuizName() {
+    return quizName;
+  }
 
-	public void setRetrievedBy(String retrievedBy) {
-		this.retrievedBy = retrievedBy;
-	}
+  public void setQuizName(String quizName) {
+    this.quizName = quizName;
+  }
 
-	public Date getSunsetDate() {
-	    // convert date to calendar
-        Calendar c = Calendar.getInstance();
-        c.setTime(createdDate);
+  public List<Long> getQuestionIds() {
+    return questionIds;
+  }
 
-        // manipulate date
-        c.add(Calendar.MONTH, Quiz.MONTHS_TO_LIVE + 1);
+  public void add(Long index) {
+    questionIds.add(index);
+  }
 
-		return c.getTime();
-	}
-	
-	@Override
-	public String toString() {
-		return "Record [quizId=" + quizId + ", quizName=" + quizName + ", createdDate="
-				+ createdDate + ", questionIds=" + questionIds + "]";
-	}
+  public String getRetrievedBy() {
+    return retrievedBy;
+  }
 
-	/*
-	 * Database Management Functionality
-	 */
-	public static List<Record> getAllRecords() {
-		RecordDAO RecordDao = (RecordDAO) Persistence.instance().get(Record.class);
-		return RecordDao.getAllRecords();
-	}
-	
-	public static Record getByQuizId(Long id) {
-		RecordDAO recordDAO = (RecordDAO) Persistence.instance().get(Record.class);
-		return recordDAO.getByQuizId(id);
-	}
+  public void setRetrievedBy(String retrievedBy) {
+    this.retrievedBy = retrievedBy;
+  }
 
-	public static Set<Long> getActiveIds() {
-		RecordDAO recordDAO = (RecordDAO) Persistence.instance().get(Record.class);
-		return recordDAO.getDeployedIds();
-	}
-	
-	public static List<Record> getEarlierThan(Date sunset) {
-		RecordDAO recordDAO = (RecordDAO) Persistence.instance().get(Record.class);
-		return recordDAO.getEarlierThan(sunset);
-	}
+  public Date getSunsetDate() {
+    // convert date to calendar
+    Calendar c = Calendar.getInstance();
+    c.setTime(createdDate);
 
-	public static Boolean isQuestionIdDeployed(Long questionId) {
-		RecordDAO recordDAO = (RecordDAO) Persistence.instance().get(Record.class);
-		return recordDAO.isQuestionIdDeployed(questionId);
-	}
-	
-	@SuppressWarnings("unchecked")
-	public void save() {
-		Persistence.instance().get(Record.class).save(this);
-	}
-	
-	@SuppressWarnings("unchecked")
-	public void delete() {
-		Persistence.instance().get(Record.class).delete(this);
-	}
+    // manipulate date
+    c.add(Calendar.MONTH, Quiz.MONTHS_TO_LIVE + 1);
+
+    return c.getTime();
+  }
+
+  @Override
+  public String toString() {
+    return (
+      "Record [quizId=" +
+      quizId +
+      ", quizName=" +
+      quizName +
+      ", createdDate=" +
+      createdDate +
+      ", questionIds=" +
+      questionIds +
+      "]"
+    );
+  }
+
+  /*
+   * Database Management Functionality
+   */
+  public static List<Record> getAllRecords() {
+    RecordDAO RecordDao = (RecordDAO) Persistence.instance().get(Record.class);
+    return RecordDao.getAllRecords();
+  }
+
+  public static Record getByQuizId(Long id) {
+    RecordDAO recordDAO = (RecordDAO) Persistence.instance().get(Record.class);
+    return recordDAO.getByQuizId(id);
+  }
+
+  public static Set<Long> getActiveIds() {
+    RecordDAO recordDAO = (RecordDAO) Persistence.instance().get(Record.class);
+    return recordDAO.getDeployedIds();
+  }
+
+  public static List<Record> getEarlierThan(Date sunset) {
+    RecordDAO recordDAO = (RecordDAO) Persistence.instance().get(Record.class);
+    return recordDAO.getEarlierThan(sunset);
+  }
+
+  public static Boolean isQuestionIdDeployed(Long questionId) {
+    RecordDAO recordDAO = (RecordDAO) Persistence.instance().get(Record.class);
+    return recordDAO.isQuestionIdDeployed(questionId);
+  }
+
+  @SuppressWarnings("unchecked")
+  public void save() {
+    Persistence.instance().get(Record.class).save(this);
+  }
+
+  @SuppressWarnings("unchecked")
+  public void delete() {
+    Persistence.instance().get(Record.class).delete(this);
+  }
 }
