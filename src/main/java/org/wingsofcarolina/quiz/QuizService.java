@@ -20,13 +20,16 @@ import org.wingsofcarolina.quiz.resources.QuizAPI;
 import org.wingsofcarolina.quiz.resources.QuizResource;
 import org.wingsofcarolina.quiz.resources.Slack;
 
-import de.thomaskrille.dropwizard_template_config.TemplateConfigBundle;
-import de.thomaskrille.dropwizard_template_config.TemplateConfigBundleConfiguration;
-import io.dropwizard.Application;
+// Temporarily disabled - needs Dropwizard 4.x compatible version
+// import de.thomaskrille.dropwizard_template_config.TemplateConfigBundle;
+// import de.thomaskrille.dropwizard_template_config.TemplateConfigBundleConfiguration;
+import io.dropwizard.core.Application;
 import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.forms.MultiPartBundle;
-import io.dropwizard.setup.Bootstrap;
-import io.dropwizard.setup.Environment;
+import io.dropwizard.core.setup.Bootstrap;
+import io.dropwizard.core.setup.Environment;
+import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
+import io.dropwizard.configuration.SubstitutingSourceProvider;
 
 public class QuizService extends Application<QuizConfiguration> {
 	private static final Logger LOG = LoggerFactory.getLogger(QuizService.class);
@@ -34,7 +37,7 @@ public class QuizService extends Application<QuizConfiguration> {
 	public static void main(String[] args) throws Exception {
 		LOG.info("Starting : WCFC Quiz Service");
         if (args.length < 2) {
-            new QuizService().run(new String[]{"server", "configuration.ftl"});
+            new QuizService().run(new String[]{"server", "configuration.yml"});
         } else {
             new QuizService().run(args);
         }
@@ -42,8 +45,17 @@ public class QuizService extends Application<QuizConfiguration> {
 
 	@Override
 	public void initialize(Bootstrap<QuizConfiguration> bootstrap) {
+		// Enable environment variable substitution
+		bootstrap.setConfigurationSourceProvider(
+			new SubstitutingSourceProvider(
+				bootstrap.getConfigurationSourceProvider(),
+				new EnvironmentVariableSubstitutor(false)
+			)
+		);
+		
 		// bootstrap.addBundle(new AssetsBundle("/doc", "/doc", "index.html","html"));
-		bootstrap.addBundle(new TemplateConfigBundle(new TemplateConfigBundleConfiguration()));
+		// Temporarily disabled - needs Dropwizard 4.x compatible version
+		// bootstrap.addBundle(new TemplateConfigBundle(new TemplateConfigBundleConfiguration()));
         bootstrap.addBundle(new AssetsBundle("/assets/", "/static"));
         bootstrap.addBundle(new MultiPartBundle());
         bootstrap.addBundle(new SundialBundle<QuizConfiguration>() {

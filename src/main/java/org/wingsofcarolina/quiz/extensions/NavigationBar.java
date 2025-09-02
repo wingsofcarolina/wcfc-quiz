@@ -4,7 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.asciidoctor.ast.ContentNode;
+import org.asciidoctor.ast.PhraseNode;
+import org.asciidoctor.ast.StructuralNode;
 import org.asciidoctor.extension.InlineMacroProcessor;
 import org.wingsofcarolina.quiz.common.Flash;
 import org.wingsofcarolina.quiz.common.Flash.Message;
@@ -17,7 +18,7 @@ public class NavigationBar extends InlineMacroProcessor {
 	}
 
 	@Override
-	public String process(ContentNode parent, String target, Map<String, Object> attributes) {
+	public PhraseNode process(StructuralNode parent, String target, Map<String, Object> attributes) {
 		List<String> items = null;
 		
 		if (attributes.size() > 0) {
@@ -53,6 +54,6 @@ public class NavigationBar extends InlineMacroProcessor {
 			sb.append(Flash.getEmptyDiv());
 		}
 		sb.append("<script>setInterval(function(){$(\"#flash\").hide('slow');}, 10000);</script>");
-		return sb.toString();
+		return createPhraseNode(parent, "quoted", sb.toString());
 	}
 }

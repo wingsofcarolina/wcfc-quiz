@@ -2,13 +2,13 @@ package org.wingsofcarolina.quiz.responses;
 
 import java.net.URI;
 
-import javax.ws.rs.core.NewCookie;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
+import jakarta.ws.rs.core.NewCookie;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
 
 import org.wingsofcarolina.quiz.common.Pages;
 
-import javax.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.core.UriBuilder;
 
 public class LoginResponse extends AbstractResponse {
 

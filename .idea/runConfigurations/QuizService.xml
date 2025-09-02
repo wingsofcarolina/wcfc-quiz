@@ -1,0 +1,29 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="QuizService" type="Application" factoryName="Application" nameIsGenerated="true">
+    <envs>
+      <env name="ASSETDIR" value="src/main/resources/assets" />
+      <env name="DATADIR" value="data" />
+      <env name="IMAGEDIR" value="src/main/resources/assets" />
+      <env name="IMAGEROOT" value="src/main/resources/assets" />
+      <env name="LOG_DIR" value="log" />
+      <env name="MODE" value="DEV" />
+      <env name="MONGODB" value="127.0.0.1:27017" />
+      <env name="SLACK" value="intentionally-invalid" />
+      <env name="TEMPLATES" value="src/main/resources/templates" />
+    </envs>
+    <option name="MAIN_CLASS_NAME" value="org.wingsofcarolina.quiz.QuizService" />
+    <module name="wcfc-quiz" />
+    <option name="PROGRAM_PARAMETERS" value="server src/main/resources/configuration.yml" />
+    <option name="VM_PARAMETERS" value="--add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.security=ALL-UNNAMED" />
+    <option name="WORKING_DIRECTORY" value="$ContentRoot$" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="org.wingsofcarolina.quiz.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

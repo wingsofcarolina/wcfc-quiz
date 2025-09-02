@@ -207,7 +207,7 @@ public abstract class QuizDSL extends Script {
 
 	public void require(List<Integer> questionIds) {
 		for (Integer id : questionIds) {
-			Question question = Question.getByQuestionId(new Long(id));
+			Question question = Question.getByQuestionId(Long.valueOf(id));
 			question = resolve(question);
 			if (question != null) {
 				section.addRequired(question);

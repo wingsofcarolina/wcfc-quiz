@@ -4,8 +4,8 @@ import java.util.Date;
 import java.util.List;
 
 import javax.crypto.spec.SecretKeySpec;
-import javax.ws.rs.core.Cookie;
-import javax.ws.rs.core.NewCookie;
+import jakarta.ws.rs.core.Cookie;
+import jakarta.ws.rs.core.NewCookie;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +18,6 @@ import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
-import io.jsonwebtoken.impl.DefaultClaims;
 
 public class AuthUtils {
 	private static final Logger LOG = LoggerFactory.getLogger(AuthUtils.class);
@@ -37,7 +36,7 @@ public class AuthUtils {
 
 	public AuthUtils() {
 		key = new SecretKeySpec(encoded, algorithm);
-		parser = Jwts.parser().setSigningKey(key);
+		parser = Jwts.parser().verifyWith(key).build();
 	}
 	
 	public static AuthUtils instance() {
@@ -83,7 +82,7 @@ public class AuthUtils {
 		Jws<Claims> claims = null;
 		String compactJws = cookie.getValue();
 		if (compactJws != null && !compactJws.isEmpty()) {
-			claims = parser.setSigningKey(key).parseClaimsJws(compactJws);
+			claims = parser.parseSignedClaims(compactJws);
 		}
 		return claims;
 	}
@@ -109,10 +108,10 @@ public class AuthUtils {
 		if (compactJws != null) {
 			try {
 				if (compactJws != null && ! compactJws.isEmpty()) {
-					claims = parser.setSigningKey(key).parseClaimsJws(compactJws);
-					String name = claims.getBody().getSubject();
-					Date issuedAt = claims.getBody().getIssuedAt();
-					String userId = (String)claims.getBody().get("userId");
+					claims = parser.parseSignedClaims(compactJws);
+					String name = claims.getPayload().getSubject();
+					Date issuedAt = claims.getPayload().getIssuedAt();
+					String userId = (String)claims.getPayload().get("userId");
 					if (timedOut(issuedAt)) {
 						Flash.add(Flash.Code.ERROR, "User idle too long.");
 						throw new AuthenticationException(403, "User idle too long.");
@@ -132,7 +131,7 @@ public class AuthUtils {
 					} else {
 						throw new AuthenticationException();
 					}
-					LOG.debug("Claims : {}", claims.getBody());
+					LOG.debug("Claims : {}", claims.getPayload());
 			    } else {
 			        throw new AuthenticationException();
 			    }
@@ -156,17 +155,18 @@ public class AuthUtils {
 		// https://github.com/jwtk/jjwt
 		// https://stormpath.com/blog/jwt-java-create-verify
 		// https://scotch.io/tutorials/the-anatomy-of-a-json-web-token
-		Claims claims = new DefaultClaims();
-		claims.setIssuedAt(new Date());
-		claims.setSubject(user.getEmail());
-		claims.put("email", user.getEmail());
-		claims.put("admin", user.getPrivileges().contains(Privilege.ADMIN));
-		claims.put("userId", user.getUserId());
 		if (questionId != null) {
-			questionId = new Long(-1);
+			questionId = Long.valueOf(-1);
 		}
-		claims.put("questionId", questionId);
-		String compactJws = Jwts.builder().setClaims(claims).signWith(SignatureAlgorithm.HS512, key).compact();
+		String compactJws = Jwts.builder()
+			.issuedAt(new Date())
+			.subject(user.getEmail())
+			.claim("email", user.getEmail())
+			.claim("admin", user.getPrivileges().contains(Privilege.ADMIN))
+			.claim("userId", user.getUserId())
+			.claim("questionId", questionId)
+			.signWith(key, SignatureAlgorithm.HS512)
+			.compact();
 
 		return compactJws;
 	}

@@ -114,8 +114,8 @@ public class CommonMarkRenderer {
 	    public void visit(Text element) {
 			String literal = element.getLiteral();
 	        com.itextpdf.layout.element.Text text = new com.itextpdf.layout.element.Text(literal);
-	        if (emphasis || head) text.setBold();
-	        if (strong) text.setItalic().setBold();
+	        if (emphasis || head) text.simulateBold();
+	        if (strong) text.simulateItalic().simulateBold();
 	        if (table == true) {
 	        	Cell cell = new Cell();
 	        	cell.add(new Paragraph(text));

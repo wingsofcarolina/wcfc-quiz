@@ -20,9 +20,9 @@ import org.wingsofcarolina.quiz.resources.QuizContext;
 
 import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.io.image.ImageDataFactory;
-import com.itextpdf.kernel.events.Event;
-import com.itextpdf.kernel.events.IEventHandler;
-import com.itextpdf.kernel.events.PdfDocumentEvent;
+import com.itextpdf.kernel.pdf.event.AbstractPdfDocumentEvent;
+import com.itextpdf.kernel.pdf.event.AbstractPdfDocumentEventHandler;
+import com.itextpdf.kernel.pdf.event.PdfDocumentEvent;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.kernel.geom.Rectangle;
@@ -42,10 +42,10 @@ import com.itextpdf.layout.element.LineSeparator;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.element.Text;
-import com.itextpdf.layout.property.HorizontalAlignment;
-import com.itextpdf.layout.property.TextAlignment;
-import com.itextpdf.layout.property.UnitValue;
-import com.itextpdf.layout.property.VerticalAlignment;
+import com.itextpdf.layout.properties.HorizontalAlignment;
+import com.itextpdf.layout.properties.TextAlignment;
+import com.itextpdf.layout.properties.UnitValue;
+import com.itextpdf.layout.properties.VerticalAlignment;
 
 
 public class PDFGenerator {
@@ -56,7 +56,7 @@ public class PDFGenerator {
 	
 	public PDFGenerator(QuizContext context) throws IOException {
 		this.context = context;
-		normal = PdfFontFactory.createFont(StandardFonts.HELVETICA, true);
+		normal = PdfFontFactory.createFont(StandardFonts.HELVETICA, PdfFontFactory.EmbeddingStrategy.FORCE_EMBEDDED);
 	}
 
 	public ByteArrayInputStream generate(Quiz quiz) throws QuizBuildException, URISyntaxException, MalformedURLException, IOException {		
@@ -217,7 +217,7 @@ public class PDFGenerator {
 		    	} else {
 					LOG.error("Could not find requested image attachment : {}", question.getAttachment());
 		    	}
-			} catch (com.itextpdf.io.IOException|MalformedURLException e) {
+			} catch (com.itextpdf.io.exceptions.IOException|MalformedURLException e) {
 				LOG.error("Exception occured trying to access image file : {}", question.getAttachment());
 			}
 		}
@@ -289,7 +289,7 @@ public class PDFGenerator {
 		p1.setFontSize(12);
 		cell1.add(p1);
 		Paragraph p2 = new Paragraph("Quiz ID : ");
-		Text id = new Text(new Long(quiz.getQuizId()).toString()).setBold();
+		Text id = new Text(Long.valueOf(quiz.getQuizId()).toString()).simulateBold();
 		p2.add(id);
 		p2.setTextAlignment(TextAlignment.RIGHT);
 		p2.setFontSize(12);
@@ -312,7 +312,7 @@ public class PDFGenerator {
 		// Add instructions
 		Paragraph instructor = new Paragraph();
 		Text text = new Text("Instructor : ");
-		instructor.add(text.setBold());
+		instructor.add(text.simulateBold());
 		instructor.add("Please note the final score (subtract " + quiz.pointsPerQuestion()
 				+ " points from 100 for each wrong answer) on the checkout form and file the quiz in "
 				+ " the Pilot Records folder.");
@@ -329,7 +329,7 @@ public class PDFGenerator {
 		if (context.getVariable("instructions") != null) {
 			Paragraph instructions = new Paragraph();
 			text = new Text("Pilot : ");
-			instructions.add(text.setBold());
+			instructions.add(text.simulateBold());
 			instructions.add(context.getVariable("instructions"));
 			document.add(instructions);
 		}
@@ -350,7 +350,7 @@ public class PDFGenerator {
 	    return cell;
 	}
 	
-    protected class PageXofY implements IEventHandler {
+    protected class PageXofY extends AbstractPdfDocumentEventHandler {
         
         protected PdfFormXObject placeholder;
         protected float side = 20;
@@ -366,7 +366,7 @@ public class PDFGenerator {
         }
         
         @Override
-        public void handleEvent(Event event) {
+        public void onAcceptedEvent(AbstractPdfDocumentEvent event) {
             PdfDocumentEvent docEvent = (PdfDocumentEvent) event;
             PdfDocument pdf = docEvent.getDocument();
             PdfPage page = docEvent.getPage();
@@ -374,7 +374,7 @@ public class PDFGenerator {
             Rectangle pageSize = page.getPageSize();
             PdfCanvas pdfCanvas = new PdfCanvas(
                 page.getLastContentStream(), page.getResources(), pdf);
-            Canvas canvas = new Canvas(pdfCanvas, pdf, pageSize);
+            Canvas canvas = new Canvas(pdfCanvas, pageSize);
             canvas.setFont(normal);
             canvas.setFontSize(10);
             Paragraph p = new Paragraph()
@@ -382,7 +382,7 @@ public class PDFGenerator {
             canvas.showTextAligned(p, x, y, TextAlignment.RIGHT);
             canvas.showTextAligned(new Paragraph("WCFC " + quiz.getQuizName() + " Quiz").setFontSize(8), 50, y, TextAlignment.LEFT);
             canvas.showTextAligned(new Paragraph("Quiz ID : " + quiz.getQuizId()).setFontSize(8), 550, y, TextAlignment.RIGHT);
-            pdfCanvas.addXObject(placeholder, x + space, y - descent);
+            pdfCanvas.addXObjectAt(placeholder, x + space, y - descent);
             pdfCanvas.release();
             canvas.close();
         }

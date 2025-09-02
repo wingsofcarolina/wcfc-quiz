@@ -20,3 +20,8 @@ buildNumber.properties
 
 # Avoid ignoring Maven wrapper jar file (.jar files are usually ignored)
 !/.mvn/wrapper/maven-wrapper.jar
+
+# Ignore IntelliJ config except for run configurations
+/.idea/*
+!/.idea/runConfigurations/
+!/.idea/runConfigurations/**

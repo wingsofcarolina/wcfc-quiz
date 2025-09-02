@@ -1,8 +1,6 @@
 package org.wingsofcarolina.quiz.domain.presentation;
 
 import static org.asciidoctor.Asciidoctor.Factory.create;
-import static org.asciidoctor.AttributesBuilder.attributes;
-import static org.asciidoctor.OptionsBuilder.options;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +10,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.asciidoctor.Asciidoctor;
+import org.asciidoctor.Attributes;
+import org.asciidoctor.Options;
 import org.asciidoctor.SafeMode;
 import org.asciidoctor.extension.JavaExtensionRegistry;
 import org.wingsofcarolina.quiz.QuizConfiguration;
@@ -21,17 +21,17 @@ import org.wingsofcarolina.quiz.extensions.CssHeaderProcessor;
 import org.wingsofcarolina.quiz.extensions.Flash;
 import org.wingsofcarolina.quiz.extensions.NavigationBar;
 
-import de.thomaskrille.dropwizard_template_config.redist.freemarker.template.Configuration;
-import de.thomaskrille.dropwizard_template_config.redist.freemarker.template.Template;
-import de.thomaskrille.dropwizard_template_config.redist.freemarker.template.TemplateException;
-import de.thomaskrille.dropwizard_template_config.redist.freemarker.template.TemplateExceptionHandler;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateExceptionHandler;
 
 public class Renderer {
 
 	@SuppressWarnings("unused")
 	private QuizConfiguration config;
 	private Asciidoctor asciidoctor;
-	private Map<String, Object> options;
+	private Options options;
 	private Configuration freemarker;
 
 	public Renderer(QuizConfiguration config) throws IOException {
@@ -41,18 +41,20 @@ public class Renderer {
 		userAttributes.put("quiz-version","1.2.0");
 
 		asciidoctor = create();
-		Map<String, Object> attributes = attributes()
+		Attributes attributes = Attributes.builder()
 				.linkCss(true)
-				.attributes(userAttributes)
 				.noFooter(true)
 				.styleSheetName("/static/default.css")
-				.allowUriRead(true).asMap();
-		options = options()
+				.allowUriRead(true)
+				.attribute("quiz-version", "1.2.0")
+				.build();
+		options = Options.builder()
 				.safe(SafeMode.SERVER)
 				.inPlace(true)
 				.backend("html5")
-				.headerFooter(true)
-				.attributes(attributes).asMap();
+				.standalone(true)
+				.attributes(attributes)
+				.build();
 		
 		// Add custom extensions
 		JavaExtensionRegistry extensionRegistry = this.asciidoctor.javaExtensionRegistry(); 

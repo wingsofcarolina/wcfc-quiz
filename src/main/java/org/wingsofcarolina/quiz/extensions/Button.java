@@ -2,7 +2,8 @@ package org.wingsofcarolina.quiz.extensions;
 
 import java.util.Map;
 
-import org.asciidoctor.ast.ContentNode;
+import org.asciidoctor.ast.PhraseNode;
+import org.asciidoctor.ast.StructuralNode;
 import org.asciidoctor.extension.InlineMacroProcessor;
 
 public class Button extends InlineMacroProcessor {
@@ -12,7 +13,7 @@ public class Button extends InlineMacroProcessor {
 	}
 
 	@Override
-	public String process(ContentNode parent, String url, Map<String, Object> attributes) {
+	public PhraseNode process(StructuralNode parent, String url, Map<String, Object> attributes) {
 		String method = (String) attributes.get("method");
 		String target = (String) attributes.get("target");
 		if (method == null) {
@@ -26,6 +27,6 @@ public class Button extends InlineMacroProcessor {
 		}
 		sb.append("<input type=\"submit\" value=\"" + attributes.get("label") + "\" />");
 		sb.append("</form>");
-		return sb.toString();
+		return createPhraseNode(parent, "quoted", sb.toString());
 	}
 }

@@ -2,10 +2,10 @@ package org.wingsofcarolina.quiz.responses;
 
 import java.net.URI;
 
-import javax.ws.rs.core.NewCookie;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.core.NewCookie;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
+import jakarta.ws.rs.core.UriBuilder;
 
 public class ViewQuestionResponse extends AbstractResponse {
 	private long questionId;

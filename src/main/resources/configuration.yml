@@ -3,42 +3,42 @@
 # Location of the MongoDB server
 # If on a Docker network, just give the name of the MongoDB
 # container. Otherwise give the IP:PORT for the MongoDB process.
-mongodb: ${MONGODB!'mongodb'}
+mongodb: ${MONGODB:-mongodb}
 
 # Location of the template directory
-templates: ${TEMPLATES!'./templates'}
+templates: ${TEMPLATES:-./templates}
 
 # Location of the data backup/restore directory
-dataDirectory: ${DATADIR!'/data'}
+dataDirectory: ${DATADIR:-/data}
 
 # Location of the image directory
-imageDirectory: ${IMAGEDIR!'/images'}
-imageRoot: ${IMAGEROOT!'/images'}
+imageDirectory: ${IMAGEDIR:-/images}
+imageRoot: ${IMAGEROOT:-/images}
 
 # Location of the asset directory
-assetDirectory: ${ASSETDIR!'./assets/'}
+assetDirectory: ${ASSETDIR:-./assets/}
 
 # Operational mode, DEV or PROD
-mode: ${MODE!'PROD'}
+mode: ${MODE:-PROD}
 
 # Slack target channel (default is WCFC #quiz channel)
-slackTarget: ${SLACK!'REDACTED'}
+slackTarget: ${SLACK:-REDACTED}
 
 # Configure ports used by DropWizard
 server:
     type: simple
     connector:
         type: http
-        port: ${SERVER_PORT!'9314'}
+        port: ${SERVER_PORT:-9314}
     applicationContextPath: /
     adminContextPath: /admin
     requestLog:
         appenders:
           - type: file
-            currentLogFilename: ${LOG_DIR!'/log'}/quiz-http.log
+            currentLogFilename: ${LOG_DIR:-/log}/quiz-http.log
             threshold: ALL
             archive: true
-            archivedLogFilenamePattern: ${LOG_DIR!'/log'}/quiz-%i-%d-http.log
+            archivedLogFilenamePattern: ${LOG_DIR:-/log}/quiz-%i-%d-http.log
             maxFileSize: 100MB
             archivedFileCount: 3
             timeZone: UTC
@@ -56,11 +56,11 @@ sundial:
 # SLF4j Logging settings.
 logging:
   # The default level of all loggers. Can be OFF, ERROR, WARN, INFO, DEBUG, TRACE, or ALL.
-  level: ${DEFAULT_LOGLEVEL!'INFO'}
+  level: ${DEFAULT_LOGLEVEL:-INFO}
 
   # Logger-specific levels.
   loggers:
-    "org.wingsofcarolina.quiz": ${LOGLEVEL!'INFO'}
+    "org.wingsofcarolina.quiz": ${LOGLEVEL:-INFO}
     
   appenders:
       - type: console
@@ -68,10 +68,10 @@ logging:
         timeZone: UTC
         target: stdout
       - type: file
-        currentLogFilename: ${LOG_DIR!'/log'}/quiz.log
+        currentLogFilename: ${LOG_DIR:-/log}/quiz.log
         threshold: ALL
         archive: true
-        archivedLogFilenamePattern: ${LOG_DIR!'/log'}/quiz-%i-%d.log
+        archivedLogFilenamePattern: ${LOG_DIR:-/log}/quiz-%i-%d.log
         maxFileSize: 100MB
         archivedFileCount: 3
         timeZone: UTC

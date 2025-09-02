@@ -1,6 +1,6 @@
 package org.wingsofcarolina.quiz.responses;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 public class Response500 extends AbstractResponse {
 
