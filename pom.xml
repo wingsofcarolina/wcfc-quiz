@@ -334,6 +334,12 @@
                 <exclude>META-INF/*.RSA</exclude>
               </excludes>
             </filter>
+            <filter>
+              <artifact>jakarta.activation:jakarta.activation-api</artifact>
+              <excludes>
+                <exclude>**</exclude>
+              </excludes>
+            </filter>
           </filters>
           <transformers>
             <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
