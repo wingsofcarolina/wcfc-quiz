@@ -14,6 +14,10 @@ format:
 	@echo Formatting Java files in populate app...
 	@cd populate && mvn prettier:write -q
 
+.PHONY: check-format
+check-format:
+	@mvn prettier:check -q
+
 .PHONY: clean
 clean:
 	rm -rf target/
