@@ -22,5 +22,9 @@ check-format:
 
 .PHONY: clean
 clean:
-	rm -rf target/
+	@rm -rfv target/ docker/
+
+.PHONY: distclean
+distclean: clean
+	@rm -rfv .mvn/ log/ data/ dynamic/ images/ tmp/ pom.xml.tag pom.xml.releaseBackup pom.xml.versionsBackup pom.xml.next release.properties dependency-reduced-pom.xml
 
