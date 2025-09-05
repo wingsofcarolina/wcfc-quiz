@@ -8,15 +8,17 @@ $(APP_JAR): pom.xml $(JAVA_FILES)
 .PHONY: format
 format:
 	@echo Formatting pom.xml files...
-	@find . -name pom.xml -exec xmllint --format --output {} {} \;
+	@find . -name pom.xml -print0 | xargs -0 -I{} bash -c 'xmllint --format --output {} {}'
 	@echo Formatting Java files...
 	@mvn prettier:write -q
 	@echo Formatting Java files in populate app...
-	@cd populate && mvn prettier:write -q
+	@mvn -f populate/ prettier:write -q
 
 .PHONY: check-format
 check-format:
+	@find . -name pom.xml -print0 | xargs -0 -I{} bash -c 'xmllint --format {} | diff -q - {} > /dev/null'
 	@mvn prettier:check -q
+	@mvn -f populate/ prettier:check -q
 
 .PHONY: clean
 clean:
