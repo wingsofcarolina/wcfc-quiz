@@ -1,9 +1,28 @@
+APP_NAME := wcfc-quiz
 APP_VERSION := $(shell mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-APP_JAR := target/wcfc-quiz-$(APP_VERSION).jar
+APP_JAR := target/$(APP_NAME)-$(APP_VERSION).jar
 JAVA_FILES := $(shell find src/main/java/org/wingsofcarolina -name '*.java')
+CONTAINER_TAG := us-central1-docker.pkg.dev/wcfc-apps/wcfc-apps/$(APP_NAME):$(APP_VERSION)
+
+ifneq ($(shell which podman),)
+	CONTAINER_CMD := podman
+else
+ifneq ($(shell which docker),)
+	CONTAINER_CMD := docker
+else
+	CONTAINER_CMD := /bin/false  # force error when used
+endif
+endif
 
 $(APP_JAR): pom.xml $(JAVA_FILES)
 	@mvn
+
+docker/.build: $(APP_JAR)
+	@cd docker && $(CONTAINER_CMD) build . -t $(CONTAINER_TAG)
+	@touch docker/.build
+
+.PHONY: build
+build: docker/.build
 
 .PHONY: format
 format:
