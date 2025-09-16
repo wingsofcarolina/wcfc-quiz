@@ -15,7 +15,7 @@ endif
 endif
 
 $(APP_JAR): pom.xml $(JAVA_FILES)
-	@mvn
+	@mvn --batch-mode
 
 docker/.build: $(APP_JAR)
 	@cd docker && $(CONTAINER_CMD) build . -t $(CONTAINER_TAG)
