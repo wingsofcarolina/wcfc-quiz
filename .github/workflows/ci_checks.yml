@@ -38,6 +38,6 @@ jobs:
     - name: Check code formatting
       run: make check-format
 
-    - name: Run Maven compile
-      run: mvn compile
+    - name: Build the app
+      run: make build
 
