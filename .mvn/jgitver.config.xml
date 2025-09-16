@@ -1,0 +1,9 @@
+<configuration>
+  <strategy>CONFIGURABLE</strategy>
+  <autoIncrementPatch>false</autoIncrementPatch>
+  <nonQualifierBranches>main</nonQualifierBranches>
+  <useCommitDistance>true</useCommitDistance>
+  <!-- <useGitCommitId>true</useGitCommitId> -->
+  <gitCommitIdLength>8</gitCommitIdLength>
+  <useDirty>false</useDirty>
+</configuration>
