@@ -14,7 +14,7 @@ else
 endif
 endif
 
-$(APP_JAR): pom.xml $(JAVA_FILES)
+$(APP_JAR): pom.xml $(JAVA_FILES) $(shell find src/main/resources -type f)
 	@mvn --batch-mode
 
 docker/.build: $(APP_JAR)
