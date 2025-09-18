@@ -1,6 +1,8 @@
 FROM azul/zulu-openjdk-alpine:8
 
-RUN apk update && apk add --no-cache curl less
+RUN apk update && apk add --no-cache curl less tzdata
+
+ENV TZ=America/New_York
 
 RUN mkdir -p /opt/app/templates
 RUN mkdir -p /opt/app/extensions
