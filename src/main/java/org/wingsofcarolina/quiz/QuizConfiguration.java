@@ -31,6 +31,15 @@ public class QuizConfiguration extends Configuration {
   @JsonProperty
   String slackWebhookUrl;
 
+  @JsonProperty
+  String adminEmail;
+
+  @JsonProperty
+  String adminName;
+
+  @JsonProperty
+  String adminPassword;
+
   public String getMongodb() {
     return mongodb;
   }
@@ -69,5 +78,17 @@ public class QuizConfiguration extends Configuration {
 
   public String getAssetDirectory() {
     return assetDirectory;
+  }
+
+  public String getAdminEmail() {
+    return adminEmail;
+  }
+
+  public String getAdminName() {
+    return adminName;
+  }
+
+  public String getAdminPassword() {
+    return adminPassword;
   }
 }

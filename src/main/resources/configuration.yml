@@ -24,6 +24,11 @@ mode: ${MODE:-PROD}
 # Slack webhook URL (must be provided via environment variable)
 slackWebhookUrl: ${SLACK_WEBHOOK_URL}
 
+# Initial admin user creation (optional - only used if all three are provided)
+adminEmail: ${ADMIN_EMAIL}
+adminName: ${ADMIN_NAME}
+adminPassword: ${ADMIN_PASSWORD}
+
 # Configure ports used by DropWizard
 server:
     type: simple

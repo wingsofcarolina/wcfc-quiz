@@ -96,18 +96,8 @@ public class QuizService extends Application<QuizConfiguration> {
     env.jersey().register(new QuizAPI(config));
     env.healthChecks().register("check", new MinimalHealthCheck());
 
-    // Now create two mandatory default users, if they don't exist
-    // Create some initial dummy data
-    User user = createUser("Dwight Frye", "dfrye@planez.co", "REDACTED");
-    if (user != null) {
-      user.addPriv(Privilege.ADMIN);
-      user.save();
-    }
-    user = createUser("George Scheer", "george.scheer@gmail.com", "REDACTED");
-    if (user != null) {
-      user.addPriv(Privilege.ADMIN);
-      user.save();
-    }
+    // Create admin user if environment variables are provided
+    createAdminUserIfConfigured(config);
   }
 
   private User createUser(String name, String email, String password) {
@@ -117,6 +107,54 @@ public class QuizService extends Application<QuizConfiguration> {
       user.save();
     }
     return user;
+  }
+
+  private void createAdminUserIfConfigured(QuizConfiguration config) {
+    String adminEmail = config.getAdminEmail();
+    String adminName = config.getAdminName();
+    String adminPassword = config.getAdminPassword();
+
+    // Check if all three admin configuration values are provided (non-null and non-empty)
+    if (
+      adminEmail != null &&
+      !adminEmail.trim().isEmpty() &&
+      adminName != null &&
+      !adminName.trim().isEmpty() &&
+      adminPassword != null &&
+      !adminPassword.trim().isEmpty()
+    ) {
+      // Check if admin user already exists
+      if (User.getByEmail(adminEmail) != null) {
+        LOG.info(
+          "Admin user with email '{}' already exists, skipping creation",
+          adminEmail
+        );
+        return;
+      }
+
+      try {
+        // Create the admin user using the existing addUser method
+        User adminUser = addUser(adminName, adminEmail, adminPassword, Privilege.USER);
+        if (adminUser != null) {
+          // Add admin privilege
+          adminUser.addPriv(Privilege.ADMIN);
+          adminUser.save();
+          LOG.info("Successfully created admin user with email: {}", adminEmail);
+        } else {
+          LOG.error("Failed to create admin user with email: {}", adminEmail);
+        }
+      } catch (Exception e) {
+        LOG.error(
+          "Error creating admin user with email '{}': {}",
+          adminEmail,
+          e.getMessage()
+        );
+      }
+    } else {
+      LOG.info(
+        "Admin user creation skipped - not all required environment variables provided (ADMIN_EMAIL, ADMIN_NAME, ADMIN_PASSWORD)"
+      );
+    }
   }
 
   public User addUser(String name, String email, String password, Privilege priv) {
