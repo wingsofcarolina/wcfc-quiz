@@ -51,19 +51,6 @@ python3 /app/test-scripts/setup-wiremock.py
 echo -e "Creating necessary directories..."
 mkdir -p /data /images /log
 
-# Test MongoDB connection before starting app
-echo -e "Testing MongoDB connection..."
-mongosh --eval "db.runCommand({ping: 1})" || echo "MongoDB ping failed"
-
-# Verify test data was inserted correctly
-echo -e "Verifying test data..."
-mongosh wcfc-quiz --eval "print('Recipes count: ' + db.Recipe.countDocuments({})); db.Recipe.find().forEach(printjson);"
-mongosh wcfc-quiz --eval "print('Questions count: ' + db.Question.countDocuments({}));"
-
-# Test the exact query that the application would use
-echo -e "Testing recipe lookup query..."
-mongosh wcfc-quiz --eval "print('Recipe lookup result:'); db.Recipe.find({alias: 'STUDENT_TEST'}).forEach(printjson);"
-
 # Start the application in the background
 echo -e "Starting WCFC Quiz application..."
 java --add-opens java.base/java.lang=ALL-UNNAMED \

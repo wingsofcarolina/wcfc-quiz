@@ -1,3 +1,5 @@
+SHELL := /bin/bash
+
 APP_NAME := wcfc-quiz
 APP_VERSION := $(shell mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
 APP_JAR := target/$(APP_NAME)-$(APP_VERSION).jar
