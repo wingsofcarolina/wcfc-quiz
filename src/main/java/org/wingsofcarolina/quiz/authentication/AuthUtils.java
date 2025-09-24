@@ -4,13 +4,14 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.security.Keys;
 import jakarta.ws.rs.core.Cookie;
 import jakarta.ws.rs.core.NewCookie;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
-import javax.crypto.spec.SecretKeySpec;
+import javax.crypto.SecretKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wingsofcarolina.quiz.common.Flash;
@@ -21,81 +22,40 @@ public class AuthUtils {
   private static final Logger LOG = LoggerFactory.getLogger(AuthUtils.class);
   private static AuthUtils instance;
 
-  // For SecretKeySpec generation
-  private String algorithm = "HmacSHA512";
-  private byte[] encoded = {
-    -8,
-    -36,
-    93,
-    58,
-    -106,
-    125,
-    -77,
-    -120,
-    -119,
-    80,
-    -67,
-    -58,
-    -103,
-    40,
-    49,
-    -81,
-    51,
-    -91,
-    -19,
-    83,
-    -67,
-    69,
-    22,
-    71,
-    74,
-    -109,
-    -125,
-    67,
-    -72,
-    -39,
-    -11,
-    -63,
-    19,
-    -121,
-    -85,
-    3,
-    -32,
-    -97,
-    -21,
-    -67,
-    -127,
-    47,
-    -46,
-    -108,
-    99,
-    -69,
-    36,
-    120,
-    -67,
-    92,
-    113,
-    51,
-    96,
-    34,
-    67,
-    -12,
-    -44,
-    -31,
-    -117,
-    -37,
-    92,
-    -97,
-    -100,
-    67,
-  };
+  private static final String JWT_SECRET_ENV_VAR = "WCFC_JWT_SECRET";
 
-  private SecretKeySpec key;
+  private SecretKey key;
   private JwtParser parser;
 
   public AuthUtils() {
-    key = new SecretKeySpec(encoded, algorithm);
+    key = Keys.hmacShaKeyFor(getSecretKeyBytes());
     parser = Jwts.parser().verifyWith(key).build();
+  }
+
+  private byte[] getSecretKeyBytes() {
+    String base64Key = System.getenv(JWT_SECRET_ENV_VAR);
+
+    if (base64Key == null || base64Key.trim().isEmpty()) {
+      String errorMsg = String.format(
+        "JWT secret key not found in environment variable '%s'. Application cannot start without a valid JWT secret key.",
+        JWT_SECRET_ENV_VAR
+      );
+      LOG.error(errorMsg);
+      throw new IllegalStateException(errorMsg);
+    }
+
+    LOG.info("JWT secret key loaded from environment variable '{}'", JWT_SECRET_ENV_VAR);
+
+    try {
+      return Base64.getDecoder().decode(base64Key);
+    } catch (IllegalArgumentException e) {
+      String errorMsg = String.format(
+        "Invalid Base64 encoding in JWT secret key from environment variable '%s'",
+        JWT_SECRET_ENV_VAR
+      );
+      LOG.error(errorMsg, e);
+      throw new IllegalStateException(errorMsg, e);
+    }
   }
 
   public static AuthUtils instance() {
@@ -114,7 +74,7 @@ public class AuthUtils {
     return cookie.toString() + ";SameSite=none";
   }
 
-  public SecretKeySpec getKey() {
+  public SecretKey getKey() {
     return key;
   }
 
@@ -228,7 +188,7 @@ public class AuthUtils {
       .claim("admin", user.getPrivileges().contains(Privilege.ADMIN))
       .claim("userId", user.getUserId())
       .claim("questionId", questionId)
-      .signWith(key, SignatureAlgorithm.HS512)
+      .signWith(key)
       .compact();
 
     return compactJws;
