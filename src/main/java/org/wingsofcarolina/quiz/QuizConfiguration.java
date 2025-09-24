@@ -29,7 +29,7 @@ public class QuizConfiguration extends Configuration {
   String mode;
 
   @JsonProperty
-  String slackTarget;
+  String slackWebhookUrl;
 
   public String getMongodb() {
     return mongodb;
@@ -63,8 +63,8 @@ public class QuizConfiguration extends Configuration {
     return mode;
   }
 
-  public String getSlackTarget() {
-    return slackTarget;
+  public String getSlackWebhookUrl() {
+    return slackWebhookUrl;
   }
 
   public String getAssetDirectory() {

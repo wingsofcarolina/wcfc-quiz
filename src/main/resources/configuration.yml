@@ -21,8 +21,8 @@ assetDirectory: ${ASSETDIR:-./assets/}
 # Operational mode, DEV or PROD
 mode: ${MODE:-PROD}
 
-# Slack target channel (default is WCFC #quiz channel)
-slackTarget: ${SLACK:-REDACTED}
+# Slack webhook URL (must be provided via environment variable)
+slackWebhookUrl: ${SLACK_WEBHOOK_URL}
 
 # Configure ports used by DropWizard
 server:

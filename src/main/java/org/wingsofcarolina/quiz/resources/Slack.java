@@ -19,17 +19,12 @@ public class Slack {
 
   private static Slack instance = null;
 
-  // WCFC #quiz channel : https://hooks.slack.com/services/REDACTED
-  // WCFC #notification : https://hooks.slack.com/services/REDACTED
-  // Planez.co #notification channel : https://hooks.slack.com/services/REDACTED
-  private String URL = null;
+  private String webhookUrl = null;
 
   private QuizConfiguration config;
 
   public Slack(QuizConfiguration config) {
-    // TODO Eventually make this configurable, but for now always go to Planez.co
-    this.URL =
-      "https://hooks.slack.com/services/REDACTED"; // WCFC #notification
+    this.webhookUrl = config.getSlackWebhookUrl();
     Slack.instance = this;
     this.config = config;
   }
@@ -40,9 +35,13 @@ public class Slack {
 
   public void sendMessage(String message) {
     //LOG.info("Sending : QUIZ: {}", message);
-    if (config.getMode().contentEquals("PROD")) {
+    if (
+      config.getMode().contentEquals("PROD") &&
+      webhookUrl != null &&
+      !webhookUrl.trim().isEmpty()
+    ) {
       CloseableHttpClient httpclient = HttpClients.createDefault();
-      HttpPost httpPost = new HttpPost(URL);
+      HttpPost httpPost = new HttpPost(webhookUrl);
       String json = "{\"text\":\"QUIZ: " + message + "\"}";
       HttpEntity stringEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
       httpPost.setEntity(stringEntity);
@@ -52,17 +51,22 @@ public class Slack {
           LOG.error("Failed to successfully send message to Slack");
         }
       } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+        LOG.error("IOException while sending message to Slack", e);
       }
+    } else if (config.getMode().contentEquals("PROD")) {
+      LOG.warn("Slack webhook URL not configured - message not sent: {}", message);
     }
   }
 
   public void sendFeedback(User user, Long questionId, String feedback) {
     //LOG.info("Sending : QUIZ: Feedback : {} : {} : {}", user.getName(), questionId, feedback);
-    if (config.getMode().contentEquals("PROD")) {
+    if (
+      config.getMode().contentEquals("PROD") &&
+      webhookUrl != null &&
+      !webhookUrl.trim().isEmpty()
+    ) {
       CloseableHttpClient httpclient = HttpClients.createDefault();
-      HttpPost httpPost = new HttpPost(URL);
+      HttpPost httpPost = new HttpPost(webhookUrl);
       String json =
         "{\"text\":\"QUIZ: Feedback : " +
         user.getName() +
@@ -79,9 +83,15 @@ public class Slack {
           LOG.error("Failed to successfully send message to Slack");
         }
       } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+        LOG.error("IOException while sending feedback to Slack", e);
       }
+    } else if (config.getMode().contentEquals("PROD")) {
+      LOG.warn(
+        "Slack webhook URL not configured - feedback not sent: {} : {} : {}",
+        user.getName(),
+        questionId,
+        feedback
+      );
     }
   }
 }
