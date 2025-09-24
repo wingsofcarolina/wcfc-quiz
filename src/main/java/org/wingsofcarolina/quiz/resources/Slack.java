@@ -19,14 +19,48 @@ public class Slack {
 
   private static Slack instance = null;
 
-  private String webhookUrl = null;
+  private String notificationUrl = null;
+  private String slackApiBaseUrl;
 
   private QuizConfiguration config;
 
   public Slack(QuizConfiguration config) {
-    this.webhookUrl = config.getSlackWebhookUrl();
-    Slack.instance = this;
     this.config = config;
+    this.slackApiBaseUrl = config.getSlackApiBaseUrl();
+
+    // Build notification webhook URL from the configuration
+    if (
+      config.getSlackNotify() != null &&
+      !config.getSlackNotify().isEmpty() &&
+      !"none".equals(config.getSlackNotify())
+    ) {
+      if (config.getSlackNotify().startsWith("https://")) {
+        notificationUrl = config.getSlackNotify();
+      } else {
+        // Assume it's in the token format (T/B/X) and convert to webhook URL
+        String[] tokenParts = config.getSlackNotify().split("/");
+        if (tokenParts.length == 3) {
+          notificationUrl =
+            slackApiBaseUrl +
+            "/services/" +
+            tokenParts[0] +
+            "/" +
+            tokenParts[1] +
+            "/" +
+            tokenParts[2];
+        } else {
+          throw new RuntimeException("Bad Slack notification token, shutting down!");
+        }
+      }
+    } else {
+      LOG.warn(
+        "Slack notification channel is disabled (token set to 'none' or not configured)"
+      );
+      notificationUrl = null;
+    }
+
+    Slack.instance = this;
+    LOG.info("Slack service initialized with API base URL: {}", slackApiBaseUrl);
   }
 
   public static Slack instance() {
@@ -35,63 +69,69 @@ public class Slack {
 
   public void sendMessage(String message) {
     //LOG.info("Sending : QUIZ: {}", message);
-    if (
-      config.getMode().contentEquals("PROD") &&
-      webhookUrl != null &&
-      !webhookUrl.trim().isEmpty()
-    ) {
-      CloseableHttpClient httpclient = HttpClients.createDefault();
-      HttpPost httpPost = new HttpPost(webhookUrl);
-      String json = "{\"text\":\"QUIZ: " + message + "\"}";
-      HttpEntity stringEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
-      httpPost.setEntity(stringEntity);
-      try {
-        CloseableHttpResponse response = httpclient.execute(httpPost);
-        if (response.getStatusLine().getStatusCode() != 200) {
-          LOG.error("Failed to successfully send message to Slack");
+    if (config.getMode().contentEquals("PROD")) {
+      if (notificationUrl != null && !notificationUrl.trim().isEmpty()) {
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        HttpPost httpPost = new HttpPost(notificationUrl);
+        String json = "{\"text\":\"QUIZ: " + escapeJson(message) + "\"}";
+        HttpEntity stringEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
+        httpPost.setEntity(stringEntity);
+        try {
+          CloseableHttpResponse response = httpclient.execute(httpPost);
+          if (response.getStatusLine().getStatusCode() != 200) {
+            LOG.error("Failed to successfully send message to Slack");
+          }
+        } catch (IOException e) {
+          LOG.error("IOException while sending message to Slack", e);
         }
-      } catch (IOException e) {
-        LOG.error("IOException while sending message to Slack", e);
+      } else {
+        LOG.warn("Slack notification URL not configured - message not sent: {}", message);
       }
-    } else if (config.getMode().contentEquals("PROD")) {
-      LOG.warn("Slack webhook URL not configured - message not sent: {}", message);
     }
   }
 
   public void sendFeedback(User user, Long questionId, String feedback) {
     //LOG.info("Sending : QUIZ: Feedback : {} : {} : {}", user.getName(), questionId, feedback);
-    if (
-      config.getMode().contentEquals("PROD") &&
-      webhookUrl != null &&
-      !webhookUrl.trim().isEmpty()
-    ) {
-      CloseableHttpClient httpclient = HttpClients.createDefault();
-      HttpPost httpPost = new HttpPost(webhookUrl);
-      String json =
-        "{\"text\":\"QUIZ: Feedback : " +
-        user.getName() +
-        " : " +
-        questionId +
-        " : " +
-        feedback +
-        "\"}";
-      HttpEntity stringEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
-      httpPost.setEntity(stringEntity);
-      try {
-        CloseableHttpResponse response = httpclient.execute(httpPost);
-        if (response.getStatusLine().getStatusCode() != 200) {
-          LOG.error("Failed to successfully send message to Slack");
+    if (config.getMode().contentEquals("PROD")) {
+      if (notificationUrl != null && !notificationUrl.trim().isEmpty()) {
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        HttpPost httpPost = new HttpPost(notificationUrl);
+        String json =
+          "{\"text\":\"QUIZ: Feedback : " +
+          escapeJson(user.getName()) +
+          " : " +
+          questionId +
+          " : " +
+          escapeJson(feedback) +
+          "\"}";
+        HttpEntity stringEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
+        httpPost.setEntity(stringEntity);
+        try {
+          CloseableHttpResponse response = httpclient.execute(httpPost);
+          if (response.getStatusLine().getStatusCode() != 200) {
+            LOG.error("Failed to successfully send message to Slack");
+          }
+        } catch (IOException e) {
+          LOG.error("IOException while sending feedback to Slack", e);
         }
-      } catch (IOException e) {
-        LOG.error("IOException while sending feedback to Slack", e);
+      } else {
+        LOG.warn(
+          "Slack notification URL not configured - feedback not sent: {} : {} : {}",
+          user.getName(),
+          questionId,
+          feedback
+        );
       }
-    } else if (config.getMode().contentEquals("PROD")) {
-      LOG.warn(
-        "Slack webhook URL not configured - feedback not sent: {} : {} : {}",
-        user.getName(),
-        questionId,
-        feedback
-      );
     }
+  }
+
+  private String escapeJson(String text) {
+    if (text == null) return "";
+    return text
+      .replace("\\", "\\\\")
+      .replace("\"", "\\\"")
+      .replace("\n", "\\n")
+      .replace("\r", "\\r")
+      .replace("\t", "\\t");
   }
 }

@@ -29,7 +29,10 @@ public class QuizConfiguration extends Configuration {
   String mode;
 
   @JsonProperty
-  String slackWebhookUrl;
+  String slackNotify;
+
+  @JsonProperty
+  String slackApiBaseUrl;
 
   @JsonProperty
   String adminEmail;
@@ -72,8 +75,12 @@ public class QuizConfiguration extends Configuration {
     return mode;
   }
 
-  public String getSlackWebhookUrl() {
-    return slackWebhookUrl;
+  public String getSlackNotify() {
+    return slackNotify;
+  }
+
+  public String getSlackApiBaseUrl() {
+    return slackApiBaseUrl != null ? slackApiBaseUrl : "https://hooks.slack.com";
   }
 
   public String getAssetDirectory() {

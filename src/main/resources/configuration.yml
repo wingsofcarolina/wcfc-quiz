@@ -21,8 +21,11 @@ assetDirectory: ${ASSETDIR:-./assets/}
 # Operational mode, DEV or PROD
 mode: ${MODE:-PROD}
 
-# Slack webhook URL (must be provided via environment variable)
-slackWebhookUrl: ${SLACK_WEBHOOK_URL}
+# Slack notification token (can reuse SLACK_TOKEN_NOTIFICATIONS from other apps)
+slackNotify: ${SLACK_TOKEN_NOTIFICATIONS:-none}
+
+# Slack API base URL (configurable for testing)
+slackApiBaseUrl: ${SLACK_API_BASE_URL:-https://hooks.slack.com}
 
 # Initial admin user creation (optional - only used if all three are provided)
 adminEmail: ${ADMIN_EMAIL}

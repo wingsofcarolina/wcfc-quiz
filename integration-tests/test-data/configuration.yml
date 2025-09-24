@@ -19,8 +19,11 @@ assetDirectory: ${ASSETDIR:-/app/assets}
 # Operational mode, DEV or PROD
 mode: ${MODE:-PROD}
 
-# Slack webhook URL (must be provided via environment variable)
-slackWebhookUrl: ${SLACK_WEBHOOK_URL:-http://localhost:8080/services/slackapi}
+# Slack notification token (configured for testing with WireMock)
+slackNotify: ${SLACK_TOKEN_NOTIFICATIONS:-T/B/slackapi}
+
+# Slack API base URL (pointing to test server)
+slackApiBaseUrl: ${SLACK_API_BASE_URL:-http://localhost:8080}
 
 # Initial admin user creation (optional - only used if all three are provided)
 adminEmail: ${ADMIN_EMAIL:-admin@test.com}
