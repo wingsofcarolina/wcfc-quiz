@@ -39,5 +39,11 @@ fi
 if [ "$1" == "/bin/bash" ]; then
   exec /bin/sh
 else
-  exec java ${DEBUG_ARGS} -jar wcfc-quiz.jar server configuration.yml
+  exec java ${DEBUG_ARGS} \
+    --add-opens java.base/java.lang=ALL-UNNAMED \
+    --add-opens java.base/java.lang.reflect=ALL-UNNAMED \
+    --add-opens java.base/java.security=ALL-UNNAMED \
+    --add-opens java.base/java.util=ALL-UNNAMED \
+    --add-opens java.base/java.util.concurrent=ALL-UNNAMED \
+    -jar wcfc-quiz.jar server configuration.yml
 fi
