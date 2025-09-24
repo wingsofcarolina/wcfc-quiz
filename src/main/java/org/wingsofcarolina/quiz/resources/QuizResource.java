@@ -134,15 +134,6 @@ public class QuizResource {
     if (cookie != null) {
       Jws<Claims> claims = authUtils.validateUser(cookie.getValue(), Privilege.USER);
       User user = User.getWithClaims(claims);
-      Slack
-        .instance()
-        .sendMessage(
-          "Version information requested by : " +
-          user.getName() +
-          "(" +
-          user.getEmail() +
-          ")"
-        );
       String output = objectMapper.writeValueAsString(buildProperties);
       output = output.replaceAll("(\r\n|\n)", "<br/>");
       output = output.replaceAll("\\s", "&nbsp;&nbsp;");
