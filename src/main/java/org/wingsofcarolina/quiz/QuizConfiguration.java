@@ -20,9 +20,6 @@ public class QuizConfiguration extends Configuration {
   String imageDirectory;
 
   @JsonProperty
-  String imageRoot;
-
-  @JsonProperty
   String assetDirectory;
 
   @JsonProperty
@@ -65,10 +62,6 @@ public class QuizConfiguration extends Configuration {
 
   public String getImageDirectory() {
     return imageDirectory;
-  }
-
-  public String getImageRoot() {
-    return imageRoot;
   }
 
   public String getMode() {

@@ -170,10 +170,7 @@ public class QuizResource {
       }
 
       String rendered = renderer
-        .render(
-          "gallery.ad",
-          new FileListWrapper(user, config.getImageRoot(), listOfFiles)
-        )
+        .render("gallery.ad", new FileListWrapper(user, "/images", listOfFiles))
         .toString();
       NewCookie newCookie = authUtils.generateCookie(user);
       return Response
@@ -184,6 +181,53 @@ public class QuizResource {
     } else {
       Flash.add(Flash.Code.ERROR, "Something went wrong generating version data.");
       return new RedirectResponse(Pages.HOME_PAGE).build();
+    }
+  }
+
+  @GET
+  @Path("images/{filename}")
+  public Response serveImage(@PathParam("filename") String filename) {
+    try {
+      String imageDir = config.getImageDirectory();
+      File imageFile = new File(imageDir, filename);
+
+      if (!imageFile.exists() || !imageFile.isFile()) {
+        return Response.status(404).build();
+      }
+
+      // Security check: ensure the file is within the image directory
+      String canonicalImageDir = new File(imageDir).getCanonicalPath();
+      String canonicalImageFile = imageFile.getCanonicalPath();
+      if (!canonicalImageFile.startsWith(canonicalImageDir)) {
+        return Response.status(403).build();
+      }
+
+      // Determine content type based on file extension
+      String contentType = getContentType(filename);
+
+      return Response.ok(imageFile).type(contentType).build();
+    } catch (Exception e) {
+      LOG.error("Error serving image: {}", filename, e);
+      return Response.status(500).build();
+    }
+  }
+
+  private String getContentType(String filename) {
+    String lowerFilename = filename.toLowerCase();
+    if (lowerFilename.endsWith(".jpg") || lowerFilename.endsWith(".jpeg")) {
+      return "image/jpeg";
+    } else if (lowerFilename.endsWith(".png")) {
+      return "image/png";
+    } else if (lowerFilename.endsWith(".gif")) {
+      return "image/gif";
+    } else if (lowerFilename.endsWith(".bmp")) {
+      return "image/bmp";
+    } else if (lowerFilename.endsWith(".webp")) {
+      return "image/webp";
+    } else if (lowerFilename.endsWith(".svg")) {
+      return "image/svg+xml";
+    } else {
+      return "application/octet-stream";
     }
   }
 

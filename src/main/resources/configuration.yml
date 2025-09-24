@@ -13,7 +13,6 @@ dataDirectory: ${DATADIR:-/data}
 
 # Location of the image directory
 imageDirectory: ${IMAGEDIR:-/images}
-imageRoot: ${IMAGEROOT:-/images}
 
 # Location of the asset directory
 assetDirectory: ${ASSETDIR:-./assets/}
