@@ -1,9 +1,7 @@
 ######
 
 # Location of the MongoDB server
-# If on a Docker network, just give the name of the MongoDB
-# container. Otherwise give the IP:PORT for the MongoDB process.
-mongodb: localhost:27017
+mongodb: mongodb://localhost:27017
 
 # Location of the template directory
 templates: ${TEMPLATES:-/app/templates}
