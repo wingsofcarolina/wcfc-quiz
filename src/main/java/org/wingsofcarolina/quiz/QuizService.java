@@ -15,8 +15,6 @@ import java.security.spec.InvalidKeySpecException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
-import org.knowm.dropwizard.sundial.SundialBundle;
-import org.knowm.dropwizard.sundial.SundialConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wingsofcarolina.quiz.authentication.AuthenticationExceptionMapper;
@@ -57,16 +55,6 @@ public class QuizService extends Application<QuizConfiguration> {
     // bootstrap.addBundle(new TemplateConfigBundle(new TemplateConfigBundleConfiguration()));
     bootstrap.addBundle(new AssetsBundle("/assets/", "/static"));
     bootstrap.addBundle(new MultiPartBundle());
-    bootstrap.addBundle(
-      new SundialBundle<QuizConfiguration>() {
-        @Override
-        public SundialConfiguration getSundialConfiguration(
-          QuizConfiguration configuration
-        ) {
-          return configuration.getSundialConfiguration();
-        }
-      }
-    );
   }
 
   @Override

@@ -5,25 +5,23 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.List;
-import org.knowm.sundial.Job;
-import org.knowm.sundial.annotations.CronTrigger;
-import org.knowm.sundial.exceptions.JobInterruptException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wingsofcarolina.quiz.domain.Question;
 import org.wingsofcarolina.quiz.domain.Record;
 import org.wingsofcarolina.quiz.resources.Quiz;
 
-//@CronTrigger(cron = "0/100 * * * * ?")  // Fire every minute, for testing
-@CronTrigger(cron = "0 0 4 * * ?") // Fire 4am every day
-public class Housekeeping extends Job {
+/**
+ * Housekeeping tasks that were previously run by Sundial scheduler
+ * Now run opportunistically when triggered by HousekeepingService
+ */
+public class HousekeepingTasks {
 
-  private static final Logger LOG = LoggerFactory.getLogger(Housekeeping.class);
+  private static final Logger LOG = LoggerFactory.getLogger(HousekeepingTasks.class);
 
   SimpleDateFormat dateFormatGmt = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss");
 
-  @Override
-  public void doRun() throws JobInterruptException {
+  public void performHousekeeping() {
     LOG.info("Housekeeping triggered .....");
 
     // Expunge all ancient/expired quiz records

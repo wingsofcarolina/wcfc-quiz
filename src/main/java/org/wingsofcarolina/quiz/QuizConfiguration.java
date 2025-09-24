@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.core.Configuration;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import org.knowm.dropwizard.sundial.SundialConfiguration;
 
 public class QuizConfiguration extends Configuration {
 
@@ -32,10 +31,6 @@ public class QuizConfiguration extends Configuration {
   @JsonProperty
   String slackTarget;
 
-  @Valid
-  @NotNull
-  public SundialConfiguration sundialConfiguration = new SundialConfiguration();
-
   public String getMongodb() {
     return mongodb;
   }
@@ -50,11 +45,6 @@ public class QuizConfiguration extends Configuration {
 
   public void setTemplates(String templates) {
     this.templates = templates;
-  }
-
-  @JsonProperty("sundial")
-  public SundialConfiguration getSundialConfiguration() {
-    return sundialConfiguration;
   }
 
   public String getDataDirectory() {

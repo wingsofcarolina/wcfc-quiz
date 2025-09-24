@@ -65,6 +65,7 @@ import org.wingsofcarolina.quiz.domain.presentation.UsersWrapper;
 import org.wingsofcarolina.quiz.domain.presentation.Version;
 import org.wingsofcarolina.quiz.domain.presentation.Wrapper;
 import org.wingsofcarolina.quiz.responses.RedirectResponse;
+import org.wingsofcarolina.quiz.services.HousekeepingService;
 
 /**
  * @author dwight
@@ -199,6 +200,9 @@ public class QuizResource {
   @Produces("text/html")
   public Response home(@CookieParam("quiz.token") Cookie cookie)
     throws Exception, AuthenticationException {
+    // Trigger housekeeping if needed (runs asynchronously)
+    HousekeepingService.getInstance().triggerHousekeepingIfNeeded();
+
     if (cookie != null) {
       Jws<Claims> claims = authUtils.validateUser(cookie.getValue());
       User user = User.getWithClaims(claims);

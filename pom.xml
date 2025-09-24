@@ -117,11 +117,6 @@
       <version>3.12.14</version>
     </dependency>
     <dependency>
-      <groupId>org.knowm</groupId>
-      <artifactId>dropwizard-sundial</artifactId>
-      <version>4.0.0</version>
-    </dependency>
-    <dependency>
       <groupId>org.commonmark</groupId>
       <artifactId>commonmark</artifactId>
       <version>0.26.0</version>
