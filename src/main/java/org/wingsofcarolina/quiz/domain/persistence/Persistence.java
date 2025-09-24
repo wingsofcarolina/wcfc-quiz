@@ -1,6 +1,7 @@
 package org.wingsofcarolina.quiz.domain.persistence;
 
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +36,11 @@ public class Persistence {
       // Connect to MongoDB via Morphia
       morphia = new Morphia();
       LOG.info("Connecting to MongoDB with '{}'", mongodb);
-      mongo = new MongoClient(mongodb, 27017);
+
+      // Use MongoDB connection string
+      MongoClientURI uri = new MongoClientURI(mongodb);
+      mongo = new MongoClient(uri);
+
       morphia.mapPackage("org.wingsofcarolina.quiz.domain");
       datastore = morphia.createDatastore(mongo, "wcfc-quiz");
 

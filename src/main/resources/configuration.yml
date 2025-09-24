@@ -1,9 +1,9 @@
 ######
 
-# Location of the MongoDB server
-# If on a Docker network, just give the name of the MongoDB
-# container. Otherwise give the IP:PORT for the MongoDB process.
-mongodb: ${MONGODB:-mongodb}
+# MongoDB connection string
+# Full MongoDB connection string including protocol, host, port, and database options
+# Example: mongodb://localhost:27017 or mongodb://user:pass@host:port/database
+mongodb: ${MONGODB:-mongodb://mongodb:27017}
 
 # Location of the template directory
 templates: ${TEMPLATES:-./templates}
