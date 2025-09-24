@@ -5,5 +5,5 @@
   <useCommitDistance>true</useCommitDistance>
   <!-- <useGitCommitId>true</useGitCommitId> -->
   <gitCommitIdLength>8</gitCommitIdLength>
-  <useDirty>false</useDirty>
+  <useDirty>true</useDirty>
 </configuration>
