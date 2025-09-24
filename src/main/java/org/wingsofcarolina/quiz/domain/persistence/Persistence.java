@@ -36,7 +36,7 @@ public class Persistence {
       morphia = new Morphia();
       LOG.info("Connecting to MongoDB with '{}'", mongodb);
       mongo = new MongoClient(mongodb, 27017);
-      morphia.mapPackage("com.skyegadgets.domain");
+      morphia.mapPackage("org.wingsofcarolina.quiz.domain");
       datastore = morphia.createDatastore(mongo, "wcfc-quiz");
 
       // Create DAOs

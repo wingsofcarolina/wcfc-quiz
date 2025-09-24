@@ -57,7 +57,7 @@ public class PDFGenerator {
     normal =
       PdfFontFactory.createFont(
         StandardFonts.HELVETICA,
-        PdfFontFactory.EmbeddingStrategy.FORCE_EMBEDDED
+        PdfFontFactory.EmbeddingStrategy.PREFER_NOT_EMBEDDED
       );
   }
 

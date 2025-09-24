@@ -37,6 +37,10 @@ push: check-version-not-dirty docker/.build
 deploy: check-version-not-dirty push
 	@gcloud run deploy $(APP_NAME) --image $(CONTAINER_TAG) --region $(GOOGLE_CLOUD_REGION)
 
+.PHONY: integration-tests
+integration-tests: $(APP_JAR)
+	@integration-tests/run-integration-tests.sh
+
 .PHONY: format
 format:
 	@echo Formatting pom.xml files...

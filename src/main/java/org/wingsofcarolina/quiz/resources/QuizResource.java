@@ -340,7 +340,6 @@ public class QuizResource {
         LOG.info(record.toString());
 
         // Actually perform the PDF quiz generation
-        // Slack.instance().sendMessage("Quiz '" + quiz.getQuizName() + "', ID " +  quiz.getQuizId() + ", requested at " + dateFormatGmt.format(new Date()));
         ByteArrayInputStream inputStream = generator.generate(quiz);
 
         return Response.ok().type("application/pdf").entity(inputStream).build();

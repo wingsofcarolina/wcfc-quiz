@@ -70,10 +70,6 @@ public class QuizService extends Application<QuizConfiguration> {
 
     // Set up Slack communications
     Slack slack = new Slack(config);
-    slack.sendMessage(
-      "WCFC Quiz System restarted at " + dateFormatGmt.format(new Date())
-    );
-    slack.sendMessage("WCFC Quiz System running in '" + config.getMode() + "' mode.");
 
     LOG.info("Java Version : {}", System.getProperty("java.version"));
 
