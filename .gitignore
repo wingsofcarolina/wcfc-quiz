@@ -25,3 +25,6 @@ buildNumber.properties
 /.idea/*
 !/.idea/runConfigurations/
 !/.idea/runConfigurations/**
+
+# Ignore Google Cloud credentials
+gha-creds-*
