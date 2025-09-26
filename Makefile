@@ -4,7 +4,8 @@ APP_NAME := wcfc-quiz
 APP_VERSION := $(shell mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
 APP_JAR := target/$(APP_NAME)-$(APP_VERSION).jar
 JAVA_FILES := $(shell find src/main/java/org/wingsofcarolina -name '*.java')
-CONTAINER_TAG := us-central1-docker.pkg.dev/wcfc-apps/wcfc-apps/$(APP_NAME):$(APP_VERSION)
+GOOGLE_CLOUD_REGION := us-central1
+CONTAINER_TAG := $(GOOGLE_CLOUD_REGION)-docker.pkg.dev/wcfc-apps/wcfc-apps/$(APP_NAME):$(APP_VERSION)
 
 ifneq ($(shell which podman),)
 	CONTAINER_CMD := podman
