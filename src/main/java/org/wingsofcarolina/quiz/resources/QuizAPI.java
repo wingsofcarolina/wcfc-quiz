@@ -91,7 +91,9 @@ public class QuizAPI {
   private String imageDir;
   private Renderer renderer;
   private SimpleDateFormat dateFormatGmt;
+  private Map<String, Object> buildProperties = null;
 
+  @SuppressWarnings("unchecked")
   public QuizAPI(QuizConfiguration config) throws IOException {
     this.config = config;
     authUtils = new AuthUtils();
@@ -101,6 +103,15 @@ public class QuizAPI {
     imageDir = config.getImageDirectory();
     questionDir = dataDir + "/questions";
     renderer = new Renderer(config);
+
+    // Load up all the system git/build properties
+    ClassLoader classLoader = getClass().getClassLoader();
+    InputStream inputStream = classLoader.getResourceAsStream("git.properties");
+    try {
+      buildProperties = objectMapper.readValue(inputStream, Map.class);
+    } catch (IOException e1) {
+      e1.printStackTrace();
+    }
 
     // Get the startup date/time format in GMT
     dateFormatGmt = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss");
@@ -1723,6 +1734,60 @@ public class QuizAPI {
         .build();
     } else {
       return new RedirectResponse(Pages.LOGIN_PAGE).build();
+    }
+  }
+
+  private Map<String, String> getBuildMetadata() {
+    if (buildProperties == null) {
+      return null;
+    }
+
+    Map<String, String> metadata = new HashMap<>();
+
+    // Extract the specific fields that match wcfc-manuals format
+    if (buildProperties.containsKey("git.commit.id.describe")) {
+      metadata.put(
+        "git.commit.id.describe",
+        String.valueOf(buildProperties.get("git.commit.id.describe"))
+      );
+    }
+    if (buildProperties.containsKey("git.commit.id")) {
+      metadata.put("git.commit.id", String.valueOf(buildProperties.get("git.commit.id")));
+    }
+    if (buildProperties.containsKey("git.build.version")) {
+      metadata.put(
+        "git.build.version",
+        String.valueOf(buildProperties.get("git.build.version"))
+      );
+    }
+    if (buildProperties.containsKey("git.commit.user.name")) {
+      metadata.put(
+        "git.commit.user.name",
+        String.valueOf(buildProperties.get("git.commit.user.name"))
+      );
+    }
+    if (buildProperties.containsKey("git.branch")) {
+      metadata.put("git.branch", String.valueOf(buildProperties.get("git.branch")));
+    }
+    if (buildProperties.containsKey("git.build.time")) {
+      metadata.put(
+        "git.build.time",
+        String.valueOf(buildProperties.get("git.build.time"))
+      );
+    }
+
+    return metadata;
+  }
+
+  @GET
+  @Path("version")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response version() {
+    Map<String, String> version = getBuildMetadata();
+    if (version == null) {
+      return Response.status(500).build();
+    } else {
+      return Response.ok().entity(version).build();
     }
   }
 
