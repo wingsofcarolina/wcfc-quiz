@@ -39,8 +39,8 @@ jobs:
       if: ${{ github.event_name == 'workflow_dispatch' }}
       id: tag
       run: |
-        if [ -n "${{ github.events.inputs.version }}" ]; then
-          TAG="${{ github.events.inputs.version }}"
+        if [ -n "${{ github.event.inputs.version }}" ]; then
+          TAG="${{ github.event.inputs.version }}"
         else
           TAG="${{ steps.calc_tag.outputs.tag }}"
         fi
