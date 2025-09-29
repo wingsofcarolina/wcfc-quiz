@@ -1,4 +1,0 @@
-eval $(minikube docker-env)
-export NODE_PORT=$(kubectl get services/wcfc-quiz -o go-template='{{(index .spec.ports 0).nodePort}}')
-export SERVER=http://$(minikube ip):$NODE_PORT
-echo "Server : " ${SERVER}
