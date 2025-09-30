@@ -27,6 +27,8 @@ jobs:
 
     - name: Checkout repository
       uses: actions/checkout@v5
+      with:
+        fetch-depth: 0
 
     - name: Setup Java
       uses: actions/setup-java@v5
