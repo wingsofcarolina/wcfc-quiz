@@ -48,6 +48,7 @@ public class CommonMarkRenderer {
   private static boolean noNewline = false;
   private static List<Element> elements;
   private static boolean graphHasContent;
+  private static float fontSize = 10f;
 
   public static String renderAsHtml(String input) {
     Node document = parser.parse(input);
@@ -105,10 +106,15 @@ public class CommonMarkRenderer {
   }
 
   public static List<Element> renderToElements(String input) {
+    return renderToElements(input, 10f);
+  }
+
+  public static List<Element> renderToElements(String input, float fontSizeParam) {
     elements = new ArrayList<>();
     graph = new Paragraph();
     graphHasContent = false;
     firstLine = true;
+    fontSize = fontSizeParam;
     Node document = parser.parse(input);
     document.accept(visitor);
     if (graphHasContent) {
@@ -142,13 +148,13 @@ public class CommonMarkRenderer {
       } else if (emphasis || head) {
         style = Font.BOLD;
       }
-      Font font = FontFactory.getFont("Helvetica", 10f, style);
+      Font font = FontFactory.getFont("Helvetica", fontSize, style);
       if (table) {
         PdfPCell cell = new PdfPCell();
         Paragraph p = new Paragraph();
         p.add(new Chunk(literal, font));
         cell.addElement(p);
-        cell.setBorder(PdfPCell.BOX);
+        cell.setBorder(PdfPCell.NO_BORDER);
         if (imbeddedTable != null) imbeddedTable.addCell(cell);
       } else if (list) {
         if (imbeddedList == null) {

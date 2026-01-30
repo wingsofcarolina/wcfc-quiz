@@ -79,14 +79,23 @@ public class PDFGenerator {
     Document document = new Document();
     try {
       PdfWriter writer = PdfWriter.getInstance(document, inMemoryStream);
-      document.setMargins(36f, 36f, 110f, 36f);
+      document.setMargins(36f, 36f, 36f, 50f);
       document.open();
       LineSeparator ls = new LineSeparator();
-      document.add(ls);
+      ls.setLineWidth(0.5f);
+      Paragraph sepTop = new Paragraph();
+      sepTop.add(ls);
+      sepTop.setSpacingBefore(5f);
+      sepTop.setSpacingAfter(5f);
+      document.add(sepTop);
 
       document.add(addQuestion(0, question));
 
-      document.add(ls);
+      Paragraph sepBottom = new Paragraph();
+      sepBottom.add(ls);
+      sepBottom.setSpacingBefore(5f);
+      sepBottom.setSpacingAfter(5f);
+      document.add(sepBottom);
     } catch (DocumentException e) {
       throw new QuizBuildException("Error generating question PDF", e);
     } finally {
@@ -103,15 +112,24 @@ public class PDFGenerator {
     Document document = new Document();
     try {
       PdfWriter writer = PdfWriter.getInstance(document, inMemoryStream);
-      document.setMargins(36f, 36f, 110f, 36f);
+      document.setMargins(36f, 36f, 36f, 50f);
       document.open();
       LineSeparator ls = new LineSeparator();
-      document.add(ls);
+      ls.setLineWidth(0.5f);
+      Paragraph sepTop = new Paragraph();
+      sepTop.add(ls);
+      sepTop.setSpacingBefore(5f);
+      sepTop.setSpacingAfter(5f);
+      document.add(sepTop);
 
       int i = 1;
       for (Question question : questions) {
         document.add(addQuestion(i++, question));
-        document.add(ls);
+        Paragraph sep = new Paragraph();
+        sep.add(ls);
+        sep.setSpacingBefore(5f);
+        sep.setSpacingAfter(5f);
+        document.add(sep);
       }
     } catch (DocumentException e) {
       throw new QuizBuildException("Error generating questions PDF", e);
@@ -129,7 +147,7 @@ public class PDFGenerator {
     Document document = new Document();
     try {
       PdfWriter writer = PdfWriter.getInstance(document, inMemoryStream);
-      document.setMargins(36f, 36f, 110f, 36f);
+      document.setMargins(36f, 36f, 36f, 50f);
       PageXofY event = new PageXofY(quiz);
       writer.setPageEvent(event);
       document.open();
@@ -160,17 +178,18 @@ public class PDFGenerator {
 
     PdfPTable table = new PdfPTable(2);
     try {
-      table.setWidths(new float[] { 1, 2 });
+      table.setWidths(new float[] { 1, 15 });
     } catch (DocumentException e) {
       // ignore, use default widths
     }
     table.setWidthPercentage(100);
+    table.setKeepTogether(true);
 
     PdfPCell cell = new PdfPCell();
     cell.setBorder(PdfPCell.NO_BORDER);
     Paragraph idx = new Paragraph(
       index.toString() + " : ",
-      FontFactory.getFont("Helvetica", 10f, Font.NORMAL)
+      FontFactory.getFont("Helvetica", 12f, Font.NORMAL)
     );
     idx.setAlignment(Element.ALIGN_RIGHT);
     cell.addElement(idx);
@@ -179,8 +198,7 @@ public class PDFGenerator {
 
     cell = new PdfPCell();
     cell.setBorder(PdfPCell.NO_BORDER);
-    Paragraph graph = new Paragraph();
-    // Render question content
+    // Render question content with 12pt font
     List<Element> qElems = question.getQuestionElements();
     for (Element e : qElems) {
       cell.addElement(e);
@@ -326,17 +344,24 @@ public class PDFGenerator {
     );
     p2.setAlignment(Element.ALIGN_RIGHT);
     cell1.addElement(p2);
+    cell1.setVerticalAlignment(Element.ALIGN_MIDDLE);
     table.addCell(cell1);
+    table.setSpacingAfter(6f);
     document.add(table);
 
-    // Add quiz details (i.e. who/what/when/how)
-    PdfPTable details = new PdfPTable(4);
+    // Add quiz details (i.e. who/what/when/how) - 2x3 table matching original layout
+    PdfPTable details = new PdfPTable(3);
     details.setWidthPercentage(100);
+
     details.addCell(new PdfPCell(new Phrase("Instructor :")));
+    details.addCell(new PdfPCell(new Phrase("")));
     details.addCell(new PdfPCell(new Phrase("Date  :")));
+
     details.addCell(new PdfPCell(new Phrase("Pilot    :")));
     details.addCell(new PdfPCell(new Phrase("Member # :")));
     details.addCell(new PdfPCell(new Phrase("Score :")));
+
+    details.setSpacingAfter(6f);
     document.add(details);
 
     // Add instructions
@@ -377,7 +402,12 @@ public class PDFGenerator {
     }
 
     LineSeparator ls = new LineSeparator();
-    document.add(ls);
+    ls.setLineWidth(0.5f);
+    Paragraph sep = new Paragraph();
+    sep.add(ls);
+    sep.setSpacingBefore(10f);
+    sep.setSpacingAfter(15f);
+    document.add(sep);
   }
 
   public PdfPCell createTextCell(String text) throws IOException {
@@ -394,7 +424,7 @@ public class PDFGenerator {
     protected PdfTemplate total;
     protected float side = 20;
     protected float x = 300;
-    protected float y = 85;
+    protected float y = 30;
     protected float space = 4.5f;
     protected float descent = 3;
     protected Quiz quiz;
@@ -417,7 +447,7 @@ public class PDFGenerator {
       ColumnText.showTextAligned(
         writer.getDirectContent(),
         Element.ALIGN_RIGHT,
-        new Phrase("Page " + pageNumber + " of", footerFont),
+        new Phrase("Page " + pageNumber + " of ", footerFont),
         x,
         y,
         0
@@ -448,7 +478,7 @@ public class PDFGenerator {
         Element.ALIGN_LEFT,
         new Phrase(String.valueOf(writer.getPageNumber() - 1), footerFont),
         0,
-        0,
+        descent,
         0
       );
     }

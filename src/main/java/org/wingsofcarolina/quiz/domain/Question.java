@@ -278,7 +278,7 @@ public class Question {
       // Turn all {} instances into blanks
       text = blankify(text);
     }
-    return CommonMarkRenderer.renderToElements(text);
+    return CommonMarkRenderer.renderToElements(text, 12f);
   }
 
   private String blankify(String input) {
