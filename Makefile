@@ -40,6 +40,17 @@ push: check-version-not-dirty docker/.build
 deploy: check-version-not-dirty push
 	@gcloud run deploy $(APP_NAME) --image $(CONTAINER_TAG) --region $(GOOGLE_CLOUD_REGION)
 
+.PHONY: launch
+launch: docker/.build
+	@echo Launching app...
+	@./scripts/launch $(CONTAINER_TAG)
+	@echo App should be running at http://localhost:9314
+
+.PHONY: shutdown
+shutdown:
+	@echo Shutting down app...
+	@$(CONTAINER_CMD) rm -f $(APP_NAME)
+
 .PHONY: integration-tests
 integration-tests: $(APP_JAR)
 	@integration-tests/run-integration-tests.sh

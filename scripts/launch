@@ -1,0 +1,40 @@
+#!/bin/bash
+
+if [ -z "$1" ]; then
+  echo "Usage: launch <image-tag>"
+  exit 1
+fi
+
+if [ -x "$(which podman)" ]; then
+  CONTAINER_CMD=podman
+elif [ -x "$(which docker)" ]; then
+  CONTAINER_CMD=docker
+else
+  echo "Neither podman nor docker are installed"
+  exit 1
+fi
+
+for SECRET in wcfc-apps-mongodb wcfc-apps-slack-notifications wcfc-apps-slack-manuals wcfc-apps-jwt-secret; do
+  if ! ${CONTAINER_CMD} secret exists $SECRET; then
+    echo "Please set up secrets before running this"
+    exit 1
+  fi
+done
+
+mkdir -p $(pwd)/log
+mkdir -p $(pwd)/root
+mkdir -p $(pwd)/dynamic
+
+${CONTAINER_CMD} rm -f wcfc-quiz
+${CONTAINER_CMD} run -d --name wcfc-quiz -p 9314:9314 \
+  --memory=2G \
+  --secret=wcfc-apps-mongodb,type=env,target=MONGODB \
+  --secret=wcfc-apps-WCFC_TOKEN,type=env,target=WCFC_TOKEN \
+  --secret=wcfc-apps-slack-notifications,type=env,target=SLACK_TOKEN_NOTIFICATIONS \
+  --secret=wcfc-apps-slack-manuals,type=env,target=SLACK_TOKEN_MANUALS \
+  --secret=wcfc-apps-jwt-secret,type=env,target=WCFC_JWT_SECRET \
+  --secret=wcfc-apps-gmail-service-account,type=env,target=GMAIL_SERVICE_ACCOUNT_KEY \
+  -v $(pwd)/log:/log \
+  -v $(pwd)/root:/opt/app/root \
+  -v $(pwd)/dynamic:/opt/app/dynamic \
+ $1
