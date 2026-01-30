@@ -1,7 +1,7 @@
 package org.wingsofcarolina.quiz.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.itextpdf.layout.element.Paragraph;
+import com.lowagie.text.Element;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Id;
 import org.wingsofcarolina.quiz.domain.presentation.CommonMarkRenderer;
@@ -40,8 +40,8 @@ public class Answer {
   }
 
   @JsonIgnore
-  public Paragraph getAnswerAsIText() {
-    return CommonMarkRenderer.renderToParagraph(answer);
+  public java.util.List<Element> getAnswerElements() {
+    return CommonMarkRenderer.renderToElements(answer);
   }
 
   public void setAnswer(String answer) {

@@ -1,33 +1,21 @@
 package org.wingsofcarolina.quiz.domain.presentation;
 
-import com.itextpdf.io.font.constants.StandardFonts;
-import com.itextpdf.io.image.ImageDataFactory;
-import com.itextpdf.kernel.font.PdfFont;
-import com.itextpdf.kernel.font.PdfFontFactory;
-import com.itextpdf.kernel.geom.Rectangle;
-import com.itextpdf.kernel.pdf.PdfDocument;
-import com.itextpdf.kernel.pdf.PdfPage;
-import com.itextpdf.kernel.pdf.PdfWriter;
-import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
-import com.itextpdf.kernel.pdf.canvas.draw.SolidLine;
-import com.itextpdf.kernel.pdf.event.AbstractPdfDocumentEvent;
-import com.itextpdf.kernel.pdf.event.AbstractPdfDocumentEventHandler;
-import com.itextpdf.kernel.pdf.event.PdfDocumentEvent;
-import com.itextpdf.kernel.pdf.xobject.PdfFormXObject;
-import com.itextpdf.layout.Canvas;
-import com.itextpdf.layout.Document;
-import com.itextpdf.layout.borders.Border;
-import com.itextpdf.layout.element.Cell;
-import com.itextpdf.layout.element.IBlockElement;
-import com.itextpdf.layout.element.Image;
-import com.itextpdf.layout.element.LineSeparator;
-import com.itextpdf.layout.element.Paragraph;
-import com.itextpdf.layout.element.Table;
-import com.itextpdf.layout.element.Text;
-import com.itextpdf.layout.properties.HorizontalAlignment;
-import com.itextpdf.layout.properties.TextAlignment;
-import com.itextpdf.layout.properties.UnitValue;
-import com.itextpdf.layout.properties.VerticalAlignment;
+import com.lowagie.text.Chunk;
+import com.lowagie.text.Document;
+import com.lowagie.text.DocumentException;
+import com.lowagie.text.Element;
+import com.lowagie.text.Font;
+import com.lowagie.text.FontFactory;
+import com.lowagie.text.Image;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.Phrase;
+import com.lowagie.text.pdf.ColumnText;
+import com.lowagie.text.pdf.PdfPCell;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.PdfPageEventHelper;
+import com.lowagie.text.pdf.PdfTemplate;
+import com.lowagie.text.pdf.PdfWriter;
+import com.lowagie.text.pdf.draw.LineSeparator;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -49,16 +37,12 @@ public class PDFGenerator {
 
   private static final Logger LOG = LoggerFactory.getLogger(PDFGenerator.class);
 
-  private PdfFont normal;
+  private Font normal;
   private QuizContext context;
 
   public PDFGenerator(QuizContext context) throws IOException {
     this.context = context;
-    normal =
-      PdfFontFactory.createFont(
-        StandardFonts.HELVETICA,
-        PdfFontFactory.EmbeddingStrategy.PREFER_NOT_EMBEDDED
-      );
+    normal = FontFactory.getFont("Helvetica", 10f, Font.NORMAL);
   }
 
   public ByteArrayInputStream generate(Quiz quiz)
@@ -92,23 +76,22 @@ public class PDFGenerator {
     throws QuizBuildException, URISyntaxException, MalformedURLException, IOException {
     // Create the document
     ByteArrayOutputStream inMemoryStream = new ByteArrayOutputStream();
-    PdfWriter writer = new PdfWriter(inMemoryStream);
-    PdfDocument pdf = new PdfDocument(writer);
-    Document document = new Document(pdf);
-    document.setBottomMargin(110.0f);
-    document.setFont(normal).setFontSize(10);
+    Document document = new Document();
+    try {
+      PdfWriter writer = PdfWriter.getInstance(document, inMemoryStream);
+      document.setMargins(36f, 36f, 110f, 36f);
+      document.open();
+      LineSeparator ls = new LineSeparator();
+      document.add(ls);
 
-    SolidLine line = new SolidLine(1f);
-    LineSeparator ls = new LineSeparator(line);
-    ls.setMargin(5);
-    document.add(ls);
+      document.add(addQuestion(0, question));
 
-    document.add(addQuestion(0, question));
-
-    document.add(ls);
-
-    // Finalize the document
-    document.close();
+      document.add(ls);
+    } catch (DocumentException e) {
+      throw new QuizBuildException("Error generating question PDF", e);
+    } finally {
+      document.close();
+    }
 
     return new ByteArrayInputStream(inMemoryStream.toByteArray());
   }
@@ -117,25 +100,24 @@ public class PDFGenerator {
     throws QuizBuildException, URISyntaxException, MalformedURLException, IOException {
     // Create the document
     ByteArrayOutputStream inMemoryStream = new ByteArrayOutputStream();
-    PdfWriter writer = new PdfWriter(inMemoryStream);
-    PdfDocument pdf = new PdfDocument(writer);
-    Document document = new Document(pdf);
-    document.setBottomMargin(110.0f);
-    document.setFont(normal).setFontSize(10);
-
-    SolidLine line = new SolidLine(1f);
-    LineSeparator ls = new LineSeparator(line);
-    ls.setMargin(5);
-    document.add(ls);
-
-    int i = 1;
-    for (Question question : questions) {
-      document.add(addQuestion(i++, question));
+    Document document = new Document();
+    try {
+      PdfWriter writer = PdfWriter.getInstance(document, inMemoryStream);
+      document.setMargins(36f, 36f, 110f, 36f);
+      document.open();
+      LineSeparator ls = new LineSeparator();
       document.add(ls);
-    }
 
-    // Finalize the document
-    document.close();
+      int i = 1;
+      for (Question question : questions) {
+        document.add(addQuestion(i++, question));
+        document.add(ls);
+      }
+    } catch (DocumentException e) {
+      throw new QuizBuildException("Error generating questions PDF", e);
+    } finally {
+      document.close();
+    }
 
     return new ByteArrayInputStream(inMemoryStream.toByteArray());
   }
@@ -144,56 +126,68 @@ public class PDFGenerator {
     throws QuizBuildException, URISyntaxException, MalformedURLException, IOException {
     // Create the document
     ByteArrayOutputStream inMemoryStream = new ByteArrayOutputStream();
-    PdfWriter writer = new PdfWriter(inMemoryStream);
-    PdfDocument pdf = new PdfDocument(writer);
-    Document document = new Document(pdf);
-    document.setBottomMargin(110.0f);
-    document.setFont(normal).setFontSize(10);
-    PageXofY event = new PageXofY(pdf, quiz);
-    pdf.addEventHandler(PdfDocumentEvent.END_PAGE, event);
+    Document document = new Document();
+    try {
+      PdfWriter writer = PdfWriter.getInstance(document, inMemoryStream);
+      document.setMargins(36f, 36f, 110f, 36f);
+      PageXofY event = new PageXofY(quiz);
+      writer.setPageEvent(event);
+      document.open();
+      // First lets flesh out the document header
+      addDocumentHeader(quiz, document);
 
-    // First lets flesh out the document header
-    addDocumentHeader(quiz, document);
-
-    // Generate all the questions
-    Integer number = 1;
-    for (Question question : quiz.getQuestions()) {
-      document.add(addQuestion(number, question));
-      document.add(new Paragraph("\n"));
-      number++;
+      // Generate all the questions
+      Integer number = 1;
+      for (Question question : quiz.getQuestions()) {
+        document.add(addQuestion(number, question));
+        Paragraph spacer = new Paragraph();
+        spacer.add(Chunk.NEWLINE);
+        document.add(spacer);
+        number++;
+      }
+    } catch (DocumentException e) {
+      throw new QuizBuildException("Error generating quiz PDF", e);
+    } finally {
+      document.close();
     }
-
-    // Finalize the document
-    event.writeTotal(pdf);
-    document.close();
 
     return new ByteArrayInputStream(inMemoryStream.toByteArray());
   }
 
-  private IBlockElement addQuestion(Integer index, Question question) {
+  private PdfPTable addQuestion(Integer index, Question question) {
     char[] characters = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L' };
     Float CELL_WIDTH = 30.0f;
 
-    Table table = new Table(new float[] { 1, 2 });
-    table.setWidth(UnitValue.createPercentValue(100));
-    table.setKeepTogether(true);
-    table.setFont(normal);
+    PdfPTable table = new PdfPTable(2);
+    try {
+      table.setWidths(new float[] { 1, 2 });
+    } catch (DocumentException e) {
+      // ignore, use default widths
+    }
+    table.setWidthPercentage(100);
 
-    Cell cell = new Cell();
-    cell.setBorder(Border.NO_BORDER);
-    cell.setTextAlignment(TextAlignment.RIGHT);
-    cell.add(new Paragraph(index.toString() + " : "));
-    cell.setWidth(CELL_WIDTH);
+    PdfPCell cell = new PdfPCell();
+    cell.setBorder(PdfPCell.NO_BORDER);
+    Paragraph idx = new Paragraph(
+      index.toString() + " : ",
+      FontFactory.getFont("Helvetica", 10f, Font.NORMAL)
+    );
+    idx.setAlignment(Element.ALIGN_RIGHT);
+    cell.addElement(idx);
+    cell.setFixedHeight(CELL_WIDTH);
     table.addCell(cell);
 
-    cell = new Cell();
-    cell.setBorder(Border.NO_BORDER);
-    cell.setFontSize(12);
-    Paragraph graph = question.getQuestionAsIText();
+    cell = new PdfPCell();
+    cell.setBorder(PdfPCell.NO_BORDER);
+    Paragraph graph = new Paragraph();
+    // Render question content
+    List<Element> qElems = question.getQuestionElements();
+    for (Element e : qElems) {
+      cell.addElement(e);
+    }
     //Remove the question number from the PDF once we go live
     //String questionId = new Long(question.getQuestionId()).toString();
     //graph.add(new Text(" (" + questionId + ")"));
-    cell.add(graph);
     table.addCell(cell);
 
     // Add an image attachment, if one is requested
@@ -202,24 +196,23 @@ public class PDFGenerator {
       try {
         File iFile = new File(imageDir + question.getAttachment());
         if (iFile.exists()) {
-          Image image = new Image(
-            ImageDataFactory.create(imageDir + question.getAttachment())
-          );
-          float imageWidth = image.getImageWidth();
+          Image image = Image.getInstance(imageDir + question.getAttachment());
+          float imageWidth = image.getWidth();
           if (imageWidth > 400f) {
             float scale = imageWidth / 450.0f;
-            float imageHeight = image.getImageHeight() / scale;
+            float imageHeight = image.getHeight() / scale;
             image.scaleAbsolute(450f, imageHeight);
           }
-          cell = new Cell();
-          cell.setBorder(Border.NO_BORDER);
-          cell.add(new Paragraph("\n"));
+          cell = new PdfPCell();
+          cell.setBorder(PdfPCell.NO_BORDER);
+          Paragraph nl = new Paragraph();
+          nl.add(Chunk.NEWLINE);
+          cell.addElement(nl);
           table.addCell(cell);
-          cell = new Cell();
-          cell.setBorder(Border.NO_BORDER);
-          cell.setVerticalAlignment(VerticalAlignment.MIDDLE);
-          cell.setHorizontalAlignment(HorizontalAlignment.CENTER);
-          cell.add(image);
+          cell = new PdfPCell();
+          cell.setBorder(PdfPCell.NO_BORDER);
+          image.setAlignment(Element.ALIGN_CENTER);
+          cell.addElement(image);
           table.addCell(cell);
         } else {
           LOG.error(
@@ -227,7 +220,7 @@ public class PDFGenerator {
             question.getAttachment()
           );
         }
-      } catch (com.itextpdf.io.exceptions.IOException | MalformedURLException e) {
+      } catch (IOException e) {
         LOG.error(
           "Exception occured trying to access image file : {}",
           question.getAttachment()
@@ -238,34 +231,40 @@ public class PDFGenerator {
     if (question.isMultipleChoice()) {
       int aIndex = 0;
       if (question.getAnswers() == null || question.getAnswers().size() == 0) {
-        cell = new Cell();
-        cell.setBorder(Border.NO_BORDER);
-        cell.setTextAlignment(TextAlignment.RIGHT);
-        cell.add(new Paragraph("\n"));
-        cell.setWidth(CELL_WIDTH);
-        cell.setPaddingTop(0);
+        cell = new PdfPCell();
+        cell.setBorder(PdfPCell.NO_BORDER);
+        Paragraph nl = new Paragraph();
+        nl.add(Chunk.NEWLINE);
+        nl.setAlignment(Element.ALIGN_RIGHT);
+        cell.addElement(nl);
         table.addCell(cell);
 
-        cell = new Cell();
-        cell.setBorder(Border.NO_BORDER);
-        cell.setFontSize(12);
-        graph.add(new Text("This question has no answers at this time."));
-        cell.add(graph);
+        cell = new PdfPCell();
+        cell.setBorder(PdfPCell.NO_BORDER);
+        Paragraph none = new Paragraph(
+          "This question has no answers at this time.",
+          FontFactory.getFont("Helvetica", 12f, Font.NORMAL)
+        );
+        cell.addElement(none);
         table.addCell(cell);
       } else {
         for (Answer answer : question.getAnswers()) {
-          cell = new Cell();
-          cell.setBorder(Border.NO_BORDER);
-          cell.setTextAlignment(TextAlignment.RIGHT);
-          cell.add(new Paragraph(characters[aIndex] + " : "));
-          cell.setWidth(CELL_WIDTH);
-          cell.setPaddingTop(0);
+          cell = new PdfPCell();
+          cell.setBorder(PdfPCell.NO_BORDER);
+          Paragraph lab = new Paragraph(
+            characters[aIndex] + " : ",
+            FontFactory.getFont("Helvetica", 10f, Font.NORMAL)
+          );
+          lab.setAlignment(Element.ALIGN_RIGHT);
+          cell.addElement(lab);
           table.addCell(cell);
 
-          cell = new Cell();
-          cell.setBorder(Border.NO_BORDER);
-          cell.add(answer.getAnswerAsIText());
-          cell.setPaddingTop(0);
+          cell = new PdfPCell();
+          cell.setBorder(PdfPCell.NO_BORDER);
+          List<Element> elems = answer.getAnswerElements();
+          for (Element e : elems) {
+            cell.addElement(e);
+          }
           table.addCell(cell);
           aIndex++;
         }
@@ -275,7 +274,7 @@ public class PDFGenerator {
   }
 
   private void addDocumentHeader(Quiz quiz, Document document)
-    throws URISyntaxException, MalformedURLException, IOException {
+    throws URISyntaxException, MalformedURLException, IOException, DocumentException {
     // Generate header
     byte[] bytes = Files.readAllBytes(
       new File(
@@ -283,60 +282,75 @@ public class PDFGenerator {
       )
         .toPath()
     );
-    Image img = new Image(ImageDataFactory.create(bytes));
-    img.setWidth(150.0f);
+    Image img = Image.getInstance(bytes);
+    img.scaleToFit(150.0f, 150.0f);
 
-    Table table = new Table(new float[] { 1, 2 });
-    table.setWidth(UnitValue.createPercentValue(100));
+    PdfPTable table = new PdfPTable(2);
+    try {
+      table.setWidths(new float[] { 1, 2 });
+    } catch (DocumentException e) {
+      // ignore, use default widths
+    }
+    table.setWidthPercentage(100);
 
     // Add WCFC Logo
-    Cell cell = new Cell();
-    cell.add(img);
-    cell.setBorder(Border.NO_BORDER);
+    PdfPCell cell = new PdfPCell();
+    cell.addElement(img);
+    cell.setBorder(PdfPCell.NO_BORDER);
     table.addCell(cell);
 
     // Add quiz details
-    Cell cell1 = new Cell();
-    cell1.setBorder(Border.NO_BORDER);
-    Paragraph p = new Paragraph(quiz.getQuizName()).setFontSize(24.0f);
-    p.setTextAlignment(TextAlignment.RIGHT);
-    cell1.add(p);
+    PdfPCell cell1 = new PdfPCell();
+    cell1.setBorder(PdfPCell.NO_BORDER);
+    Paragraph p = new Paragraph(
+      quiz.getQuizName(),
+      FontFactory.getFont("Helvetica", 24.0f, Font.NORMAL)
+    );
+    p.setAlignment(Element.ALIGN_RIGHT);
+    cell1.addElement(p);
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     String sunsetDate = sdf.format(quiz.getSunsetDate());
-    Paragraph p1 = new Paragraph("Review before : " + sunsetDate);
-    p1.setTextAlignment(TextAlignment.RIGHT);
-    p1.setFontSize(12);
-    cell1.add(p1);
-    Paragraph p2 = new Paragraph("Quiz ID : ");
-    Text id = new Text(Long.valueOf(quiz.getQuizId()).toString()).simulateBold();
-    p2.add(id);
-    p2.setTextAlignment(TextAlignment.RIGHT);
-    p2.setFontSize(12);
-    cell1.add(p2);
-    cell1.setVerticalAlignment(VerticalAlignment.MIDDLE);
+    Paragraph p1 = new Paragraph(
+      "Review before : " + sunsetDate,
+      FontFactory.getFont("Helvetica", 12f, Font.NORMAL)
+    );
+    p1.setAlignment(Element.ALIGN_RIGHT);
+    cell1.addElement(p1);
+    Paragraph p2 = new Paragraph();
+    p2.add(new Chunk("Quiz ID : ", FontFactory.getFont("Helvetica", 12f, Font.NORMAL)));
+    p2.add(
+      new Chunk(
+        Long.valueOf(quiz.getQuizId()).toString(),
+        FontFactory.getFont("Helvetica", 12f, Font.BOLD)
+      )
+    );
+    p2.setAlignment(Element.ALIGN_RIGHT);
+    cell1.addElement(p2);
     table.addCell(cell1);
     document.add(table);
 
     // Add quiz details (i.e. who/what/when/how)
-    Cell tc1;
-    Table details = new Table(4);
-    details.setWidth(UnitValue.createPercentValue(100));
-    details.addCell(new Cell(1, 3).add(new Paragraph("Instructor :")));
-    details.addCell(new Cell(1, 1).add(new Paragraph("Date  :")));
-    details.addCell(new Cell(1, 1).add(new Paragraph("Pilot    :")));
-    details.addCell(new Cell(1, 2).add(new Paragraph("Member # :")));
-    details.addCell(new Cell(1, 1).add(new Paragraph("Score :")));
+    PdfPTable details = new PdfPTable(4);
+    details.setWidthPercentage(100);
+    details.addCell(new PdfPCell(new Phrase("Instructor :")));
+    details.addCell(new PdfPCell(new Phrase("Date  :")));
+    details.addCell(new PdfPCell(new Phrase("Pilot    :")));
+    details.addCell(new PdfPCell(new Phrase("Member # :")));
+    details.addCell(new PdfPCell(new Phrase("Score :")));
     document.add(details);
 
     // Add instructions
     Paragraph instructor = new Paragraph();
-    Text text = new Text("Instructor : ");
-    instructor.add(text.simulateBold());
     instructor.add(
-      "Please note the final score (subtract " +
-      quiz.pointsPerQuestion() +
-      " points from 100 for each wrong answer) on the checkout form and file the quiz in " +
-      " the Pilot Records folder."
+      new Chunk("Instructor : ", FontFactory.getFont("Helvetica", 10f, Font.BOLD))
+    );
+    instructor.add(
+      new Chunk(
+        "Please note the final score (subtract " +
+        quiz.pointsPerQuestion() +
+        " points from 100 for each wrong answer) on the checkout form and file the quiz in the Pilot Records folder.",
+        FontFactory.getFont("Helvetica", 10f, Font.NORMAL)
+      )
     );
     document.add(instructor);
     //		Paragraph pilot = new Paragraph();
@@ -350,91 +364,93 @@ public class PDFGenerator {
     // Add any Front Matter that might have been configured
     if (context.getVariable("instructions") != null) {
       Paragraph instructions = new Paragraph();
-      text = new Text("Pilot : ");
-      instructions.add(text.simulateBold());
-      instructions.add(context.getVariable("instructions"));
+      instructions.add(
+        new Chunk("Pilot : ", FontFactory.getFont("Helvetica", 10f, Font.BOLD))
+      );
+      instructions.add(
+        new Chunk(
+          String.valueOf(context.getVariable("instructions")),
+          FontFactory.getFont("Helvetica", 10f, Font.NORMAL)
+        )
+      );
       document.add(instructions);
     }
 
-    SolidLine line = new SolidLine(1f);
-    LineSeparator ls = new LineSeparator(line);
-    ls.setMargin(5);
+    LineSeparator ls = new LineSeparator();
     document.add(ls);
   }
 
-  public Cell createTextCell(String text) throws IOException {
-    Cell cell = new Cell();
-    cell.setBorder(Border.NO_BORDER);
-    Paragraph p = new Paragraph(text);
-    p.setTextAlignment(TextAlignment.RIGHT);
-    cell.add(p);
-    cell.setVerticalAlignment(VerticalAlignment.MIDDLE);
+  public PdfPCell createTextCell(String text) throws IOException {
+    PdfPCell cell = new PdfPCell();
+    cell.setBorder(PdfPCell.NO_BORDER);
+    Paragraph p = new Paragraph(text, FontFactory.getFont("Helvetica", 10f, Font.NORMAL));
+    p.setAlignment(Element.ALIGN_RIGHT);
+    cell.addElement(p);
     return cell;
   }
 
-  protected class PageXofY extends AbstractPdfDocumentEventHandler {
+  protected class PageXofY extends PdfPageEventHelper {
 
-    protected PdfFormXObject placeholder;
+    protected PdfTemplate total;
     protected float side = 20;
     protected float x = 300;
     protected float y = 85;
     protected float space = 4.5f;
     protected float descent = 3;
     protected Quiz quiz;
+    protected Font footerFont = FontFactory.getFont("Helvetica", 10f, Font.NORMAL);
+    protected Font smallFont = FontFactory.getFont("Helvetica", 8f, Font.NORMAL);
 
-    public PageXofY(PdfDocument pdf, Quiz quiz) {
+    public PageXofY(Quiz quiz) {
       this.quiz = quiz;
-      placeholder = new PdfFormXObject(new Rectangle(0, 0, side, side));
     }
 
     @Override
-    public void onAcceptedEvent(AbstractPdfDocumentEvent event) {
-      PdfDocumentEvent docEvent = (PdfDocumentEvent) event;
-      PdfDocument pdf = docEvent.getDocument();
-      PdfPage page = docEvent.getPage();
-      int pageNumber = pdf.getPageNumber(page);
-      Rectangle pageSize = page.getPageSize();
-      PdfCanvas pdfCanvas = new PdfCanvas(
-        page.getLastContentStream(),
-        page.getResources(),
-        pdf
-      );
-      Canvas canvas = new Canvas(pdfCanvas, pageSize);
-      canvas.setFont(normal);
-      canvas.setFontSize(10);
-      Paragraph p = new Paragraph()
-        .add("Page ")
-        .add(String.valueOf(pageNumber))
-        .add(" of");
-      canvas.showTextAligned(p, x, y, TextAlignment.RIGHT);
-      canvas.showTextAligned(
-        new Paragraph("WCFC " + quiz.getQuizName() + " Quiz").setFontSize(8),
-        50,
-        y,
-        TextAlignment.LEFT
-      );
-      canvas.showTextAligned(
-        new Paragraph("Quiz ID : " + quiz.getQuizId()).setFontSize(8),
-        550,
-        y,
-        TextAlignment.RIGHT
-      );
-      pdfCanvas.addXObjectAt(placeholder, x + space, y - descent);
-      pdfCanvas.release();
-      canvas.close();
+    public void onOpenDocument(PdfWriter writer, Document document) {
+      total = writer.getDirectContent().createTemplate(side, side);
     }
 
-    public void writeTotal(PdfDocument pdf) {
-      Canvas canvas = new Canvas(placeholder, pdf);
-      canvas.setFont(normal);
-      canvas.setFontSize(10);
-      canvas.showTextAligned(
-        String.valueOf(pdf.getNumberOfPages()),
-        0,
-        descent,
-        TextAlignment.LEFT
+    @Override
+    public void onEndPage(PdfWriter writer, Document document) {
+      int pageNumber = writer.getPageNumber();
+      com.lowagie.text.Rectangle pageSize = document.getPageSize();
+      ColumnText.showTextAligned(
+        writer.getDirectContent(),
+        Element.ALIGN_RIGHT,
+        new Phrase("Page " + pageNumber + " of", footerFont),
+        x,
+        y,
+        0
       );
-      canvas.close();
+      ColumnText.showTextAligned(
+        writer.getDirectContent(),
+        Element.ALIGN_LEFT,
+        new Phrase("WCFC " + quiz.getQuizName() + " Quiz", smallFont),
+        50,
+        y,
+        0
+      );
+      ColumnText.showTextAligned(
+        writer.getDirectContent(),
+        Element.ALIGN_RIGHT,
+        new Phrase("Quiz ID : " + quiz.getQuizId(), smallFont),
+        550,
+        y,
+        0
+      );
+      writer.getDirectContent().addTemplate(total, x + space, y - descent);
+    }
+
+    @Override
+    public void onCloseDocument(PdfWriter writer, Document document) {
+      ColumnText.showTextAligned(
+        total,
+        Element.ALIGN_LEFT,
+        new Phrase(String.valueOf(writer.getPageNumber() - 1), footerFont),
+        0,
+        0,
+        0
+      );
     }
   }
 }

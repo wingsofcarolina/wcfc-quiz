@@ -1,7 +1,14 @@
 package org.wingsofcarolina.quiz.domain.presentation;
 
-import com.itextpdf.layout.element.Cell;
-import com.itextpdf.layout.element.Paragraph;
+import com.lowagie.text.Chunk;
+import com.lowagie.text.Element;
+import com.lowagie.text.Font;
+import com.lowagie.text.FontFactory;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.Phrase;
+import com.lowagie.text.pdf.PdfPCell;
+import com.lowagie.text.pdf.PdfPTable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.commonmark.Extension;
@@ -39,6 +46,8 @@ public class CommonMarkRenderer {
   private static Paragraph graph;
   private static boolean firstLine = true;
   private static boolean noNewline = false;
+  private static List<Element> elements;
+  private static boolean graphHasContent;
 
   public static String renderAsHtml(String input) {
     Node document = parser.parse(input);
@@ -82,14 +91,30 @@ public class CommonMarkRenderer {
     }
   }
 
+  // Legacy method retained for compatibility; prefers plain text rendering
   public static Paragraph renderToParagraph(String input) {
-    graph = new Paragraph();
+    Paragraph p = new Paragraph();
+    Node document = parser.parse(input);
+    elements = new ArrayList<>();
+    graph = p;
+    graphHasContent = false;
     firstLine = true;
+    document.accept(visitor);
+    // Add accumulated text to paragraph
+    return graph;
+  }
 
+  public static List<Element> renderToElements(String input) {
+    elements = new ArrayList<>();
+    graph = new Paragraph();
+    graphHasContent = false;
+    firstLine = true;
     Node document = parser.parse(input);
     document.accept(visitor);
-
-    return graph;
+    if (graphHasContent) {
+      elements.add(graph);
+    }
+    return elements;
   }
 
   static class MyVisitor extends AbstractVisitor {
@@ -98,42 +123,51 @@ public class CommonMarkRenderer {
     private boolean strong = false;
     private boolean head = false;
     private boolean table = false;
-    private com.itextpdf.layout.element.Table imbeddedTable = null;
+    private PdfPTable imbeddedTable = null;
     private int rows = 0;
     private int columns = 0;
     private int rowcount = -1;
     private int columnCount = -1;
 
     private boolean list = false;
-    private com.itextpdf.layout.element.List imbeddedList = null;
+    private com.lowagie.text.List imbeddedList = null;
     private boolean noNewline;
 
     @Override
     public void visit(Text element) {
       String literal = element.getLiteral();
-      com.itextpdf.layout.element.Text text = new com.itextpdf.layout.element.Text(
-        literal
-      );
-      if (emphasis || head) text.simulateBold();
-      if (strong) text.simulateItalic().simulateBold();
-      if (table == true) {
-        Cell cell = new Cell();
-        cell.add(new Paragraph(text));
+      int style = Font.NORMAL;
+      if (strong) {
+        style = Font.BOLDITALIC;
+      } else if (emphasis || head) {
+        style = Font.BOLD;
+      }
+      Font font = FontFactory.getFont("Helvetica", 10f, style);
+      if (table) {
+        PdfPCell cell = new PdfPCell();
+        Paragraph p = new Paragraph();
+        p.add(new Chunk(literal, font));
+        cell.addElement(p);
+        cell.setBorder(PdfPCell.BOX);
         if (imbeddedTable != null) imbeddedTable.addCell(cell);
-      } else if (list == true) {
+      } else if (list) {
         if (imbeddedList == null) {
-          imbeddedList = new com.itextpdf.layout.element.List();
+          imbeddedList = new com.lowagie.text.List(com.lowagie.text.List.UNORDERED);
         }
-        imbeddedList.add(new com.itextpdf.layout.element.ListItem(literal));
+        com.lowagie.text.ListItem li = new com.lowagie.text.ListItem(
+          new Phrase(literal, font)
+        );
+        imbeddedList.add(li);
       } else {
         if (list && !firstLine) {
-          graph.add("\n");
+          graph.add(Chunk.NEWLINE);
           if (!noNewline) {
-            graph.add("\n");
+            graph.add(Chunk.NEWLINE);
           }
         }
         firstLine = false;
-        graph.add(text);
+        graph.add(new Chunk(literal, font));
+        graphHasContent = true;
       }
     }
 
@@ -168,9 +202,18 @@ public class CommonMarkRenderer {
       //	    	LOG.info("BulletList {}", bulletList);
       list = true;
       visitChildren(bulletList);
-      graph.add("\n\n");
-      graph.add(imbeddedList);
-      graph.add("\n\n");
+      if (graphHasContent) {
+        elements.add(graph);
+        graph = new Paragraph();
+        graphHasContent = false;
+      }
+      if (imbeddedList != null) {
+        elements.add(imbeddedList);
+      }
+      Paragraph spacer = new Paragraph();
+      spacer.add(Chunk.NEWLINE);
+      spacer.add(Chunk.NEWLINE);
+      elements.add(spacer);
       imbeddedList = null;
       list = false;
     }
@@ -179,9 +222,9 @@ public class CommonMarkRenderer {
       if (node instanceof TableHead) {
         //		    	LOG.info("TableHead {}", node);
         if (imbeddedTable == null) {
-          graph.add("\n\n");
           columnCount = getColumnCount(node.getFirstChild());
-          imbeddedTable = new com.itextpdf.layout.element.Table(columnCount);
+          imbeddedTable = new PdfPTable(columnCount);
+          imbeddedTable.setWidthPercentage(100);
         }
         head = true;
         table = true;
@@ -192,9 +235,9 @@ public class CommonMarkRenderer {
         table = true;
       } else if (node instanceof TableBody) {
         if (imbeddedTable == null) {
-          graph.add("\n\n");
           columnCount = getColumnCount(node);
-          imbeddedTable = new com.itextpdf.layout.element.Table(columnCount);
+          imbeddedTable = new PdfPTable(columnCount);
+          imbeddedTable.setWidthPercentage(100);
         }
         rows = 0;
         rowcount = getRowCount(node);
@@ -214,8 +257,16 @@ public class CommonMarkRenderer {
       // all rows and all columns. This is because there is no
       // event which actually marks the end of a table (damn it).
       if (!head && imbeddedTable != null && rows == rowcount && columns == columnCount) {
-        graph.add(imbeddedTable);
-        graph.add("\n\n");
+        if (graphHasContent) {
+          elements.add(graph);
+          graph = new Paragraph();
+          graphHasContent = false;
+        }
+        elements.add(imbeddedTable);
+        Paragraph spacer = new Paragraph();
+        spacer.add(Chunk.NEWLINE);
+        spacer.add(Chunk.NEWLINE);
+        elements.add(spacer);
         imbeddedTable = null;
         head = false;
         table = false;

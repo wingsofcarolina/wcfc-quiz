@@ -1,7 +1,7 @@
 package org.wingsofcarolina.quiz.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.itextpdf.layout.element.Paragraph;
+import com.lowagie.text.Element;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
@@ -272,13 +272,13 @@ public class Question {
   }
 
   @JsonIgnore
-  public Paragraph getQuestionAsIText() {
+  public List<Element> getQuestionElements() {
     String text = details.getQuestion();
     if (type == Type.BLANK) {
       // Turn all {} instances into blanks
       text = blankify(text);
     }
-    return CommonMarkRenderer.renderToParagraph(text);
+    return CommonMarkRenderer.renderToElements(text);
   }
 
   private String blankify(String input) {

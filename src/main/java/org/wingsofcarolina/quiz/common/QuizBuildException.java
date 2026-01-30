@@ -7,4 +7,8 @@ public class QuizBuildException extends Exception {
   public QuizBuildException(String message) {
     super(message);
   }
+
+  public QuizBuildException(String message, Throwable cause) {
+    super(message, cause);
+  }
 }
