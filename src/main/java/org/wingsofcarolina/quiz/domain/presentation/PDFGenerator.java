@@ -215,11 +215,17 @@ public class PDFGenerator {
         File iFile = new File(imageDir + question.getAttachment());
         if (iFile.exists()) {
           Image image = Image.getInstance(imageDir + question.getAttachment());
-          float imageWidth = image.getWidth();
+          // Get pixel dimensions and scale appropriately
+          // Only scale down images wider than 400px - never scale up to avoid pixelation
+          float imageWidth = image.getPlainWidth();
+          float imageHeight = image.getPlainHeight();
           if (imageWidth > 400f) {
+            // Scale down to fit within 450 points width
             float scale = imageWidth / 450.0f;
-            float imageHeight = image.getHeight() / scale;
-            image.scaleAbsolute(450f, imageHeight);
+            image.scaleAbsolute(450f, imageHeight / scale);
+          } else {
+            // Lock in the pixel dimensions as points to prevent OpenPDF auto-scaling
+            image.scaleAbsolute(imageWidth, imageHeight);
           }
           cell = new PdfPCell();
           cell.setBorder(PdfPCell.NO_BORDER);
@@ -229,7 +235,7 @@ public class PDFGenerator {
           table.addCell(cell);
           cell = new PdfPCell();
           cell.setBorder(PdfPCell.NO_BORDER);
-          image.setAlignment(Element.ALIGN_CENTER);
+          image.setAlignment(Element.ALIGN_LEFT);
           cell.addElement(image);
           table.addCell(cell);
         } else {
