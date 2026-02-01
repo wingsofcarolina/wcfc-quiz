@@ -37,4 +37,6 @@ ${CONTAINER_CMD} run -d --name wcfc-quiz -p 9314:9314 \
   -v $(pwd)/log:/log \
   -v $(pwd)/root:/opt/app/root \
   -v $(pwd)/dynamic:/opt/app/dynamic \
+  -e IMAGEDIR=/mnt/wcfc-quiz/images \
+  -v $(pwd)/images:/mnt/wcfc-quiz/images \
  $1
