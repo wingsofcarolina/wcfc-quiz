@@ -1,7 +1,6 @@
 package org.wingsofcarolina.quiz.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.lowagie.text.Element;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
@@ -11,6 +10,7 @@ import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Transient;
+import org.openpdf.text.Element;
 import org.wingsofcarolina.quiz.domain.dao.QuestionDAO;
 import org.wingsofcarolina.quiz.domain.persistence.Persistence;
 import org.wingsofcarolina.quiz.domain.presentation.CommonMarkRenderer;

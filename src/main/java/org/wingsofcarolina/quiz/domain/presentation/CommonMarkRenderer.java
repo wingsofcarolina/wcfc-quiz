@@ -1,13 +1,5 @@
 package org.wingsofcarolina.quiz.domain.presentation;
 
-import com.lowagie.text.Chunk;
-import com.lowagie.text.Element;
-import com.lowagie.text.Font;
-import com.lowagie.text.FontFactory;
-import com.lowagie.text.Paragraph;
-import com.lowagie.text.Phrase;
-import com.lowagie.text.pdf.PdfPCell;
-import com.lowagie.text.pdf.PdfPTable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -28,6 +20,14 @@ import org.commonmark.node.StrongEmphasis;
 import org.commonmark.node.Text;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
+import org.openpdf.text.Chunk;
+import org.openpdf.text.Element;
+import org.openpdf.text.Font;
+import org.openpdf.text.FontFactory;
+import org.openpdf.text.Paragraph;
+import org.openpdf.text.Phrase;
+import org.openpdf.text.pdf.PdfPCell;
+import org.openpdf.text.pdf.PdfPTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -136,7 +136,7 @@ public class CommonMarkRenderer {
     private int columnCount = -1;
 
     private boolean list = false;
-    private com.lowagie.text.List imbeddedList = null;
+    private org.openpdf.text.List imbeddedList = null;
     private boolean noNewline;
 
     @Override
@@ -158,9 +158,9 @@ public class CommonMarkRenderer {
         if (imbeddedTable != null) imbeddedTable.addCell(cell);
       } else if (list) {
         if (imbeddedList == null) {
-          imbeddedList = new com.lowagie.text.List(com.lowagie.text.List.UNORDERED);
+          imbeddedList = new org.openpdf.text.List(org.openpdf.text.List.UNORDERED);
         }
-        com.lowagie.text.ListItem li = new com.lowagie.text.ListItem(
+        org.openpdf.text.ListItem li = new org.openpdf.text.ListItem(
           new Phrase(literal, font)
         );
         imbeddedList.add(li);

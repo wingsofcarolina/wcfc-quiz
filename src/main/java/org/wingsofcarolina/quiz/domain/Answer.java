@@ -1,9 +1,9 @@
 package org.wingsofcarolina.quiz.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.lowagie.text.Element;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Id;
+import org.openpdf.text.Element;
 import org.wingsofcarolina.quiz.domain.presentation.CommonMarkRenderer;
 
 public class Answer {
