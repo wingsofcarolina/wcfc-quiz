@@ -28,3 +28,6 @@ buildNumber.properties
 
 # Ignore Google Cloud credentials
 gha-creds-*
+
+# Ignore codex lock file
+/.codex
