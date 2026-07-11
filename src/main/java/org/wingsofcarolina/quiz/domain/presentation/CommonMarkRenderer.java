@@ -35,24 +35,13 @@ public class CommonMarkRenderer {
 
   private static final Logger LOG = LoggerFactory.getLogger(CommonMarkRenderer.class);
 
-  private static List<Extension> extensions = Arrays.asList(TablesExtension.create());
-  private static Parser parser = Parser.builder().extensions(extensions).build();
-  private static HtmlRenderer htmlRenderer = HtmlRenderer
-    .builder()
-    .extensions(extensions)
-    .build();
-  private static MyVisitor visitor = new MyVisitor();
-
-  private static Paragraph graph;
-  private static boolean firstLine = true;
-  private static boolean noNewline = false;
-  private static List<Element> elements;
-  private static boolean graphHasContent;
-  private static float fontSize = 10f;
+  private static final List<Extension> extensions = Arrays.asList(
+    TablesExtension.create()
+  );
 
   public static String renderAsHtml(String input) {
-    Node document = parser.parse(input);
-    String output = htmlRenderer.render(document);
+    Node document = parser().parse(input);
+    String output = htmlRenderer().render(document);
     String result = removeAll(output, "<p>");
     result = removeLast(result, "</p>");
     return result;
@@ -94,15 +83,11 @@ public class CommonMarkRenderer {
 
   // Legacy method retained for compatibility; prefers plain text rendering
   public static Paragraph renderToParagraph(String input) {
-    Paragraph p = new Paragraph();
-    Node document = parser.parse(input);
-    elements = new ArrayList<>();
-    graph = p;
-    graphHasContent = false;
-    firstLine = true;
+    Node document = parser().parse(input);
+    RenderState state = new RenderState(new Paragraph(), 10f);
+    MyVisitor visitor = new MyVisitor(state);
     document.accept(visitor);
-    // Add accumulated text to paragraph
-    return graph;
+    return state.graph;
   }
 
   public static List<Element> renderToElements(String input) {
@@ -110,20 +95,41 @@ public class CommonMarkRenderer {
   }
 
   public static List<Element> renderToElements(String input, float fontSizeParam) {
-    elements = new ArrayList<>();
-    graph = new Paragraph();
-    graphHasContent = false;
-    firstLine = true;
-    fontSize = fontSizeParam;
-    Node document = parser.parse(input);
+    Node document = parser().parse(input);
+    RenderState state = new RenderState(new Paragraph(), fontSizeParam);
+    MyVisitor visitor = new MyVisitor(state);
     document.accept(visitor);
-    if (graphHasContent) {
-      elements.add(graph);
+    if (state.graphHasContent) {
+      state.elements.add(state.graph);
     }
-    return elements;
+    return state.elements;
+  }
+
+  private static Parser parser() {
+    return Parser.builder().extensions(extensions).build();
+  }
+
+  private static HtmlRenderer htmlRenderer() {
+    return HtmlRenderer.builder().extensions(extensions).build();
+  }
+
+  private static class RenderState {
+
+    private Paragraph graph;
+    private boolean firstLine = true;
+    private List<Element> elements = new ArrayList<>();
+    private boolean graphHasContent = false;
+    private float fontSize;
+
+    private RenderState(Paragraph graph, float fontSize) {
+      this.graph = graph;
+      this.fontSize = fontSize;
+    }
   }
 
   static class MyVisitor extends AbstractVisitor {
+
+    private final RenderState state;
 
     private boolean emphasis = false;
     private boolean strong = false;
@@ -139,6 +145,10 @@ public class CommonMarkRenderer {
     private org.openpdf.text.List imbeddedList = null;
     private boolean noNewline;
 
+    private MyVisitor(RenderState state) {
+      this.state = state;
+    }
+
     @Override
     public void visit(Text element) {
       String literal = element.getLiteral();
@@ -148,7 +158,7 @@ public class CommonMarkRenderer {
       } else if (emphasis || head) {
         style = Font.BOLD;
       }
-      Font font = FontFactory.getFont("Helvetica", fontSize, style);
+      Font font = FontFactory.getFont("Helvetica", state.fontSize, style);
       if (table) {
         PdfPCell cell = new PdfPCell();
         Paragraph p = new Paragraph();
@@ -165,15 +175,15 @@ public class CommonMarkRenderer {
         );
         imbeddedList.add(li);
       } else {
-        if (list && !firstLine) {
-          graph.add(Chunk.NEWLINE);
+        if (list && !state.firstLine) {
+          state.graph.add(Chunk.NEWLINE);
           if (!noNewline) {
-            graph.add(Chunk.NEWLINE);
+            state.graph.add(Chunk.NEWLINE);
           }
         }
-        firstLine = false;
-        graph.add(new Chunk(literal, font));
-        graphHasContent = true;
+        state.firstLine = false;
+        state.graph.add(new Chunk(literal, font));
+        state.graphHasContent = true;
       }
     }
 
@@ -208,18 +218,18 @@ public class CommonMarkRenderer {
       //	    	LOG.info("BulletList {}", bulletList);
       list = true;
       visitChildren(bulletList);
-      if (graphHasContent) {
-        elements.add(graph);
-        graph = new Paragraph();
-        graphHasContent = false;
+      if (state.graphHasContent) {
+        state.elements.add(state.graph);
+        state.graph = new Paragraph();
+        state.graphHasContent = false;
       }
       if (imbeddedList != null) {
-        elements.add(imbeddedList);
+        state.elements.add(imbeddedList);
       }
       Paragraph spacer = new Paragraph();
       spacer.add(Chunk.NEWLINE);
       spacer.add(Chunk.NEWLINE);
-      elements.add(spacer);
+      state.elements.add(spacer);
       imbeddedList = null;
       list = false;
     }
@@ -263,16 +273,16 @@ public class CommonMarkRenderer {
       // all rows and all columns. This is because there is no
       // event which actually marks the end of a table (damn it).
       if (!head && imbeddedTable != null && rows == rowcount && columns == columnCount) {
-        if (graphHasContent) {
-          elements.add(graph);
-          graph = new Paragraph();
-          graphHasContent = false;
+        if (state.graphHasContent) {
+          state.elements.add(state.graph);
+          state.graph = new Paragraph();
+          state.graphHasContent = false;
         }
-        elements.add(imbeddedTable);
+        state.elements.add(imbeddedTable);
         Paragraph spacer = new Paragraph();
         spacer.add(Chunk.NEWLINE);
         spacer.add(Chunk.NEWLINE);
-        elements.add(spacer);
+        state.elements.add(spacer);
         imbeddedTable = null;
         head = false;
         table = false;

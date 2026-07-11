@@ -368,7 +368,6 @@ public class QuizResource {
     }
 
     if (recipe != null) {
-      String output = "";
       try {
         // Build the quiz itself
         quiz = new Quiz(recipe);
@@ -388,26 +387,60 @@ public class QuizResource {
 
         return Response.ok().type("application/pdf").entity(inputStream).build();
       } catch (QuizBuildException e) {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.enable(SerializationFeature.INDENT_OUTPUT);
-        output = mapper.writeValueAsString(recipe);
-        output = output.replaceAll("(\r\n|\n)", "<br/>");
-        output = output.replaceAll("\\s", "&nbsp;&nbsp;");
-
-        // Notify someone of the failure to generate a quiz. This is critical!
-        Slack
-          .instance()
-          .sendMessage(
-            "ERROR generating quiz for " + quiz.getQuizName() + " : " + e.getMessage()
-          );
-
-        QuizBuildErrorWrapper wrapper = new QuizBuildErrorWrapper(e.getMessage(), output);
-        output = renderer.render("quizBuildError.ad", wrapper);
-        return Response.ok().entity(output).build();
+        LOG.error(
+          "Quiz build failed for alias '{}' using recipe '{}' ({})",
+          alias,
+          recipe.getName(),
+          recipe.getRecipeId(),
+          e
+        );
+        return quizGenerationErrorResponse(alias, recipe, quiz, e, false);
+      } catch (Exception e) {
+        LOG.error(
+          "Unexpected error generating quiz for alias '{}' using recipe '{}' ({})",
+          alias,
+          recipe.getName(),
+          recipe.getRecipeId(),
+          e
+        );
+        return quizGenerationErrorResponse(alias, recipe, quiz, e, true);
       }
     } else {
       return Response.status(404).entity("Recipe not found").build();
     }
+  }
+
+  private Response quizGenerationErrorResponse(
+    String alias,
+    Recipe recipe,
+    Quiz quiz,
+    Exception exception,
+    boolean serverError
+  ) throws IOException {
+    ObjectMapper mapper = new ObjectMapper();
+    mapper.enable(SerializationFeature.INDENT_OUTPUT);
+    String output = mapper.writeValueAsString(recipe);
+    output = output.replaceAll("(\r\n|\n)", "<br/>");
+    output = output.replaceAll("\\s", "&nbsp;&nbsp;");
+
+    String quizName = quiz != null ? quiz.getQuizName() : recipe.getName();
+    String message = exception.getMessage() != null
+      ? exception.getMessage()
+      : exception.getClass().getSimpleName();
+
+    // Notify someone of the failure to generate a quiz. This is critical!
+    Slack
+      .instance()
+      .sendMessage(
+        "ERROR generating quiz for " + quizName + " (" + alias + ") : " + message
+      );
+
+    QuizBuildErrorWrapper wrapper = new QuizBuildErrorWrapper(message, output);
+    output = renderer.render("quizBuildError.ad", wrapper);
+    if (serverError) {
+      return Response.status(500).entity(output).build();
+    }
+    return Response.ok().entity(output).build();
   }
 
   @GET

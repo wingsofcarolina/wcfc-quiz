@@ -37,13 +37,13 @@ public class RuntimeExceptionMapper implements ExceptionMapper<RuntimeException>
     if (exception instanceof NotFoundException) {
       code = 404;
     } else {
-      LOG.info(
+      LOG.error(
         "{} : {} : {}",
         code,
         exception.getClass().getSimpleName(),
-        exception.getMessage()
+        exception.getMessage(),
+        exception
       );
-      exception.printStackTrace();
     }
 
     return Response
